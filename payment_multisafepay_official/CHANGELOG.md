@@ -1,0 +1,17 @@
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and the version number follows the community convention:
+`odoo_major.odoo_minor.module_major.module_minor.module_patch`
+(e.g. `18.0.1.0.0` = Odoo 18.1 + module v1.0.0), which also aligns
+with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+
+## [Unreleased]
+
+## [18.0.1.0.0] - 2025-09-15
+### Added
+- Compatibility with Odoo 18.0.
+- Support for MultiSafepay payment methods.
+- Support for partial and full refunds.
+- Ability to mark MultiSafepay transactions as shipped when items are delivered.

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Extend the shop confirmation template -->
+    <template id="shop_confirmation_multisafepay_info" inherit_id="website_sale.confirmation" name="MultiSafepay Payment Information">
+        <xpath expr="//div[@id='oe_structure_website_sale_confirmation_2']" position="inside">
+            <!-- Hide the original transaction status banner for MultiSafepay methods -->
+            <style t-if="request.httprequest.args.get('payment_method')">
+                .oe_website_sale_tx_status.mt-3 {
+                    display: none !important;
+                }
+            </style>
+
+            <div t-if="request.httprequest.args.get('payment_method')" class="card mt-4">
+
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <small class="text-muted">Payment Method</small>
+                                    <div class="fw-bold" t-esc="request.httprequest.args.get('payment_method', '').upper()"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <small class="text-muted">Status</small>
+                                    <div>
+                                        <span class="badge badge-warning" t-esc="request.httprequest.args.get('payment_status', 'pending').title()"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <small class="text-muted">Amount</small>
+                                    <div class="fw-bold">
+                                        <span t-esc="request.httprequest.args.get('amount', '')"/>
+                                        <span t-esc="request.httprequest.args.get('currency', '')"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr/>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <small class="text-muted">Transaction ID</small>
+                            <div class="font-monospace small" t-esc="request.httprequest.args.get('transaction_id', '')"/>
+                        </div>
+                        <div class="col-md-6" t-if="request.httprequest.args.get('multisafepay_order_id')">
+                            <small class="text-muted">MultiSafepay ID</small>
+                            <div class="font-monospace small" t-esc="request.httprequest.args.get('multisafepay_order_id', '')"/>
+                        </div>
+                    </div>
+
+                    <!-- Additional payment method information -->
+                    <div t-if="request.httprequest.args.get('account_holder_name') or request.httprequest.args.get('external_transaction_id')" class="mt-3">
+                        <hr/>
+                        <div class="row">
+                            <div class="col-md-6" t-if="request.httprequest.args.get('account_holder_name')">
+                                <small class="text-muted">Account Holder</small>
+                                <div class="fw-bold" t-esc="request.httprequest.args.get('account_holder_name', '')"/>
+                            </div>
+                            <div class="col-md-6" t-if="request.httprequest.args.get('external_transaction_id')">
+                                <small class="text-muted">External Transaction ID</small>
+                                <div class="font-monospace small" t-esc="request.httprequest.args.get('external_transaction_id', '')"/>
+                            </div>
+                        </div>
+                        <div class="row mt-2" t-if="request.httprequest.args.get('payment_description') or request.httprequest.args.get('account_id')">
+                            <div class="col-md-6" t-if="request.httprequest.args.get('payment_description')">
+                                <small class="text-muted">Payment Description</small>
+                                <div t-esc="request.httprequest.args.get('payment_description', '')"/>
+                            </div>
+                            <div class="col-md-6" t-if="request.httprequest.args.get('account_id')">
+                                <small class="text-muted">Account ID</small>
+                                <div class="font-monospace small" t-esc="request.httprequest.args.get('account_id', '')"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Show fallback message if no specific details available -->
+                    <div t-if="not request.httprequest.args.get('account_holder_name') and not request.httprequest.args.get('external_transaction_id')" class="alert alert-warning mt-3 mb-0">
+                        <i class="fa fa-exclamation-triangle"/>
+                        Action required to complete your payment.
+                    </div>
+
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+
+    <!-- Extend payment template to show errors -->
+    <template id="payment_form_error_message" inherit_id="website_sale.payment" name="MultiSafepay Payment Error Messages">
+        <xpath expr="//div[@id='payment_method']" position="before">
+
+            <!-- Show error message if exists -->
+            <div t-if="request.params.get('error')" class="alert alert-danger alert-dismissible" role="alert">
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <strong><i class="fa fa-exclamation-triangle"></i> Payment Error</strong><br/>
+                <t t-esc="request.params.get('message', 'An error occurred. Please try again.')"/>
+            </div>
+        </xpath>
+    </template>
+
+
+    <template id="multisafepay_form" name="MultiSafepay Payment Form">
+        <!-- Basic debug -->
+        <script type="text/javascript">
+            console.log('MultiSafepay Form Processing...');
+        </script>
+
+        <!-- POST form to internal controller -->
+        <form name="multisafepay_payment_form" action="/payment/multisafepay/redirect" method="post" class="d-none">
+            <input type="hidden" name="reference" t-att-value="reference"/>
+            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+            <input type="submit" value="Redirecting to MultiSafepay..." class="btn btn-primary"/>
+        </form>
+
+        <script type="text/javascript">
+            // Auto-submit form
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('Auto-submitting MultiSafepay form...');
+                var form = document.forms['multisafepay_payment_form'];
+                if (form) {
+                    form.submit();
+                } else {
+                    console.error('Form not found!');
+                }
+            });
+        </script>
+    </template>
+</odoo>

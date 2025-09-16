@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="payment_provider_form_multisafepay" model="ir.ui.view">
+        <field name="name">payment.provider.form.inherit.multisafepay</field>
+        <field name="model">payment.provider</field>
+        <field name="inherit_id" ref="payment.payment_provider_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='provider_credentials']" position="inside">
+                <group
+                    name="multisafepay_credentials"
+                    string="MultiSafepay Credentials"
+                    invisible="code != 'multisafepay'"
+                >
+                    <field name="multisafepay_api_key" password="True" />
+                </group>
+            </xpath>
+
+            <xpath expr="//field[@name='allow_tokenization']" position="before">
+                <div
+                    class="row mt-2"
+                    invisible="code != 'multisafepay' or code == 'multisafepay' and state == 'disabled'"
+                >
+                    <div class="col">
+                        <button
+                            string="Pull Payment Methods"
+                            type="object"
+                            name="pull_merchant_payment_methods"
+                            class="btn btn-primary"
+                        />
+                        <p class="text-muted mt-2">
+                            Load available payment methods from your MultiSafepay account.
+                        </p>
+                    </div>
+                </div>
+            </xpath>
+
+            <xpath expr="//field[@name='allow_tokenization']" position="attributes">
+                <attribute name="readonly">code == 'multisafepay'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='capture_manually']" position="attributes">
+                <attribute name="readonly">code == 'multisafepay'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='allow_express_checkout']" position="attributes">
+                <attribute name="readonly">code == 'multisafepay'</attribute>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

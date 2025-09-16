@@ -1,0 +1,387 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* payment_multisafepay_official
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-09-08 12:17+0000\n"
+"PO-Revision-Date: 2025-09-08 12:17+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: payment_multisafepay_official
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_official.shop_confirmation_multisafepay_info
+msgid ""
+"<i class=\"fa fa-exclamation-triangle\"/> \n"
+"                        Action required to complete your payment."
+msgstr ""
+"<i class=\"fa fa-exclamation-triangle\"/> \n"
+"                        Acción requerida para completar su pago."
+
+#. module: payment_multisafepay_official
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_official.shop_confirmation_multisafepay_info
+msgid "<small class=\"text-muted\">Account Holder</small>"
+msgstr "<small class=\"text-muted\">Titular de la cuenta</small>"
+
+#. module: payment_multisafepay_official
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_official.shop_confirmation_multisafepay_info
+msgid "<small class=\"text-muted\">Account ID</small>"
+msgstr "<small class=\"text-muted\">ID de cuenta</small>"
+
+#. module: payment_multisafepay_official
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_official.shop_confirmation_multisafepay_info
+msgid "<small class=\"text-muted\">Amount</small>"
+msgstr "<small class=\"text-muted\">Importe</small>"
+
+#. module: payment_multisafepay_official
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_official.shop_confirmation_multisafepay_info
+msgid "<small class=\"text-muted\">External Transaction ID</small>"
+msgstr "<small class=\"text-muted\">ID de transacción externa</small>"
+
+#. module: payment_multisafepay_official
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_official.shop_confirmation_multisafepay_info
+msgid "<small class=\"text-muted\">MultiSafepay ID</small>"
+msgstr "<small class=\"text-muted\">ID de MultiSafepay</small>"
+
+#. module: payment_multisafepay_official
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_official.shop_confirmation_multisafepay_info
+msgid "<small class=\"text-muted\">Payment Description</small>"
+msgstr "<small class=\"text-muted\">Descripción del pago</small>"
+
+#. module: payment_multisafepay_official
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_official.shop_confirmation_multisafepay_info
+msgid "<small class=\"text-muted\">Payment Method</small>"
+msgstr "<small class=\"text-muted\">Método de pago</small>"
+
+#. module: payment_multisafepay_official
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_official.shop_confirmation_multisafepay_info
+msgid "<small class=\"text-muted\">Status</small>"
+msgstr "<small class=\"text-muted\">Estado</small>"
+
+#. module: payment_multisafepay_official
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_official.shop_confirmation_multisafepay_info
+msgid "<small class=\"text-muted\">Transaction ID</small>"
+msgstr "<small class=\"text-muted\">ID de transacción</small>"
+
+#. module: payment_multisafepay_official
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_official.payment_form_error_message
+msgid ""
+"<strong><i class=\"fa fa-exclamation-triangle\"/> Payment "
+"Error</strong><br/>"
+msgstr ""
+"<strong><i class=\"fa fa-exclamation-triangle\"/> Error de "
+"pago</strong><br/>"
+
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,field_description:payment_multisafepay_official.field_payment_provider__multisafepay_api_key
+msgid "API Key"
+msgstr "Clave API"
+
+#. module: payment_multisafepay_official
+#. odoo-python
+#: code:addons/payment_multisafepay_official/controllers/main.py:0
+msgid "An unexpected error occurred. Please try again."
+msgstr "Ocurrió un error inesperado. Por favor, inténtelo de nuevo."
+
+#. module: payment_multisafepay_official
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_official.payment_form_error_message
+msgid "Close"
+msgstr "Cerrar"
+
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,field_description:payment_multisafepay_official.field_payment_provider__code
+msgid "Code"
+msgstr "Código"
+
+#. module: payment_multisafepay_official
+#. odoo-python
+#: code:addons/payment_multisafepay_official/models/payment_transaction.py:0
+msgid ""
+"Could not retrieve order information from MultiSafepay for transaction %s.\n"
+"\n"
+"Reference: %s\n"
+"Provider: %s\n"
+"\n"
+"Please check your internet connection and try again later."
+msgstr ""
+"No se pudo recuperar la información del pedido de MultiSafepay para la transacción %s.\n"
+"\n"
+"Referencia: %s\n"
+"Proveedor: %s\n"
+"\n"
+"Por favor, verifique su conexión a internet e inténtelo de nuevo más tarde."
+
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,help:payment_multisafepay_official.field_account_bank_statement_line__multisafepay_notified
+#: model:ir.model.fields,help:payment_multisafepay_official.field_account_move__multisafepay_notified
+msgid "Indicates whether MultiSafepay has been notified about this invoice"
+msgstr "Indica si MultiSafepay ha sido notificado sobre esta factura"
+
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,help:payment_multisafepay_official.field_stock_picking__multisafepay_notified
+msgid "Indicates whether MultiSafepay has been notified about this shipment"
+msgstr "Indica si MultiSafepay ha sido notificado sobre este envío"
+
+#. module: payment_multisafepay_official
+#: model:ir.model,name:payment_multisafepay_official.model_account_move
+msgid "Journal Entry"
+msgstr "Asiento contable"
+
+#. module: payment_multisafepay_official
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_official.payment_provider_form_multisafepay
+msgid "Load available payment methods from your MultiSafepay account."
+msgstr "Cargar métodos de pago disponibles desde su cuenta de MultiSafepay."
+
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,field_description:payment_multisafepay_official.field_payment_method__main_currency_id
+msgid "Main Currency"
+msgstr "Moneda principal"
+
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,field_description:payment_multisafepay_official.field_payment_method__maximum_amount
+msgid "Maximum Amount"
+msgstr "Importe máximo"
+
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,field_description:payment_multisafepay_official.field_payment_method__minimum_amount
+msgid "Minimum Amount"
+msgstr "Importe mínimo"
+
+#. module: payment_multisafepay_official
+#: model:payment.provider,name:payment_multisafepay_official.payment_provider_multisafepay
+msgid "MultiSafepay"
+msgstr "MultiSafepay"
+
+#. module: payment_multisafepay_official
+#. odoo-python
+#: code:addons/payment_multisafepay_official/controllers/main.py:0
+msgid ""
+"MultiSafepay API error: Transaction not found. Please refresh and try again."
+msgstr ""
+"Error de API de MultiSafepay: Transacción no encontrada. Por favor, actualice e inténtelo de nuevo."
+
+#. module: payment_multisafepay_official
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_official.payment_provider_form_multisafepay
+msgid "MultiSafepay Credentials"
+msgstr "Credenciales de MultiSafepay"
+
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,field_description:payment_multisafepay_official.field_account_bank_statement_line__multisafepay_notified
+#: model:ir.model.fields,field_description:payment_multisafepay_official.field_account_move__multisafepay_notified
+#: model:ir.model.fields,field_description:payment_multisafepay_official.field_stock_picking__multisafepay_notified
+msgid "MultiSafepay Notified"
+msgstr "MultiSafepay notificado"
+
+#. module: payment_multisafepay_official
+#. odoo-python
+#: code:addons/payment_multisafepay_official/controllers/main.py:0
+msgid "MultiSafepay SDK is not initialized."
+msgstr "El SDK de MultiSafepay no está inicializado."
+
+#. module: payment_multisafepay_official
+#. odoo-python
+#: code:addons/payment_multisafepay_official/controllers/main.py:0
+msgid "MultiSafepay did not return a valid order identifier."
+msgstr "MultiSafepay no devolvió un identificador de pedido válido."
+
+#. module: payment_multisafepay_official
+#: model:ir.model.fields.selection,name:payment_multisafepay_official.selection__payment_provider__code__multisafepay
+msgid "Multisafepay"
+msgstr "Multisafepay"
+
+#. module: payment_multisafepay_official
+#. odoo-python
+#: code:addons/payment_multisafepay_official/controllers/main.py:0
+msgid "No customer info partner associated."
+msgstr "No hay información de cliente asociada."
+
+#. module: payment_multisafepay_official
+#. odoo-python
+#: code:addons/payment_multisafepay_official/models/payment_transaction.py:0
+msgid ""
+"No response received from MultiSafepay when attempting to refund transaction %s.\n"
+"\n"
+"Please check your internet connection and try again later."
+msgstr ""
+"No se recibió respuesta de MultiSafepay al intentar reembolsar la transacción %s.\n"
+"\n"
+"Por favor, verifique su conexión a internet e inténtelo de nuevo más tarde."
+
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,field_description:payment_multisafepay_official.field_payment_method__only_multisafepay
+msgid "Only Multisafepay"
+msgstr "Solo Multisafepay"
+
+#. module: payment_multisafepay_official
+#: model:ir.model,name:payment_multisafepay_official.model_payment_method
+msgid "Payment Method"
+msgstr "Método de pago"
+
+#. module: payment_multisafepay_official
+#: model:ir.model,name:payment_multisafepay_official.model_payment_provider
+msgid "Payment Provider"
+msgstr "Proveedor de pago"
+
+#. module: payment_multisafepay_official
+#: model:ir.model,name:payment_multisafepay_official.model_payment_transaction
+msgid "Payment Transaction"
+msgstr "Transacción de pago"
+
+#. module: payment_multisafepay_official
+#. odoo-python
+#: code:addons/payment_multisafepay_official/controllers/main.py:0
+msgid "Payment provider not found."
+msgstr "Proveedor de pago no encontrado."
+
+#. module: payment_multisafepay_official
+#. odoo-python
+#: code:addons/payment_multisafepay_official/controllers/main.py:0
+msgid "Payment reference is missing. Please try again."
+msgstr "Falta la referencia de pago. Por favor, inténtelo de nuevo."
+
+#. module: payment_multisafepay_official
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_official.payment_provider_form_multisafepay
+msgid "Pull Payment Methods"
+msgstr "Obtener métodos de pago"
+
+#. module: payment_multisafepay_official
+#. odoo-python
+#: code:addons/payment_multisafepay_official/models/payment_transaction.py:0
+msgid ""
+"Refund amount exceeds available amount.\n"
+"\n"
+"Transaction: %s\n"
+"Requested Refund: %.2f %s\n"
+"Maximum Available: %.2f %s\n"
+"Already Refunded: %.2f %s\n"
+"\n"
+"Please adjust the refund amount."
+msgstr ""
+"El importe del reembolso excede el importe disponible.\n"
+"\n"
+"Transacción: %s\n"
+"Reembolso solicitado: %.2f %s\n"
+"Máximo disponible: %.2f %s\n"
+"Ya reembolsado: %.2f %s\n"
+"\n"
+"Por favor, ajuste el importe del reembolso."
+
+#. module: payment_multisafepay_official
+#. odoo-python
+#: code:addons/payment_multisafepay_official/models/payment_transaction.py:0
+msgid "Refund failed at MultiSafepay: %s\n"
+msgstr "Reembolso fallido en MultiSafepay: %s\n"
+
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,help:payment_multisafepay_official.field_payment_provider__multisafepay_api_key
+msgid ""
+"The API key for the Multisafepay account. This is used to authenticate "
+"requests to the Multisafepay API."
+msgstr ""
+"La clave API para la cuenta de Multisafepay. Se utiliza para autenticar "
+"solicitudes a la API de Multisafepay."
+
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,help:payment_multisafepay_official.field_payment_method__main_currency_id
+msgid "The main currency of the first provider linked to this payment method."
+msgstr "La moneda principal del primer proveedor vinculado a este método de pago."
+
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,help:payment_multisafepay_official.field_payment_method__maximum_amount
+msgid ""
+"The maximum payment amount that this payment provider is available for. "
+"Leave blank to make it available for any payment amount."
+msgstr ""
+"El importe máximo de pago para el que este proveedor de pagos está disponible. "
+"Deje en blanco para que esté disponible para cualquier importe de pago."
+
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,help:payment_multisafepay_official.field_payment_method__minimum_amount
+msgid ""
+"The minimum payment amount that this payment provider is available for. "
+"Leave blank to make it available for any payment amount."
+msgstr ""
+"El importe mínimo de pago para el que este proveedor de pagos está disponible. "
+"Deje en blanco para que esté disponible para cualquier importe de pago."
+
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,help:payment_multisafepay_official.field_payment_provider__code
+msgid "The technical code of this payment provider."
+msgstr "El código técnico de este proveedor de pagos."
+
+#. module: payment_multisafepay_official
+#. odoo-python
+#: code:addons/payment_multisafepay_official/models/payment_transaction.py:0
+msgid ""
+"This order has already been fully refunded.\n"
+"\n"
+"Transaction: %s\n"
+"Order Status: %s\n"
+"Original Amount: %.2f %s\n"
+"\n"
+"No additional refunds can be processed."
+msgstr ""
+"Este pedido ya ha sido completamente reembolsado.\n"
+"\n"
+"Transacción: %s\n"
+"Estado del pedido: %s\n"
+"Importe original: %.2f %s\n"
+"\n"
+"No se pueden procesar reembolsos adicionales."
+
+#. module: payment_multisafepay_official
+#. odoo-python
+#: code:addons/payment_multisafepay_official/controllers/main.py:0
+msgid "Transaction amount is missing or invalid."
+msgstr "El importe de la transacción falta o es inválido."
+
+#. module: payment_multisafepay_official
+#. odoo-python
+#: code:addons/payment_multisafepay_official/controllers/main.py:0
+msgid "Transaction currency is missing or invalid."
+msgstr "La moneda de la transacción falta o es inválida."
+
+#. module: payment_multisafepay_official
+#. odoo-python
+#: code:addons/payment_multisafepay_official/controllers/main.py:0
+msgid "Transaction not found. Please refresh and try again."
+msgstr "Transacción no encontrada. Por favor, actualice e inténtelo de nuevo."
+
+#. module: payment_multisafepay_official
+#. odoo-python
+#: code:addons/payment_multisafepay_official/controllers/main.py:0
+msgid "Transaction reference is missing."
+msgstr "Falta la referencia de la transacción."
+
+#. module: payment_multisafepay_official
+#: model:ir.model,name:payment_multisafepay_official.model_stock_picking
+msgid "Transfer"
+msgstr "Traslado"
+
+#. module: payment_multisafepay_official
+#: model_terms:payment.provider,auth_msg:payment_multisafepay_official.payment_provider_multisafepay
+msgid "Your payment has been authorized."
+msgstr "Su pago ha sido autorizado."
+
+#. module: payment_multisafepay_official
+#: model_terms:payment.provider,cancel_msg:payment_multisafepay_official.payment_provider_multisafepay
+msgid "Your payment has been cancelled."
+msgstr "Su pago ha sido cancelado."
+
+#. module: payment_multisafepay_official
+#: model_terms:payment.provider,pending_msg:payment_multisafepay_official.payment_provider_multisafepay
+msgid ""
+"Your payment has been successfully processed but is waiting for approval."
+msgstr ""
+"Su pago ha sido procesado exitosamente pero está esperando aprobación."
+
+#. module: payment_multisafepay_official
+#: model_terms:payment.provider,done_msg:payment_multisafepay_official.payment_provider_multisafepay
+msgid "Your payment has been successfully processed."
+msgstr "Su pago ha sido procesado exitosamente."
