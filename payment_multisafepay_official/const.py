@@ -46,9 +46,9 @@ SUPPORTED_CURRENCIES = [
 
 STATUS_MAPPING = {
     'draft': ('initialized',),
-    'pending': ('uncleared',),
+    'pending': (),
     'authorized': ('reserved',),
-    'done': ('completed', 'partial_refunded', 'refunded'),
+    'done': ('completed', 'partial_refunded', 'refunded', 'uncleared'),
     'cancel': ('canceled', 'cancelled', 'void', 'expired'),
     'error': ('declined', 'chargedback', 'charged_back'),
 }
