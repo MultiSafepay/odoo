@@ -9,6 +9,8 @@ Handles redirect flow for MultiSafepay payments
 """
 import logging
 import pprint
+import json
+
 from werkzeug.exceptions import Forbidden
 from typing import cast
 from urllib.parse import quote_plus
@@ -124,68 +126,20 @@ class MultiSafepayController(http.Controller):
     @http.route('/payment/multisafepay/webhook', type='http', auth='public', csrf=False, methods=['POST', 'GET'])
     def multisafepay_webhook(self, **kwargs):
         """Handle MultiSafepay webhook notifications"""
-        _logger.info("MultiSafepay webhook received")
-        _logger.info("Webhook data: %s", pprint.pformat(kwargs))
+
+        _logger.info("MultiSafepay webhook received via %s", request.httprequest.method)
+        _logger.debug("Webhook data: %s", pprint.pformat(kwargs))
 
         try:
-            # Get transaction ID first to retrieve provider for API key
-            transactionid = kwargs.get('transactionid')
-            if not transactionid:
-                _logger.error("No transaction ID provided in webhook")
-                return request.make_response('Transaction ID required', status=400)
+            if request.httprequest.method == 'POST':
+                return self._handle_post_webhook(**kwargs)
+            else:
+                return self._handle_get_webhook(**kwargs)
 
-            payment_transaction = request.env['payment.transaction'].sudo().search([
-                ('reference', '=', transactionid),
-                ('provider_code', '=', 'multisafepay')
-            ], limit=1)
-
-            if not payment_transaction:
-                _logger.error("Transaction not found for webhook validation: %s", transactionid)
-                return request.make_response('Transaction not found', status=404)
-
-            # Get request data for webhook validation
-            request_body = request.httprequest.get_data(as_text=True)
-            auth_header = request.httprequest.headers.get('Auth', '')
-
-            # Get API key from transaction's provider
-            provider = payment_transaction.provider_id
-            api_key = provider.multisafepay_api_key
-
-            # Validate webhook authenticity using MultiSafepay SDK
-            try:
-                Webhook.validate(request=request_body, auth=auth_header, api_key=api_key, validation_time_in_seconds=600)
-                _logger.info("Webhook validation successful for transaction: %s", transactionid)
-            except Exception as validation_error:
-                _logger.error("Webhook validation failed for transaction %s: %s", transactionid, str(validation_error))
-                return request.make_response('Webhook validation failed', status=403)
-
-            multisafepay_sdk = provider.get_multisafepay_sdk()
-
-            order_manager = multisafepay_sdk.get_order_manager()
-            order_response = order_manager.get(transactionid)
-            order = order_response.get_data()
-            if not order:
-                _logger.error("No order data found for transaction ID: %s", transactionid)
-                return request.make_response('No order data found', status=404)
-
-            if not order.status:
-                _logger.error("No status found in order data for transaction ID: %s", transactionid)
-                return request.make_response('No status found', status=404)
-
-            notification_data = {
-                'status': order.status,
-                'reference': order.transaction_id if hasattr(order, 'transaction_id') else None,
-                # Other relevant data can be added here
-            }
-
-            # Call method _process_notification_data
-            payment_transaction._process_notification_data(notification_data)
-
-            return request.make_response('OK', status=200)
-
-        except Forbidden as e:
-            _logger.error("Forbidden access to MultiSafepay webhook: %s", str(e))
-            return request.make_response('Forbidden', status=403)
+        except Exception as e:
+            _logger.error("Unexpected error in webhook processing: %s", str(e))
+            return request.make_response('Internal Server Error', status=500)
+    
 
 
     @http.route('/payment/multisafepay/return', type='http', auth='public', csrf=False, methods=['GET', 'POST'])
@@ -258,6 +212,131 @@ class MultiSafepayController(http.Controller):
         payment_transaction._process_notification_data(notification_data)
 
         return request.redirect('/payment/status?cancelled=1')
+
+    def _handle_get_webhook(self, **kwargs):
+        """Handle GET webhook from MultiSafepay"""
+
+        transactionid = kwargs.get('transactionid')
+        if not transactionid:
+            _logger.error("No transaction ID provided in webhook")
+            return request.make_response('Transaction ID required', status=400)
+
+        payment_transaction = request.env['payment.transaction'].sudo().search([
+            ('reference', '=', transactionid),
+            ('provider_code', '=', 'multisafepay')
+        ], limit=1)
+
+        if not payment_transaction:
+            _logger.error("Transaction not found for webhook validation: %s", transactionid)
+            return request.make_response('Transaction not found', status=404)
+
+        provider = payment_transaction.provider_id
+        multisafepay_sdk = provider.get_multisafepay_sdk()
+
+        order_manager = multisafepay_sdk.get_order_manager()
+        order_response = order_manager.get(transactionid)
+        order = order_response.get_data()
+        if not order:
+            _logger.error("No order data found for transaction ID: %s", transactionid)
+            return request.make_response('No order data found', status=404)
+
+        if not order.status:
+            _logger.error("No status found in order data for transaction ID: %s", transactionid)
+            return request.make_response('No status found', status=400)
+        
+        duplicated = self._duplicated_status(payment_transaction, order.status)
+        if duplicated:
+            _logger.debug("Duplicate webhook received for transaction %s with status %s, ignoring.", transactionid, order.status)
+            return request.make_response('OK', status=200)
+
+        notification_data = {
+            'status': order.status,
+            'reference': order.transaction_id if hasattr(order, 'transaction_id') else None,
+        }
+
+        payment_transaction._process_notification_data(notification_data)
+
+        _logger.info("Webhook processing completed for transaction %s with status %s", transactionid, order.status)
+        return request.make_response('OK', status=200)
+
+    def _handle_post_webhook(self, **kwargs):
+        """Handle POST webhook from MultiSafepay"""
+
+        request_body_raw = request.httprequest.get_data(as_text=True)
+        try:
+            _logger.debug("POST webhook data: %s", request_body_raw)
+
+            order = None
+            if request_body_raw:
+
+                try:
+                    order_data = json.loads(request_body_raw)
+                    order = Order.from_dict(order_data)
+                    _logger.debug("Parsed POST webhook data: %s", pprint.pformat(order_data))
+
+                except json.JSONDecodeError:
+                    _logger.error("Failed to parse POST webhook body as JSON, using form data")
+                    return request.make_response('Invalid JSON format in webhook body', status=403)
+
+            
+            if not order or not order.order_id:
+                _logger.error("No transaction ID provided in webhook")
+                return request.make_response('Transaction ID required', status=400)
+
+            transactionid = order.order_id
+            payment_transaction = request.env['payment.transaction'].sudo().search([
+                ('reference', '=', transactionid),
+                ('provider_code', '=', 'multisafepay')
+            ], limit=1)
+
+            if not payment_transaction:
+                _logger.error("Transaction not found for webhook validation: %s", transactionid)
+                return request.make_response('Transaction not found', status=404)
+
+            auth_header = request.httprequest.headers.get('Auth', '')
+
+            provider = payment_transaction.provider_id
+            api_key = provider.multisafepay_api_key
+
+            try:
+                Webhook.validate(request=request_body_raw, auth=auth_header, api_key=api_key, validation_time_in_seconds=600)
+                _logger.info("Webhook validation successful for transaction: %s", transactionid)
+
+                if not order.status:
+                    _logger.error("No status found in order data for transaction ID: %s", transactionid)
+                    return request.make_response('No status found', status=400)
+
+                duplicated = self._duplicated_status(payment_transaction, order.status)
+                if duplicated:
+                    _logger.debug("Duplicate webhook received for transaction %s with status %s, ignoring.", transactionid, order.status)
+                    return request.make_response('OK', status=200)
+    
+                notification_data = {
+                    'status': order.status,
+                    'reference': order.transaction_id if hasattr(order, 'transaction_id') else None,
+                }
+
+                payment_transaction._process_notification_data(notification_data)
+
+                _logger.info("Webhook processing completed for transaction %s with status %s", transactionid, order.status)
+                return request.make_response('OK', status=200)
+
+
+            except Exception as validation_error:
+                _logger.error("Webhook validation failed for transaction %s: %s", transactionid, str(validation_error))
+                return request.make_response('Webhook validation failed', status=403)
+
+
+        except Forbidden as e:
+            _logger.error("Forbidden access to MultiSafepay webhook: %s", str(e))
+            return request.make_response('Forbidden', status=403)
+
+
+    def _duplicated_status(self, payment_transaction, new_status, message=''):
+        """Check if the transaction already has the specified status to detect duplicates."""
+        _logger.debug("Transaction %s status changed to %s: %s", payment_transaction.id, new_status, message)
+        return payment_transaction.state == payment_transaction._get_multisafepay_status_to_odoo_state(new_status)
+
 
 
     def _get_order(self, url, payment_transaction) -> Order:
