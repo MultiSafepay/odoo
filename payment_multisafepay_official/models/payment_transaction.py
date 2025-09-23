@@ -37,15 +37,13 @@ class PaymentTransaction(models.Model):
         if self.provider_code != 'multisafepay':
             return res
 
-        _logger.info("MultiSafepay _get_specific_processing_values called")
-        _logger.info("Input processing_values: %s", pprint.pformat(processing_values))
-        _logger.info("Transaction: ID=%s, Ref=%s, Amount=%s", self.id, self.reference, self.amount)
+        _logger.debug("Input processing values: %s", str(processing_values))
 
         res.update({
             'reference': self.reference,
         })
 
-        _logger.info("Final processing values: %s", pprint.pformat(res))
+        _logger.debug("Final processing values: %s", str(res))
 
         return res
 
@@ -95,40 +93,42 @@ class PaymentTransaction(models.Model):
             self.write({
                 'provider_reference': transaction_id
             })
-            _logger.info("Updated provider_reference to: %s", transaction_id)
+            _logger.debug("Updated provider_reference to: %s", transaction_id)
 
 
         status = notification_data.get('status')
         # If it's already a native Odoo state, return it directly
         odoo_native_states = ['draft', 'pending', 'authorized', 'done', 'cancel', 'error']
         if status in odoo_native_states:
-            _logger.info("Status '%s' is native Odoo state - using as-is", status)
+            _logger.debug("Status '%s' is native Odoo state - using as-is", status)
             odoo_state = status
         else:
             odoo_state = self._get_multisafepay_status_to_odoo_state(status)
 
         if odoo_state == 'draft':
-            _logger.info("MSP status '%s' → keeping transaction in draft (ref=%s)", status, self.reference)
+            _logger.debug("MSP status '%s' → keeping transaction in draft (ref=%s)", status, self.reference)
 
         elif odoo_state == 'done':
-            _logger.info("MSP status '%s' → marking transaction done (ref=%s)", status, self.reference)
+            _logger.debug("MSP status '%s' → marking transaction done (ref=%s)", status, self.reference)
             self._set_done("Payment completed at MultiSafepay")
 
         elif odoo_state == 'cancel':
-            _logger.info("MSP status '%s' → canceling transaction (ref=%s)", status, self.reference)
+            _logger.debug("MSP status '%s' → canceling transaction (ref=%s)", status, self.reference)
             self._set_canceled(f"Payment {status} at MultiSafepay")
 
         elif odoo_state == 'error':
-            _logger.error("MSP status '%s' → setting transaction to error (ref=%s)", status, self.reference)
+            _logger.debug("MSP status '%s' → setting transaction to error (ref=%s)", status, self.reference)
             self._set_error("Payment error at MultiSafepay")
 
         elif odoo_state == 'pending':
-            _logger.info("MSP status '%s' → setting transaction to pending (ref=%s)", status, self.reference)
+            _logger.debug("MSP status '%s' → setting transaction to pending (ref=%s)", status, self.reference)
             self._set_pending("Payment pending at MultiSafepay")
 
         elif odoo_state == 'partial_refunded':
-            _logger.info("MSP status '%s' → payment partially refunded (ref=%s)", status, self.reference)
+            _logger.debug("MSP status '%s' → payment partially refunded (ref=%s)", status, self.reference)
             self._set_done("Payment completed (partially refunded) at MultiSafepay")
+
+        _logger.info("Transaction %s updated to state '%s'", self.reference, odoo_state)
 
 
 
@@ -240,6 +240,9 @@ class PaymentTransaction(models.Model):
                         .add_description(
                             Description(**{}).add_description(f'Refund for Odoo order {self.reference}')))
 
+
+                _logger.debug("Refund payload for order %s: %s", self.reference, str(refund_payload.dict()))
+
                 refund_response: CustomApiResponse = order_manager.refund(self.reference, refund_payload)
             except Exception:
                 refund_response = False
@@ -250,7 +253,7 @@ class PaymentTransaction(models.Model):
 
             refund_data: OrderRefund = refund_response.get_data()
 
-            _logger.info("Refund response data: %s", pprint.pformat(refund_data))
+            _logger.debug("Refund response data: %s", str(refund_data))
 
             success_refund = False
             if is_bnpl:

@@ -83,7 +83,11 @@ class StockPicking(models.Model):
                         update_order_request.add_carrier(picking.carrier_id.name)
                         update_order_request.add_ship_date(picking.date_done.strftime('%Y-%m-%dT%H:%M:%S') if picking.scheduled_date else None)
 
+                    _logger.debug("MultiSafepay update order request: %s", str(update_order_request.to_dict()))
+
                     response = order_manager.update(multisafepay_tx.reference, update_order_request)
+
+                    _logger.debug("MultiSafepay update order request response: %s", str(response))
 
                     if response.status_code == 200:
                         _logger.info("MultiSafepay notified successfully for picking %s", picking.name)

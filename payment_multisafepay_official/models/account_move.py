@@ -59,10 +59,14 @@ class AccountMove(models.Model):
 
                 update_order_request = UpdateOrderRequest().add_invoice_id(invoice.name)
 
+                _logger.debug("MultiSafepay update order request: %s", str(update_order_request.to_dict()))
+
                 if(invoice.access_url):
                     update_order_request.add_invoice_url(invoice.access_url)
 
                 response = order_manager.update(multisafepay_tx.reference, update_order_request)
+
+                _logger.debug("MultiSafepay update order request response: %s", str(response))
 
                 if response.status_code == 200:
 

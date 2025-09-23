@@ -61,8 +61,8 @@ class MultiSafepayController(http.Controller):
     @http.route('/payment/multisafepay/redirect', type='http', auth='public', methods=['POST'], csrf=False)
     def multisafepay_redirect(self, **post):
         """Handle redirect to MultiSafepay payment page"""
-        _logger.info("MultiSafepay redirect endpoint called")
-        _logger.info("POST data: %s", pprint.pformat(post))
+        _logger.info("MultiSafepay redirect endpoint")
+        _logger.debug("MultiSafepay redirect endpoint request POST data: %s", str(post))
 
         try:
             reference = post.get('reference')
@@ -87,13 +87,14 @@ class MultiSafepayController(http.Controller):
                 base_url = self._get_correct_base_url()
                 order = self._get_order(base_url, payment_transaction)
 
-                _logger.info("Order created successfully: %s", order)
-
                 if not order or not order.payment_url:
                     return self._redirect_to_payment_with_error(
                         "multiSafepay_api_error",
                         _("MultiSafepay API error: Transaction not found. Please refresh and try again.")
                     )
+
+                _logger.info("Payment url was generated successfully.")
+                _logger.debug("Payment url was generated successfully: %s", order.payment_url)
 
                 return request.redirect(order.payment_url, local=False)
 
@@ -128,7 +129,7 @@ class MultiSafepayController(http.Controller):
         """Handle MultiSafepay webhook notifications"""
 
         _logger.info("MultiSafepay webhook received via %s", request.httprequest.method)
-        _logger.debug("Webhook data: %s", pprint.pformat(kwargs))
+        _logger.debug("MultiSafepay webhook data: %s", str(kwargs))
 
         try:
             if request.httprequest.method == 'POST':
@@ -139,14 +140,14 @@ class MultiSafepayController(http.Controller):
         except Exception as e:
             _logger.error("Unexpected error in webhook processing: %s", str(e))
             return request.make_response('Internal Server Error', status=500)
-    
+
 
 
     @http.route('/payment/multisafepay/return', type='http', auth='public', csrf=False, methods=['GET', 'POST'])
     def multisafepay_return(self, **kwargs):
         """Handle return from MultiSafepay payment page"""
         _logger.info("MultiSafepay return received")
-        _logger.info("Return data: %s", pprint.pformat(kwargs))
+        _logger.debug("Return data: %s", str(kwargs))
 
         transactionid = kwargs.get('transactionid')
 
@@ -158,7 +159,7 @@ class MultiSafepayController(http.Controller):
         if payment_transaction.payment_method_code in PAYMENT_METHOD_PENDING:
             _logger.info("Payment method '%s' requires manual confirmation. Setting as pending.", payment_transaction.payment_method_code)
 
-            # 1. Get real state from MultiSafepay
+            # Get real state from MultiSafepay
             provider = payment_transaction.provider_id
             multisafepay_sdk = provider.get_multisafepay_sdk()
             order_manager = multisafepay_sdk.get_order_manager()
@@ -171,7 +172,7 @@ class MultiSafepayController(http.Controller):
                 'reference': transactionid,
             }
 
-            # 2. Process notification to update transaction state
+            # Process notification to update transaction state
             payment_transaction._process_notification_data(notification_data)
 
             # Pass additional information in the URL
@@ -195,7 +196,7 @@ class MultiSafepayController(http.Controller):
     def multisafepay_cancel(self, **kwargs):
         """Handle cancellation from MultiSafepay payment page"""
         _logger.info("MultiSafepay payment cancelled")
-        _logger.info("Cancel data: %s", pprint.pformat(kwargs))
+        _logger.debug("Cancel data: %s", str(kwargs))
 
         transactionid = kwargs.get('transactionid')
 
@@ -210,6 +211,8 @@ class MultiSafepayController(http.Controller):
         }
 
         payment_transaction._process_notification_data(notification_data)
+
+        _logger.info("MultiSafepay payment cancelled: %s", transactionid)
 
         return request.redirect('/payment/status?cancelled=1')
 
@@ -243,7 +246,7 @@ class MultiSafepayController(http.Controller):
         if not order.status:
             _logger.error("No status found in order data for transaction ID: %s", transactionid)
             return request.make_response('No status found', status=400)
-        
+
         duplicated = self._duplicated_status(payment_transaction, order.status)
         if duplicated:
             _logger.debug("Duplicate webhook received for transaction %s with status %s, ignoring.", transactionid, order.status)
@@ -272,13 +275,13 @@ class MultiSafepayController(http.Controller):
                 try:
                     order_data = json.loads(request_body_raw)
                     order = Order.from_dict(order_data)
-                    _logger.debug("Parsed POST webhook data: %s", pprint.pformat(order_data))
+                    _logger.debug("Parsed POST webhook data: %s", str(order_data))
 
                 except json.JSONDecodeError:
                     _logger.error("Failed to parse POST webhook body as JSON, using form data")
                     return request.make_response('Invalid JSON format in webhook body', status=403)
 
-            
+
             if not order or not order.order_id:
                 _logger.error("No transaction ID provided in webhook")
                 return request.make_response('Transaction ID required', status=400)
@@ -308,9 +311,9 @@ class MultiSafepayController(http.Controller):
 
                 duplicated = self._duplicated_status(payment_transaction, order.status)
                 if duplicated:
-                    _logger.debug("Duplicate webhook received for transaction %s with status %s, ignoring.", transactionid, order.status)
+                    _logger.info("Duplicate webhook received for transaction %s with status %s, ignoring.", transactionid, order.status)
                     return request.make_response('OK', status=200)
-    
+
                 notification_data = {
                     'status': order.status,
                     'reference': order.transaction_id if hasattr(order, 'transaction_id') else None,
@@ -516,6 +519,25 @@ class MultiSafepayController(http.Controller):
 
         for line in order_lines:
             product = getattr(line, 'product_id', None)
+
+            order_line_info = {
+                "line_id": getattr(line, "id", None),
+                "name": getattr(line, "name", ""),
+                "quantity": getattr(line, "product_qty", 0),
+                "unit_price": getattr(line, "price_unit", 0.0),
+                "tax": getattr(line.tax_id, "amount", None) if getattr(line, "tax_id", None) else None,
+                "product_id": getattr(product, "id", None),
+                "product_code": getattr(product, "code", ""),
+                "product_name": getattr(product, "name", ""),
+                "description": getattr(product, "description_sale", ""),
+                "weight": getattr(product, "weight", 0.0),
+                "category": getattr(product.categ_id, "name", "") if getattr(product, "categ_id", None) else "",
+                "attributes": [getattr(attr, "name", "") for attr in
+                               getattr(line, "product_no_variant_attribute_value_ids", [])],
+            }
+
+            _logger.debug("Order line details: %s", str(order_line_info))
+
             # Create a ShoppingCart object with the items
             tax_table_selector = line.tax_id.amount if line.tax_id else None
 
@@ -566,7 +588,7 @@ class MultiSafepayController(http.Controller):
         else:
             multisafepay_gateway_code = odoo_method_code.upper()
 
-        _logger.info("Mapping Odoo method '%s' to MultiSafepay gateway '%s'", odoo_method_code, multisafepay_gateway_code)
+        _logger.debug("Mapping Odoo method '%s' to MultiSafepay gateway '%s'", odoo_method_code, multisafepay_gateway_code)
 
         order_request = (OrderRequest(**{})
             .add_type('redirect')
@@ -597,8 +619,12 @@ class MultiSafepayController(http.Controller):
             _logger.error("MultiSafepay SDK not initialized.")
             raise ValidationError(_("MultiSafepay SDK is not initialized."))
 
+        _logger.debug("Order request: %s", order_request.to_dict())
+
         order_manager = multisafepay_sdk.get_order_manager()
         create_response = order_manager.create(order_request)
+
+        _logger.debug("Order created response: %s", str(create_response))
 
         order: Order = create_response.get_data()
 
@@ -619,7 +645,7 @@ class MultiSafepayController(http.Controller):
         # Priority 1: System parameter (configured domain)
         base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url', '')
         if base_url and not ('localhost' in base_url or '127.0.0.1' in base_url):
-            _logger.info("Using configured base URL: %s", base_url)
+            _logger.debug("Using configured base URL: %s", base_url)
             return base_url
 
         # Priority 2: X-Forwarded-Host header (from proxy)
@@ -628,7 +654,7 @@ class MultiSafepayController(http.Controller):
 
         if x_forwarded_host:
             base_url = f"{x_forwarded_proto}://{x_forwarded_host}"
-            _logger.info("Using X-Forwarded-Host: %s", base_url)
+            _logger.debug("Using X-Forwarded-Host: %s", base_url)
             return base_url
 
         # Priority 3: Host header
@@ -637,7 +663,7 @@ class MultiSafepayController(http.Controller):
             is_secure = request.httprequest.is_secure or x_forwarded_proto == 'https'
             scheme = 'https' if is_secure else 'http'
             base_url = f"{scheme}://{host}"
-            _logger.info("Using Host header: %s", base_url)
+            _logger.debug("Using Host header: %s", base_url)
             return base_url
 
         # Priority 4: Website domain (if configured)
@@ -645,7 +671,7 @@ class MultiSafepayController(http.Controller):
             website_domain = request.website.domain
             if website_domain and not ('localhost' in website_domain or '127.0.0.1' in website_domain):
                 base_url = f"https://{website_domain}"
-                _logger.info("Using website domain: %s", base_url)
+                _logger.debug("Using website domain: %s", base_url)
                 return base_url
 
         # Fallback: Use original method but log warning

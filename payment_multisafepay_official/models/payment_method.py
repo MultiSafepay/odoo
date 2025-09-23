@@ -86,12 +86,12 @@ class PaymentMethod(models.Model):
                 order = self.env['sale.order'].browse(sale_order_id)
                 if order.exists():
                     amount = order.amount_total
-                    _logger.info("Using amount %s from sale order %s", amount, order.name)
+                    _logger.debug("Using amount %s from sale order %s", amount, order.name)
             except Exception as e:
-                _logger.warning("Error getting amount from sale order: %s", str(e))
+                _logger.error("Error getting amount from sale order: %s", str(e))
 
         if amount is None:
-            _logger.info("Amount not found in kwargs, checking request parameters")
+            _logger.debug("Amount not found in kwargs, checking request parameters")
             try:
                 from odoo.http import request
                 if request and hasattr(request, 'httprequest') and hasattr(request.httprequest, 'args'):
@@ -99,13 +99,13 @@ class PaymentMethod(models.Model):
                     if amount_str:
                         try:
                             amount = float(amount_str)
-                            _logger.info("Using amount %s from URL parameters", amount)
+                            _logger.debug("Using amount %s from URL parameters", amount)
                         except (ValueError, TypeError):
-                            _logger.warning("Could not convert URL amount parameter to float: %s", amount_str)
+                            _logger.error("Could not convert URL amount parameter to float: %s", amount_str)
             except ImportError:
-                _logger.warning("Could not import request object to get URL parameters")
+                _logger.error("Could not import request object to get URL parameters")
             except Exception as e:
-                _logger.warning("Error getting amount from request: %s", str(e))
+                _logger.error("Error getting amount from request: %s", str(e))
 
 
         if amount is not None:

@@ -10,10 +10,9 @@ import requests
 
 _logger = logging.getLogger(__name__)
 
-# it should be moved to a utility module
 def _get_image_base64(url):
     try:
-        _logger.info('URL %s', url)
+        _logger.debug('URL %s', url)
         response = requests.get(url)
         if response.status_code == 200:
             return base64.b64encode(response.content)
