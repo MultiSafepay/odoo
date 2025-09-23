@@ -653,31 +653,3 @@ class MultiSafepayController(http.Controller):
         _logger.warning("Falling back to request URL root (may be localhost): %s", base_url)
         return base_url
 
-
-class MultiSafepayPaymentStatus(PaymentPostProcessing):
-    """Extend payment status to handle MultiSafepay specific cases"""
-
-    @http.route('/payment/status', type='http', auth='public', website=True, sitemap=False)
-    def display_status(self, **kwargs):
-        """Override display_status to handle cancelled and error messages"""
-
-        _logger.info("MultiSafepayPaymentStatus.display_status called with kwargs: %s", kwargs)
-
-        # Get the response from parent
-        result = super().display_status(**kwargs)
-
-        _logger.info("Parent response type: %s", type(result))
-
-        # Always add MultiSafepay specific context
-        if hasattr(result, 'qcontext'):
-            _logger.info("Adding MultiSafepay context to qcontext")
-            result.qcontext = result.qcontext or {}
-            result.qcontext.update({
-                'multisafepay_cancelled': kwargs.get('cancelled', '0') == '1',
-                'multisafepay_message': kwargs.get('message', ''),
-            })
-            _logger.info("Updated qcontext: %s", list(result.qcontext.keys()))
-        else:
-            _logger.warning("Result has no qcontext attribute")
-
-        return result
