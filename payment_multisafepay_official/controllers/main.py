@@ -520,28 +520,16 @@ class MultiSafepayController(http.Controller):
         for line in order_lines:
             product = getattr(line, 'product_id', None)
 
-            order_line_info = {
-                "line_id": getattr(line, "id", None),
-                "name": getattr(line, "name", ""),
-                "quantity": getattr(line, "product_qty", 0),
-                "unit_price": getattr(line, "price_unit", 0.0),
-                "tax": getattr(line.tax_id, "amount", None) if getattr(line, "tax_id", None) else None,
-                "product_id": getattr(product, "id", None),
-                "product_code": getattr(product, "code", ""),
-                "product_name": getattr(product, "name", ""),
-                "description": getattr(product, "description_sale", ""),
-                "weight": getattr(product, "weight", 0.0),
-                "category": getattr(product.categ_id, "name", "") if getattr(product, "categ_id", None) else "",
-                "attributes": [getattr(attr, "name", "") for attr in
-                               getattr(line, "product_no_variant_attribute_value_ids", [])],
-            }
-
-            _logger.debug("Order line details: %s", str(order_line_info))
-
-            # Create a ShoppingCart object with the items
             tax_table_selector = line.tax_id.amount if line.tax_id else None
 
             merchant_item_id = line.product_id.code if line.product_id.code else str(line.product_id.id)
+
+            if line.reward_id:
+                if line.reward_id and line.reward_id.reward_type:
+                    merchant_item_id = f"{line.reward_id.reward_type}-{merchant_item_id}"
+                if line.reward_id and line.reward_id.program_type:
+                    merchant_item_id = f"{line.reward_id.program_type}-{merchant_item_id}"
+                    
             for variant in line.product_no_variant_attribute_value_ids:
                 merchant_item_id += f"-{variant.name}"
 
@@ -553,12 +541,14 @@ class MultiSafepayController(http.Controller):
                 .add_merchant_item_id(merchant_item_id)
                 .add_weight(Weight(value=getattr(product, 'weight', 0.0) or 0.0, unit='kg'))
             )
-            if(tax_table_selector is not None):
+
+            if tax_table_selector is not None:
                 cart_item.add_tax_rate_percentage(tax_table_selector)
             else:
                 cart_item.add_tax_rate_percentage(0)
 
             cart_items.append(cart_item)
+            _logger.debug("Order line details: %s", str(cart_item.to_dict()))
 
         shopping_cart = ShoppingCart(items=cart_items)
         checkout_options = CheckoutOptions.generate_from_shopping_cart(shopping_cart)
