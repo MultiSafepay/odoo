@@ -561,7 +561,9 @@ class MultiSafepayController(http.Controller):
             cart_items.append(cart_item)
 
         shopping_cart = ShoppingCart(items=cart_items)
-        checkout_options= CheckoutOptions.generate_from_shopping_cart(shopping_cart)
+        checkout_options = CheckoutOptions.generate_from_shopping_cart(shopping_cart)
+        if checkout_options:
+            checkout_options.add_validate_cart(True)
 
         tax_rule = TaxRule(
             name="0",
