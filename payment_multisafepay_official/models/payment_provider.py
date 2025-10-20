@@ -29,147 +29,79 @@ class PaymentProvider(models.Model):
 
 
     def write(self, vals):
-        """Override to detect state changes and execute actions"""
-        # Capture the state and API key before the write
+        """Override to detect state and API key changes and execute actions"""
         old_states = {record.id: record.state for record in self}
         old_api_keys = {record.id: record.multisafepay_api_key for record in self}
 
-        # Execute original write
         result = super().write(vals)
 
-        # If 'state' in vals and self.code == 'multisafepay':
-        if 'state' in vals:
-            for record in self.filtered(lambda r: r.code == 'multisafepay'):
-                old_state = old_states.get(record.id)
-                new_state = record.state
-
-                if old_state != new_state:
-                    try:
-                        # Execute actions based on state change
-                        record._on_state_changed(old_state, new_state)
-                    except Exception as e:
-                        _logger.error(f"Error in state change handling: {e}")
-                        # Do not re-raise the exception to allow the change to complete
-
-
-        #  Handle API key changes
-        if 'multisafepay_api_key' in vals:
-            for record in self.filtered(lambda r: r.code == 'multisafepay'):
-                old_api_key = old_api_keys.get(record.id)
-                new_api_key = record.multisafepay_api_key
-
-                # Just in case, check that the API key actually changed and the provider is active or in test mode
-                if (old_api_key != new_api_key and
-                    record.state in ['enabled', 'test'] and
-                    new_api_key):  # Only if new key is not empty
-                    try:
-                        record._on_api_key_changed(old_api_key, new_api_key)
-                    except Exception as e:
-                        _logger.error(f"Error in API key change handling: {e}")
+        multisafepay_records = self.filtered(lambda r: r.code == 'multisafepay')
+        
+        for record in multisafepay_records:
+            old_state = old_states.get(record.id)
+            old_api_key = old_api_keys.get(record.id)
+            new_state = record.state
+            new_api_key = record.multisafepay_api_key
+            
+            state_changed = 'state' in vals and old_state != new_state
+            api_key_changed = 'multisafepay_api_key' in vals and old_api_key != new_api_key
+            
+            try:
+                if state_changed or api_key_changed:
+                    record._on_multisafepay_config_changed(
+                        old_state, new_state, state_changed, new_api_key, api_key_changed
+                    )
+            except Exception as e:
+                _logger.error(f"Error in MultiSafepay configuration change handling: {e}")
 
         return result
 
-    def _on_api_key_changed(self, old_api_key, new_api_key):
-        """Handle API key change for MultiSafepay provider"""
+    def _on_multisafepay_config_changed(self, old_state, new_state, state_changed, new_api_key, api_key_changed):
+        """Handle combined MultiSafepay configuration changes (state and API key)
+        
+        This method processes state and API key changes together to avoid duplicate operations
+        like multiple pulls of payment methods when both fields change simultaneously.
+        """
         self.ensure_one()
-
-        mode_label = "PRODUCTION" if self.state == 'enabled' else "TEST"
-        _logger.debug(f"MultiSafepay API key changed for {mode_label} environment")
-
-        try:
-            # Clean up payment methods related to the old API key
-            cleanup_result = self._cleanup_multisafepay_payment_methods()
-            _logger.debug(f"API key change cleanup: {cleanup_result['removed']} removed, "
-                        f"{cleanup_result['unlinked']} unlinked, {cleanup_result['deactivated']} deactivated")
-
-            # Validate the new API key by fetching payment methods
-            sync_result = self.fetch_merchant_payment_methods()
-
-            if sync_result.get('params', {}).get('type') == 'success':
-                _logger.debug(f"New API key validated and payment methods synchronized for {mode_label}")
-                self._notify_api_key_change_success(mode_label, sync_result.get('params', {}).get('message', ''))
-            else:
-                # If the sync failed, revert to the old API key
-                error_msg = sync_result.get('params', {}).get('message', 'Invalid API key or sync failed')
-                _logger.error(f"API key validation failed: {error_msg}")
-                self._notify_api_key_change_error(error_msg)
-
-        except Exception as e:
-            _logger.error(f"Failed to process API key change: %s", e)
-            self._notify_api_key_change_error(f"API key change failed: {str(e)}")
-
-    def _notify_api_key_change_success(self, mode_label, message):
-        """Notify successful API key change"""
-        self.env['bus.bus']._sendone(
-            f'res.partner_{self.env.user.partner_id.id}',
-            'simple_notification',
-            {
-                'title': f'MultiSafepay API Key Updated ({mode_label})',
-                'message': f'API key successfully updated and payment methods synchronized. {message}',
-                'type': 'success'
-            }
-        )
-
-    def _notify_api_key_change_error(self, error_msg):
-        """Notify API key change error"""
-        self.env['bus.bus']._sendone(
-            f'res.partner_{self.env.user.partner_id.id}',
-            'simple_notification',
-            {
-                'title': 'MultiSafepay API Key Error',
-                'message': f'Failed to validate new API key: {error_msg}',
-                'type': 'danger'
-            }
-        )
-
-    def _on_state_changed(self, old_state, new_state):
-        """Handle state change for MultiSafepay provider"""
-        self.ensure_one()
-
-        _logger.debug(f"State changed: {old_state} → {new_state}")
-
+        
+        mode_label = "PRODUCTION" if new_state == 'enabled' else "TEST"
+        
+        if state_changed and api_key_changed:
+            _logger.debug(f"MultiSafepay provider {self.name}: state changed {old_state} → {new_state} "
+                        f"and API key changed in {mode_label} environment")
+        elif state_changed:
+            _logger.debug(f"MultiSafepay provider {self.name}: state changed {old_state} → {new_state}")
+        elif api_key_changed:
+            _logger.debug(f"MultiSafepay API key changed for {mode_label} environment")
+        
+        if new_state == 'disabled':
+            self._on_provider_disabled()
+            return
+            
         if new_state in ['enabled', 'test']:
-            self._on_provider_update(old_state)
-        elif new_state == 'disabled':
-            self._on_provider_disabled(old_state)
+            try:
+                cleanup_result = self._cleanup_multisafepay_payment_methods()
+                _logger.debug(f"Configuration change cleanup: {cleanup_result['removed']} removed, "
+                            f"{cleanup_result['removed']} removed, {cleanup_result['deactivated']} deactivated")
+                
+                if new_api_key:
+                    self._fetch_merchant_payment_methods()
+                    _logger.debug("MultiSafepay configuration updated successfully")
+                else:
+                    if api_key_changed:
+                        _logger.error("API key is required")
+                    elif state_changed:
+                        _logger.warning(f"Environment changed to {mode_label} - Configure API key to sync payment methods")
+                        
+            except Exception as e:
+                error_msg = str(e)
+                _logger.error(f"Error in MultiSafepay configuration change handling: {error_msg}")
 
-
-    def _on_provider_disabled(self, old_state):
+    def _on_provider_disabled(self):
         """Actions when provider is disabled"""
 
         self._cleanup_multisafepay_payment_methods()
         _logger.debug("MultiSafepay provider disabled")
-
-
-    def _on_provider_update(self, old_state):
-        """Actions when provider is in test mode"""
-        _logger.debug("MultiSafepay provider in TEST mode")
-
-        try:
-            self.pull_merchant_payment_methods()
-        except Exception as e:
-            _logger.error("Failed the Multisafepay update: %s", e)
-
-        self._notify_state_change("test", "Provider is in TEST mode - no real payments will be processed")
-
-
-    def _notify_state_change(self, new_state, message):
-        """Send notification about state change"""
-
-        self.env['bus.bus']._sendone(
-            f'res.partner_{self.env.user.partner_id.id}',
-            'simple_notification',
-            {
-                'title': f'MultiSafepay Provider {new_state.title()}',
-                'message': message,
-                'type': 'info' if new_state == 'test' else 'success' if new_state == 'enabled' else 'warning'
-            }
-        )
-
-    def _get_default_support_refund(self):
-        if self.code == 'multisafepay':
-            return True
-        return super()._get_default_support_refund()
 
 
     def _get_supported_currencies(self):
@@ -195,11 +127,10 @@ class PaymentProvider(models.Model):
         - Deactivate: Disable methods that have transactions but keep them for history
 
         Returns:
-            dict: Summary with counts of removed, unlinked, and deactivated methods
+            dict: Summary with counts of removed, and deactivated methods
         """
         self.ensure_one()
 
-        # Search payment methods only if the provider is MultiSafepay
         multisafepay_methods = self.env['payment.method'].with_context(active_test=False).search([
             ('provider_ids', 'in', [self.id])
         ])
@@ -208,35 +139,25 @@ class PaymentProvider(models.Model):
 
         if not multisafepay_methods:
             _logger.debug("No payment methods found for this MultiSafepay provider")
-            return {'removed': 0, 'unlinked': 0, 'deactivated': 0}
+            return {'removed': 0, 'deactivated': 0}
 
         methods_to_remove = []
-        methods_to_unlink = []
         methods_to_deactivate = []
 
         for method in multisafepay_methods:
-            # Use .ids to access the IDs of the many2many
             provider_ids = method.provider_ids.ids
 
-            # Verify if the method has transactions
             has_transactions = self.env['payment.transaction'].search_count([
                 ('payment_method_id', '=', method.id)
             ]) > 0
 
             if has_transactions:
-                # If it has transactions, we deactivate it
                 methods_to_deactivate.append(method.id)
                 _logger.debug(f"Deactivating payment method (has transactions): {method.name} (code: {method.code})")
             elif len(provider_ids) == 1 and self.id in provider_ids:
-                # Only related to this provider and has no transactions -> remove
                 methods_to_remove.append(method.id)
                 _logger.debug(f"Removing payment method: {method.name} (code: {method.code})")
-            elif len(provider_ids) > 1 and self.id in provider_ids:
-                # Related with other providers -> just unlink
-                methods_to_unlink.append(method.id)
-                _logger.debug(f"Unlinking payment method: {method.name} from MultiSafepay provider")
 
-        # Remove methods that have no transactions and only belong to this provider
         removed_count = 0
         if methods_to_remove:
             try:
@@ -245,40 +166,24 @@ class PaymentProvider(models.Model):
                 _logger.debug(f"Removed {removed_count} payment methods")
             except Exception as e:
                 _logger.error(f"Error removing methods: {e}")
-                # If fails, move to deactivate
                 methods_to_deactivate.extend(methods_to_remove)
                 removed_count = 0
 
-        # Unlink methods that contain other providers
-        unlinked_count = 0
-        if methods_to_unlink:
-            try:
-                for method_id in methods_to_unlink:
-                    method = self.env['payment.method'].browse(method_id)
-                    method.write({'provider_ids': [(3, self.id, 0)]})  # (3, id, 0) = unlink
-                unlinked_count = len(methods_to_unlink)
-                _logger.debug(f"Unlinked {unlinked_count} payment methods from provider")
-            except Exception as e:
-                _logger.error(f"Error unlinking methods: {e}")
 
-        # Disable methods that have transactions
         deactivated_count = 0
         if methods_to_deactivate:
             try:
                 deactivate_methods = self.env['payment.method'].browse(methods_to_deactivate)
                 deactivate_methods.write({'active': False})
-                # Also unlink the provider
-                deactivate_methods.write({'provider_ids': [(3, self.id, 0)]})
                 deactivated_count = len(methods_to_deactivate)
                 _logger.debug(f"Deactivated {deactivated_count} payment methods (had transactions)")
             except Exception as e:
                 _logger.error(f"Error deactivating methods: {e}")
 
-        _logger.info(f"Payment methods cleanup complete: {removed_count} removed, {unlinked_count} unlinked, {deactivated_count} deactivated")
+        _logger.debug(f"Payment methods cleanup complete: {removed_count} removed, {deactivated_count} deactivated")
 
         return {
             'removed': removed_count,
-            'unlinked': unlinked_count,
             'deactivated': deactivated_count
         }
 
@@ -295,17 +200,11 @@ class PaymentProvider(models.Model):
         """
 
         self.ensure_one()
+        _logger.debug('Pulling merchant payment methods')
 
         if not self.multisafepay_api_key:
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'display_notification',
-                'params': {
-                    'title': 'MultiSafepay',
-                    'message': 'No API key found. Please configure your API key first.',
-                    'type': 'warning',
-                }
-            }
+            _logger.warning('No API key found. Please configure your API key first.')
+            return
 
         try:
             multisafepay_sdk = self.get_multisafepay_sdk()
@@ -314,15 +213,8 @@ class PaymentProvider(models.Model):
             custom_response = gateway_manager.get_payment_methods()
             gateways = custom_response.get_data()
             if not gateways or len(gateways) == 0:
-                return {
-                    'type': 'ir.actions.client',
-                    'tag': 'display_notification',
-                    'params': {
-                        'title': 'MultiSafepay',
-                        'message': 'No payment methods found',
-                        'type': 'warning',
-                    }
-                }
+                _logger.warning('No payment methods found')
+                return
 
             count_new = 0
             count_updated = 0
@@ -351,18 +243,15 @@ class PaymentProvider(models.Model):
                             currency_ids.append(currency_record.id)
 
                 domain = [
-                    ('code', '=', unique_code),
-                    '|',
-                    ('provider_ids', 'in', [self.id]),
-                    ('provider_ids', '=', False)
+                    ('code', '=', unique_code)
                 ]
-                existing = payment_method.search(domain, limit=1)
+                existing = payment_method.with_context(active_test=False).search(domain, limit=1)
 
                 vals = {
                     'name': gateway.name or gateway.id,
                     'code': unique_code,
                     'active': True,
-                    'support_refund': 'partial',  # MultiSafepay supports partial refunds
+                    'support_refund': 'partial',
                 }
 
                 if gateway.allowed_amount:
@@ -423,7 +312,7 @@ class PaymentProvider(models.Model):
                     if country_ids:
                         brand_vals['supported_country_ids'] = [(6, 0, country_ids)]
 
-                    brand_rec = payment_method.search(brand_domain, limit=1)
+                    brand_rec = payment_method.with_context(active_test=False).search(brand_domain, limit=1)
 
                     if not brand_rec:
                         main_brand_method = payment_method.create(brand_vals)
@@ -434,31 +323,21 @@ class PaymentProvider(models.Model):
                         if self.id not in brand_rec.provider_ids.ids:
                             brand_rec.write({'provider_ids': [(4, self.id, 0)]})
 
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'display_notification',
-                'params': {
-                    'title': 'MultiSafepay',
-                    'message': f'{count_new} new methods, {count_updated} methods updated,',
-                    'type': 'success',
-                }
-            }
+            _logger.debug(f'Successfully synchronized {count_new} new methods, {count_updated} methods updated')
 
         except Exception as e:
             _logger.error("Error loading payment methods: %s", e)
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'display_notification',
-                'params': {
-                    'title': 'Error',
-                    'message': f'Failed to load payment methods: {str(e)}',
-                    'type': 'danger',
-                }
-            }
 
     def pull_merchant_payment_methods(self):
-        self._cleanup_multisafepay_payment_methods()
+        """Pull merchant payment methods from MultiSafepay API
+        
+        This method first cleans up existing payment methods, then fetches new ones from the API.
+        """
+        cleanup_result = self._cleanup_multisafepay_payment_methods()
+        _logger.debug(f"Payment methods cleanup: {cleanup_result['removed']} removed, {cleanup_result['deactivated']} deactivated")
+        
         self._fetch_merchant_payment_methods()
+        _logger.debug("MultiSafepay payment methods pull completed")
 
     def _compute_feature_support_fields(self):
         """ Compute the feature support fields based on the provider.
@@ -497,47 +376,35 @@ class PaymentProvider(models.Model):
 
     def _map_multisafepay_to_odoo_code(self, multisafepay_code):
         """
-        Map MultiSafepay payment method code to Odoo code.
+        Map MultiSafepay payment method code to Odoo code with multisafepay_ prefix.
 
         Args:
             multisafepay_code (str): Payment method code from MultiSafepay (e.g., 'MISTERCASH', 'mistercash')
 
         Returns:
-            str: Corresponding Odoo code (e.g., 'bancontact') or lowercase MultiSafepay code
+            str: Odoo code with multisafepay_ prefix (e.g., 'multisafepay_mistercash')
         """
         if not multisafepay_code:
             return ''
 
-        # Convert to lowercase for comparison
         msp_code_lower = multisafepay_code.lower()
-
-        # Search for the MultiSafepay code in the dictionary values
-        for odoo_code, msp_code in const.PAYMENT_METHOD_CODES.items():
-            if msp_code == msp_code_lower:
-                return odoo_code
-
-        # If no mapping found, return the original code in lowercase
-        return msp_code_lower
+        return f"{const.PAYMENT_METHOD_PREFIX}{msp_code_lower}"
 
     def _map_odoo_to_multisafepay_code(self, odoo_code):
         """
-        Map Odoo payment method code to MultiSafepay code.
+        Map Odoo payment method code to MultiSafepay code, handling multisafepay_ prefix.
 
         Args:
-            odoo_code (str): Odoo internal payment method code (e.g., 'bancontact')
+            odoo_code (str): Odoo internal payment method code (e.g., 'multisafepay_mistercash')
 
         Returns:
-            str: Corresponding MultiSafepay code (e.g., 'MISTERCASH') or uppercase Odoo code
+            str: MultiSafepay code in uppercase (e.g., 'MISTERCASH')
         """
         if not odoo_code:
             return ''
 
-        # Get MultiSafepay code from dictionary
-        multisafepay_code = const.PAYMENT_METHOD_CODES.get(odoo_code.lower())
+        clean_code = odoo_code
+        if odoo_code.startswith(const.PAYMENT_METHOD_PREFIX):
+            clean_code = odoo_code[len(const.PAYMENT_METHOD_PREFIX):]
 
-        if multisafepay_code:
-            # Return MultiSafepay code in uppercase (as MultiSafepay expects)
-            return multisafepay_code.upper()
-
-        # If no mapping found, return the original code in uppercase
-        return odoo_code.upper()
+        return clean_code.upper()

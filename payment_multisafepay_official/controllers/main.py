@@ -524,11 +524,15 @@ class MultiSafepayController(http.Controller):
 
             merchant_item_id = line.product_id.code if line.product_id.code else str(line.product_id.id)
 
-            if line.reward_id:
-                if line.reward_id and line.reward_id.reward_type:
-                    merchant_item_id = f"{line.reward_id.reward_type}-{merchant_item_id}"
-                if line.reward_id and line.reward_id.program_type:
-                    merchant_item_id = f"{line.reward_id.program_type}-{merchant_item_id}"
+            # Check for reward/loyalty lines safely
+            reward_id = getattr(line, 'reward_id', None)
+            if reward_id:
+                reward_type = getattr(reward_id, 'reward_type', None)
+                if reward_type:
+                    merchant_item_id = f"{reward_type}-{merchant_item_id}"
+                program_type = getattr(reward_id, 'program_type', None)
+                if program_type:
+                    merchant_item_id = f"{program_type}-{merchant_item_id}"
                     
             for variant in line.product_no_variant_attribute_value_ids:
                 merchant_item_id += f"-{variant.name}"

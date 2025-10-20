@@ -3,6 +3,9 @@
 # See the LICENSE.md file for more information.
 # See the DISCLAIMER.md file for disclaimer details
 
+# Payment method code prefix
+PAYMENT_METHOD_PREFIX = 'multisafepay_'
+
 SUPPORTED_CURRENCIES = [
     'AED',
     'AUD',
@@ -57,13 +60,6 @@ PAYMENT_METHOD_PENDING = [
     'bank_transfer',
     'multibanco',
 ]
-
-PAYMENT_METHOD_CODES = {
-    'bancontact': 'mistercash',
-    'bank_transfer': 'banktrans',
-    'kbc_cbc': 'kbc',
-    'wechat_pay': 'wechat',
-}
 
 BNPL_METHODS = [
     'afterpay',
