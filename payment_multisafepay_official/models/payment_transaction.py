@@ -216,7 +216,7 @@ class PaymentTransaction(models.Model):
         try:
             amount_in_cents = int(abs(amount_to_refund) * currency_divisor)
             refund_response = None
-            is_bnpl = self.payment_method_code in const.BNPL_METHODS
+            is_bnpl = self.payment_method_code.removeprefix(const.PAYMENT_METHOD_PREFIX) in const.BNPL_METHODS
 
             try:
                 if is_bnpl:

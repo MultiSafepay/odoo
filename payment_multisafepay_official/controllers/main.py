@@ -44,7 +44,7 @@ from multisafepay.api.paths.orders.response.order_response import Order
 from multisafepay.util.address_parser import AddressParser
 from multisafepay.util.webhook import Webhook
 
-from ..const import PAYMENT_METHOD_PENDING
+from ..const import PAYMENT_METHOD_PENDING, PAYMENT_METHOD_PREFIX
 
 
 _logger = logging.getLogger(__name__)
@@ -156,7 +156,7 @@ class MultiSafepayController(http.Controller):
             ('provider_code', '=', 'multisafepay')
         ], limit=1)
 
-        if payment_transaction.payment_method_code in PAYMENT_METHOD_PENDING:
+        if payment_transaction.payment_method_code.removeprefix(PAYMENT_METHOD_PREFIX) in PAYMENT_METHOD_PENDING:
             _logger.info("Payment method '%s' requires manual confirmation. Setting as pending.", payment_transaction.payment_method_code)
 
             # Get real state from MultiSafepay
@@ -533,7 +533,7 @@ class MultiSafepayController(http.Controller):
                 program_type = getattr(reward_id, 'program_type', None)
                 if program_type:
                     merchant_item_id = f"{program_type}-{merchant_item_id}"
-                    
+
             for variant in line.product_no_variant_attribute_value_ids:
                 merchant_item_id += f"-{variant.name}"
 
