@@ -9,6 +9,19 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [18.0.1.1.0] - 2025-10-24
+### Added
+- HTTP GET method support in webhook endpoint for improved integration flexibility
+- Enhanced logging functionality across multiple modules for better debugging and monitoring
+
+### Changed
+- Enabled cart validation in Order Request for better transaction integrity
+
+### Fixed
+- Resolved duplicated merchant item ID issue in buy_x_get_y promotions
+- Corrected unclear transaction status mapping for better transaction tracking
+- Fixed inconsistencies in provider configuration management
+
 ## [18.0.1.0.0] - 2025-09-15
 ### Added
 - Compatibility with Odoo 18.0.

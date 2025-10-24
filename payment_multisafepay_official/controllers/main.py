@@ -496,7 +496,7 @@ class MultiSafepayController(http.Controller):
 
         # Create a Plugin object with the necessary details
         plugin = (Plugin(**{})
-            .add_plugin_version('1.0.0')
+            .add_plugin_version('1.1.0')
             .add_shop('Odoo')
             .add_shop_version('18.0')
             .add_shop_root_url(url))
