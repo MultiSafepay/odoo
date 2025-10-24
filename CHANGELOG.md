@@ -9,8 +9,9 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-## [18.0.1.1.0] - 2025-10-24
+## [19.0.1.0.0] - 2025-10-24
 ### Added
+- Add support for Odoo 19.0.
 - HTTP GET method support in webhook endpoint for improved integration flexibility
 - Enhanced logging functionality across multiple modules for better debugging and monitoring
 
