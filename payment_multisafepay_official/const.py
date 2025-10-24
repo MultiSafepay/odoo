@@ -57,7 +57,7 @@ STATUS_MAPPING = {
 }
 
 PAYMENT_METHOD_PENDING = [
-    'bank_transfer',
+    'banktrans',
     'multibanco',
 ]
 

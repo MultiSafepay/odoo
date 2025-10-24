@@ -15,25 +15,16 @@
                 </group>
             </xpath>
 
-            <xpath expr="//field[@name='allow_tokenization']" position="before">
-                <div
-                    class="row mt-2"
-                    invisible="code != 'multisafepay' or code == 'multisafepay' and state == 'disabled'"
+           <xpath expr="//a[@name='action_view_payment_methods']" position="after">
+                <a invisible="code != 'multisafepay' or code == 'multisafepay' and state == 'disabled'"
+                    type="object"
+                    name="pull_merchant_payment_methods"
+                    class="btn btn-link pl-2"
+                    role="button"
                 >
-                    <div class="col">
-                        <button
-                            string="Pull Payment Methods"
-                            type="object"
-                            name="pull_merchant_payment_methods"
-                            class="btn btn-primary"
-                        />
-                        <p class="text-muted mt-2">
-                            Load available payment methods from your MultiSafepay account.
-                        </p>
-                    </div>
-                </div>
+                    <i class="fa fa-refresh"/> Sync Payment Methods
+                </a>
             </xpath>
-
             <xpath expr="//field[@name='allow_tokenization']" position="attributes">
                 <attribute name="readonly">code == 'multisafepay'</attribute>
             </xpath>

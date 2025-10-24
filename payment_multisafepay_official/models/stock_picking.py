@@ -36,20 +36,29 @@ class StockPicking(models.Model):
                 _logger.info("MultiSafepay already notified for picking %s", picking.name)
                 continue
 
+            # Get sale order(s) from picking - Odoo 19 compatibility
+            # In Odoo 19, stock.picking has a direct computed field 'sale_id'
+            sale_order = picking.sale_id
+            
+            if not sale_order:
+                _logger.info("No sale order found for picking %s", picking.name)
+                continue
+
             # Find MultiSafepay transaction through the sale order
             multisafepay_tx = self.env['payment.transaction'].search([
-                ('sale_order_ids', 'in', [picking.sale_id.id]),
+                ('sale_order_ids', 'in', [sale_order.id]),
                 ('provider_code', '=', 'multisafepay')
             ], limit=1)
 
             # If no transaction found, log and continue
             if not multisafepay_tx:
-                _logger.info("No MultiSafepay transaction found for order %s", picking.sale_id.name)
+                _logger.info("No MultiSafepay transaction found for order %s", sale_order.name)
                 continue
 
             # Check if this is the last picking (all others are done or cancelled)
+            # In Odoo 19, use sale_id field directly instead of searching by origin
             pending_pickings = self.env['stock.picking'].search([
-                ('sale_id', '=', picking.sale_id.id),
+                ('sale_id', '=', sale_order.id),
                 ('state', 'not in', ['done', 'cancel']),
                 ('id', '!=', picking.id)  # Exclude current picking
             ])
@@ -57,7 +66,7 @@ class StockPicking(models.Model):
             # Only notify MultiSafepay if this is the last shipment
             if pending_pickings:
                 _logger.info("Order %s has pending pickings: %s. Not notifying MultiSafepay yet.",
-                        picking.sale_id.name, pending_pickings.mapped('name'))
+                        sale_order.name, pending_pickings.mapped('name'))
                 continue
 
             # If we have a transaction, check if we need to notify MultiSafepay

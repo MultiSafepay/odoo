@@ -117,4 +117,4 @@ Are you a developer interested in working at MultiSafepay? Check out our [job op
 
 ## License
 
-This project is licensed under the terms specified in the [LICENSE](https://github.com/MultiSafepay/odoo/blob/18.0/LICENSE.md) file in the root directory of this repository.
+This project is licensed under the terms specified in the [LICENSE](https://github.com/MultiSafepay/odoo/blob/19.0/LICENSE.md) file in the root directory of this repository.

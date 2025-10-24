@@ -44,7 +44,7 @@ from multisafepay.api.paths.orders.response.order_response import Order
 from multisafepay.util.address_parser import AddressParser
 from multisafepay.util.webhook import Webhook
 
-from ..const import PAYMENT_METHOD_PENDING
+from ..const import PAYMENT_METHOD_PENDING, PAYMENT_METHOD_PREFIX
 
 
 _logger = logging.getLogger(__name__)
@@ -156,7 +156,7 @@ class MultiSafepayController(http.Controller):
             ('provider_code', '=', 'multisafepay')
         ], limit=1)
 
-        if payment_transaction.payment_method_code in PAYMENT_METHOD_PENDING:
+        if payment_transaction.payment_method_code.removeprefix(PAYMENT_METHOD_PREFIX) in PAYMENT_METHOD_PENDING:
             _logger.info("Payment method '%s' requires manual confirmation. Setting as pending.", payment_transaction.payment_method_code)
 
             # Get real state from MultiSafepay
@@ -498,7 +498,7 @@ class MultiSafepayController(http.Controller):
         plugin = (Plugin(**{})
             .add_plugin_version('1.0.0')
             .add_shop('Odoo')
-            .add_shop_version('18.0')
+            .add_shop_version('19.0')
             .add_shop_root_url(url))
 
         # Create payment options for the order
@@ -520,7 +520,12 @@ class MultiSafepayController(http.Controller):
         for line in order_lines:
             product = getattr(line, 'product_id', None)
 
-            tax_table_selector = line.tax_id.amount if line.tax_id else None
+            # Fix: Handle tax_id field change from Odoo 18 to 19 (tax_id -> tax_ids)
+            tax_table_selector = None
+            if hasattr(line, 'tax_ids') and line.tax_ids:
+                # Odoo 19+: tax_ids is a many2many field, get the first tax rate
+                tax_table_selector = line.tax_ids[0].amount
+
 
             merchant_item_id = line.product_id.code if line.product_id.code else str(line.product_id.id)
 
@@ -533,7 +538,7 @@ class MultiSafepayController(http.Controller):
                 program_type = getattr(reward_id, 'program_type', None)
                 if program_type:
                     merchant_item_id = f"{program_type}-{merchant_item_id}"
-                    
+
             for variant in line.product_no_variant_attribute_value_ids:
                 merchant_item_id += f"-{variant.name}"
 

@@ -84,7 +84,8 @@ class PaymentTransaction(models.Model):
         """ Override of `payment` to process the transaction based on MultiSafepay data. """
         self.ensure_one()
 
-        super()._process_notification_data(notification_data)
+        # Fix: Odoo 19 compatibility - parent class doesn't have _process_notification_data
+        # Handle notification processing directly without calling super()
         if self.provider_code != 'multisafepay':
             return
 
@@ -110,23 +111,28 @@ class PaymentTransaction(models.Model):
 
         elif odoo_state == 'done':
             _logger.debug("MSP status '%s' → marking transaction done (ref=%s)", status, self.reference)
-            self._set_done("Payment completed at MultiSafepay")
+            # Fix: Odoo 19 compatibility - _set_done() no longer accepts message parameter
+            self._set_done()
 
         elif odoo_state == 'cancel':
             _logger.debug("MSP status '%s' → canceling transaction (ref=%s)", status, self.reference)
-            self._set_canceled(f"Payment {status} at MultiSafepay")
+            # Fix: Odoo 19 compatibility - _set_canceled() no longer accepts message parameter
+            self._set_canceled()
 
         elif odoo_state == 'error':
             _logger.debug("MSP status '%s' → setting transaction to error (ref=%s)", status, self.reference)
-            self._set_error("Payment error at MultiSafepay")
+            # Fix: Odoo 19 compatibility - _set_error() no longer accepts message parameter
+            self._set_error()
 
         elif odoo_state == 'pending':
             _logger.debug("MSP status '%s' → setting transaction to pending (ref=%s)", status, self.reference)
-            self._set_pending("Payment pending at MultiSafepay")
+            # Fix: Odoo 19 compatibility - _set_pending() no longer accepts message parameter
+            self._set_pending()
 
         elif odoo_state == 'partial_refunded':
             _logger.debug("MSP status '%s' → payment partially refunded (ref=%s)", status, self.reference)
-            self._set_done("Payment completed (partially refunded) at MultiSafepay")
+            # Fix: Odoo 19 compatibility - _set_done() no longer accepts message parameter
+            self._set_done()
 
         _logger.info("Transaction %s updated to state '%s'", self.reference, odoo_state)
 
@@ -157,25 +163,38 @@ class PaymentTransaction(models.Model):
         self.ensure_one()
 
         if self.provider_code != 'multisafepay':
-            return super()._send_refund_request(amount_to_refund=amount_to_refund)
+            return super()._send_refund_request()
+
+        # In Odoo 19, self is already the refund transaction
+        # Get the original transaction via source_transaction_id
+        if not self.source_transaction_id:
+            raise UserError(_("Refunds can only be processed from a refund transaction linked to an original payment transaction."))
+
+        original_tx = self.source_transaction_id
+        original_reference = original_tx.reference
+        amount_to_refund = abs(self.amount)
 
         provider = self.provider_id
         multisafepay_sdk = provider.get_multisafepay_sdk()
         order_manager = multisafepay_sdk.get_order_manager()
 
-        # Get current order status from MultiSafepay
-        order_response = order_manager.get(self.reference)
-        order_data = order_response.get_data()
+        try:
+            # Get current order status from MultiSafepay using original reference
+            order_response = order_manager.get(original_reference)
+            order_data = order_response.get_data()
+        except Exception as api_error:
+            _logger.error("API error retrieving order %s: %s", original_reference, str(api_error))
+            raise UserError(_("Could not connect to MultiSafepay API for transaction %s.\n\nError: %s") % (self.reference, str(api_error)))
 
         if not order_data:
             _logger.error("Could not retrieve order data for %s", self.reference)
             raise UserError(_("Could not retrieve order information from MultiSafepay for transaction %s.\n\nReference: %s\nProvider: %s\n\nPlease check your internet connection and try again later.") % (
                 self.reference,
-                self.reference,
+                original_reference,
                 self.provider_id.name
             ))
 
-        original_amount = abs(self.amount)
+        original_amount = abs(original_tx.amount)
         decimal_places = self.currency_id.decimal_places or 2
         currency_divisor = 10 ** decimal_places
 
@@ -184,9 +203,9 @@ class PaymentTransaction(models.Model):
 
         # Early check: if already refunded, don't proceed
         if order_status == 'refunded':
-            _logger.error("Order %s is already refunded", self.reference)
+            _logger.error("Order %s is already refunded", original_reference)
             raise UserError(_("This order has already been fully refunded.\n\nTransaction: %s\nOrder Status: %s\nOriginal Amount: %.2f %s\n\nNo additional refunds can be processed.") % (
-                self.reference,
+                original_reference,
                 order_status,
                 abs(amount_to_refund),
                 self.currency_id.name
@@ -194,7 +213,7 @@ class PaymentTransaction(models.Model):
 
         remaining_amount = 0
         if hasattr(order_data, 'amount_refunded') and order_data.amount_refunded:
-            _logger.warning("Order %s has already been partially refunded", self.reference)
+            _logger.warning("Order %s has already been partially refunded", original_reference)
 
             refunded_amount = order_data.amount_refunded / currency_divisor
             remaining_amount = original_amount - refunded_amount
@@ -202,9 +221,9 @@ class PaymentTransaction(models.Model):
 
         if remaining_amount and amount_to_refund > remaining_amount:
             _logger.error("Refund amount %s exceeds remaining amount %s for order %s",
-                        amount_to_refund, remaining_amount, self.reference)
+                        amount_to_refund, remaining_amount, original_reference)
             raise UserError(_("Refund amount exceeds available amount.\n\nTransaction: %s\nRequested Refund: %.2f %s\nMaximum Available: %.2f %s\nAlready Refunded: %.2f %s\n\nPlease adjust the refund amount.") % (
-                self.reference,
+                original_reference,
                 abs(amount_to_refund),
                 self.currency_id.name,
                 remaining_amount,
@@ -216,14 +235,14 @@ class PaymentTransaction(models.Model):
         try:
             amount_in_cents = int(abs(amount_to_refund) * currency_divisor)
             refund_response = None
-            is_bnpl = self.payment_method_code in const.BNPL_METHODS
+            is_bnpl = original_tx.payment_method_code.removeprefix(const.PAYMENT_METHOD_PREFIX) in const.BNPL_METHODS
 
             try:
                 if is_bnpl:
-                    refund_request = order_manager. create_refund_request(order_data)
+                    refund_request = order_manager.create_refund_request(order_data)
                     cart_item = (CartItem(**{})
                         .add_merchant_item_id(str(uuid.uuid4()))
-                        .add_name(f"Refund for Odoo order {self.reference}")
+                        .add_name(f"Refund for Odoo order {original_reference}")
                         .add_quantity(1)
                         .add_unit_price(-amount_to_refund)
                         .add_tax_table_selector('0')
@@ -238,20 +257,21 @@ class PaymentTransaction(models.Model):
                         .add_amount(amount_in_cents)
                         .add_currency(Currency(currency=self.currency_id.name).currency)
                         .add_description(
-                            Description(**{}).add_description(f'Refund for Odoo order {self.reference}')))
+                            Description(**{}).add_description(f'Refund for Odoo order {original_reference}')))
 
 
-                _logger.debug("Refund payload for order %s: %s", self.reference, str(refund_payload.dict()))
+                _logger.debug("Refund payload for order %s: %s", original_reference, str(refund_payload.dict()))
 
-                refund_response: CustomApiResponse = order_manager.refund(self.reference, refund_payload)
+                refund_response = order_manager.refund(original_reference, refund_payload)
             except Exception:
                 refund_response = False
 
             if not refund_response:
-                _logger.error("No response received from MultiSafepay for refund of order %s", self.reference)
-                raise _("No response received from MultiSafepay when attempting to refund transaction %s.\n\nPlease check your internet connection and try again later.") % self.reference
+                _logger.error("No response received from MultiSafepay for refund of order %s", original_reference)
+                raise UserError(_("No response received from MultiSafepay when attempting to refund transaction %s.\n\nPlease check your internet connection and try again later.") % original_reference)
 
-            refund_data: OrderRefund = refund_response.get_data()
+            refund_data = refund_response.get_data()
+            _logger.info("Refund response data: %s", pprint.pformat(refund_data))
 
             _logger.debug("Refund response data: %s", str(refund_data))
 
@@ -283,24 +303,21 @@ class PaymentTransaction(models.Model):
                 _logger.error("Something went wrong with refund for order %s", self.reference)
                 raise UserError(_("Refund failed at MultiSafepay: %s\n") % self.reference)
 
+            # Update refund transaction with provider reference
+            if refund_data and hasattr(refund_data, 'transaction_id'):
+                self.provider_reference = refund_data.transaction_id
+
+            # Mark refund as successful
+            notification_data = {
+                'status': 'completed',
+                'amount': amount_to_refund,
+                'currency': self.currency_id.name
+            }
+            if refund_data and hasattr(refund_data, 'transaction_id'):
+                notification_data['reference'] = refund_data.transaction_id
+
+            self._process_notification_data(notification_data)
 
         except Exception as e:
             _logger.error("Something went wrong with refund for order %s: %s", self.reference, str(e))
             raise UserError(str(e))
-
-
-        refund_tx = super()._send_refund_request(amount_to_refund=amount_to_refund)
-
-        notification_data = {
-            'status': 'completed',
-            'amount': amount_to_refund,
-            'currency': self.currency_id.name
-        }
-
-        if refund_data and hasattr(refund_data, 'transaction_id'):
-            refund_tx.provider_reference = refund_data.transaction_id
-            notification_data['reference'] = refund_data.transaction_id
-
-        refund_tx._process_notification_data(notification_data)
-
-        return refund_tx
