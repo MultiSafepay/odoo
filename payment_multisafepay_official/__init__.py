@@ -5,6 +5,7 @@
 
 from . import models
 from . import controllers
+from . import wizard
 from . import utils
 
 import odoo.addons.payment as payment
