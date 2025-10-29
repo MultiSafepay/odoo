@@ -4,6 +4,7 @@
 # See the DISCLAIMER.md file for disclaimer details
 
 from datetime import date, datetime, time
+from decimal import Decimal
 import logging
 import pprint
 import uuid
@@ -214,7 +215,9 @@ class PaymentTransaction(models.Model):
             ))
 
         try:
-            amount_in_cents = int(abs(amount_to_refund) * currency_divisor)
+            # Use Decimal for precise monetary calculations
+            amount_in_cents = int(Decimal(str(abs(amount_to_refund))) * Decimal(str(currency_divisor)))            
+            
             refund_response = None
             is_bnpl = self.payment_method_code.removeprefix(const.PAYMENT_METHOD_PREFIX) in const.BNPL_METHODS
 
