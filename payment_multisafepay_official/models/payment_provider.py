@@ -3,6 +3,7 @@
 # See the LICENSE.md file for more information.
 # See the DISCLAIMER.md file for disclaimer details
 
+from decimal import Decimal
 import logging
 
 from multisafepay.sdk import Sdk
@@ -256,9 +257,13 @@ class PaymentProvider(models.Model):
 
                 if gateway.allowed_amount:
                     if gateway.allowed_amount.min:
-                        vals['minimum_amount'] = gateway.allowed_amount.min / 100.0
+                        # Use Decimal for precise monetary calculations to avoid floating-point errors
+                        min_decimal = Decimal(str(gateway.allowed_amount.min))
+                        vals['minimum_amount'] = float(min_decimal / Decimal('100'))
                     if gateway.allowed_amount.max:
-                        vals['maximum_amount'] = gateway.allowed_amount.max / 100.0
+                        # Use Decimal for precise monetary calculations to avoid floating-point errors
+                        max_decimal = Decimal(str(gateway.allowed_amount.max))
+                        vals['maximum_amount'] = float(max_decimal / Decimal('100'))
 
                 if country_ids:
                     vals['supported_country_ids'] = [(6, 0, country_ids)]

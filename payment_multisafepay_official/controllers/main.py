@@ -7,6 +7,7 @@
 MultiSafepay Payment Controller
 Handles redirect flow for MultiSafepay payments
 """
+from decimal import Decimal
 import logging
 import pprint
 import json
@@ -378,9 +379,13 @@ class MultiSafepayController(http.Controller):
         order_id = payment_transaction.reference
 
         decimal_places = getattr(currency_id, 'decimal_places', 2)  # Default to 2 if not found
+        
+        # Use Decimal for precise monetary calculations to avoid floating-point errors
         multiplier = 10 ** decimal_places
-        multiplied_amount = amount * multiplier
+        amount_decimal = Decimal(str(amount))
+        multiplied_amount = amount_decimal * multiplier
         normalized_amount = int(multiplied_amount)
+        
         amount = Amount(amount=normalized_amount).amount
         currency = Currency(currency=currency_id.name)
 
