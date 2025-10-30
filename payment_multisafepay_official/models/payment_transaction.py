@@ -197,7 +197,10 @@ class PaymentTransaction(models.Model):
         if hasattr(order_data, 'amount_refunded') and order_data.amount_refunded:
             _logger.warning("Order %s has already been partially refunded", self.reference)
 
-            refunded_amount = order_data.amount_refunded / currency_divisor
+            # Use Decimal for precise monetary calculations to avoid floating-point errors
+            refunded_decimal = Decimal(str(order_data.amount_refunded))
+            divisor_decimal = Decimal(str(currency_divisor))
+            refunded_amount = float(refunded_decimal / divisor_decimal)
             remaining_amount = original_amount - refunded_amount
 
 
@@ -215,8 +218,10 @@ class PaymentTransaction(models.Model):
             ))
 
         try:
-            # Use Decimal for precise monetary calculations
-            amount_in_cents = int(Decimal(str(abs(amount_to_refund))) * Decimal(str(currency_divisor)))            
+            # Use Decimal for precise monetary calculations to avoid floating-point errors
+            amount_decimal = Decimal(str(abs(amount_to_refund)))
+            divisor_decimal = Decimal(str(currency_divisor))
+            amount_in_cents = int(amount_decimal * divisor_decimal)
             
             refund_response = None
             is_bnpl = self.payment_method_code.removeprefix(const.PAYMENT_METHOD_PREFIX) in const.BNPL_METHODS
