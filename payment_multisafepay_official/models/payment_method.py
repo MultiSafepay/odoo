@@ -117,12 +117,3 @@ class PaymentMethod(models.Model):
         return payment_methods
 
 
-    def _get_from_code(self, code, mapping=None):
-        """ Override to ensure that the method is only returned if it is compatible with the given code. """
-        mapping = mapping or {}
-        methods = super()._get_from_code(code, mapping)
-        if not methods:
-            return methods
-        # Filter methods to ensure they are compatible with the given code
-        return methods.filtered(lambda m: m.provider_ids.code == code)
-
