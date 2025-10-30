@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Extend the standard payment refund wizard form to add MultiSafepay refund reason -->
+    <record id="payment_refund_wizard_form_multisafepay" model="ir.ui.view">
+        <field name="name">payment.refund.wizard.form.multisafepay</field>
+        <field name="model">payment.refund.wizard</field>
+        <field name="inherit_id" ref="account_payment.payment_refund_wizard_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Add provider_code field (invisible) to use in condition -->
+            <field name="transaction_id" position="after">
+                <field name="provider_code" invisible="1"/>
+            </field>
+            <!-- Add the refund reason field after amount_to_refund -->
+            <field name="amount_to_refund" position="after">
+                <field name="multisafepay_refund_reason" 
+                       string="Refund Reason"
+                       placeholder="Optional: e.g., Customer requested, Damaged product..."
+                       invisible="provider_code != 'multisafepay'"/>
+            </field>
+        </field>
+    </record>
+</odoo>

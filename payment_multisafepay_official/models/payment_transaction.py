@@ -8,7 +8,7 @@ from decimal import Decimal
 import logging
 import pprint
 import uuid
-from odoo import _, models
+from odoo import _, fields, models
 from odoo.exceptions import UserError
 from pydantic import ValidationError
 
@@ -28,6 +28,12 @@ _logger = logging.getLogger(__name__)
 class PaymentTransaction(models.Model):
     _inherit = 'payment.transaction'
 
+    # MultiSafepay specific fields
+    multisafepay_refund_reason = fields.Char(
+        string="Refund Reason",
+        help="Reason for the refund (MultiSafepay specific)",
+        copy=False,
+    )
 
     def _get_specific_processing_values(self, processing_values):
         """ Override to return specific processing values for MultiSafepay. """
@@ -151,6 +157,26 @@ class PaymentTransaction(models.Model):
 
         return 'error'
 
+
+    def _create_child_transaction(self, amount, is_refund=False, **custom_create_values):
+        """Override to add the MultiSafepay refund reason when creating a refund transaction.
+        
+        The reason can come from context (set by the wizard).
+        """
+        # Get the refund reason from the context (set by the wizard)
+        if is_refund and self.provider_code == 'multisafepay':
+            refund_reason = self.env.context.get('multisafepay_refund_reason')
+            _logger.debug("Creating refund transaction. Provider: %s, Reason from context: %s", 
+                        self.provider_code, refund_reason)
+            if refund_reason:
+                custom_create_values['multisafepay_refund_reason'] = refund_reason
+                _logger.debug("Added reason to custom_create_values: %s", refund_reason)
+        
+        # Call the parent method with the updated custom_create_values
+        result = super()._create_child_transaction(amount, is_refund=is_refund, **custom_create_values)
+        _logger.debug("Child transaction created. ID: %s, Reason field: %s", 
+                    result.id, result.multisafepay_refund_reason)
+        return result
 
 
     def _send_refund_request(self, amount_to_refund=0.0):
