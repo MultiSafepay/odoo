@@ -303,7 +303,12 @@ class MultiSafepayController(http.Controller):
             api_key = provider.multisafepay_api_key
 
             try:
-                Webhook.validate(request=request_body_raw, auth=auth_header, api_key=api_key, validation_time_in_seconds=600)
+                validated = Webhook.validate(request=request_body_raw, auth=auth_header, api_key=api_key, validation_time_in_seconds=600)
+
+                if not validated:
+                    _logger.error("Webhook validation failed for transaction %s: Invalid signature", transactionid)
+                    return request.make_response('Webhook validation failed', status=403)
+
                 _logger.info("Webhook validation successful for transaction: %s", transactionid)
 
                 if not order.status:
@@ -379,13 +384,13 @@ class MultiSafepayController(http.Controller):
         order_id = payment_transaction.reference
 
         decimal_places = getattr(currency_id, 'decimal_places', 2)  # Default to 2 if not found
-        
+
         # Use Decimal for precise monetary calculations to avoid floating-point errors
         multiplier = 10 ** decimal_places
         amount_decimal = Decimal(str(amount))
         multiplied_amount = amount_decimal * multiplier
         normalized_amount = int(multiplied_amount)
-        
+
         amount = Amount(amount=normalized_amount).amount
         currency = Currency(currency=currency_id.name)
 
