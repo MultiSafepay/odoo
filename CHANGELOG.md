@@ -9,6 +9,16 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [19.0.1.1.0] - 2025-10-31
+### Added
+- ODOO-123: Refund reason field for better transaction tracking
+
+### Fixed
+- ODOO-147: Webhook validation issues for improved reliability
+- ODOO-131: Floating-point arithmetic calculation error for accurate financial calculations
+- ODOO-147: Precise calculation implementation in all cases to ensure accuracy
+- ODOO-132: Unnecessary filter removal from code for better performance
+
 ## [19.0.1.0.0] - 2025-10-24
 ### Added
 - Add support for Odoo 19.0.
