@@ -9,6 +9,16 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [18.0.1.2.0] - 2025-10-31
+### Added
+- ODOO-135: Refund reason field for better transaction tracking
+
+### Fixed
+- ODOO-148: Webhook validation issues for improved reliability
+- ODOO-134: Floating-point arithmetic calculation error for accurate financial calculations
+- ODOO-137: Incorrect decimal precision in calculations for better accuracy
+- ODOO-136: Unnecessary filter removal from code for better performance
+
 ## [18.0.1.1.0] - 2025-10-24
 ### Added
 - HTTP GET method support in webhook endpoint for improved integration flexibility
