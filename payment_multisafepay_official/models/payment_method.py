@@ -7,6 +7,12 @@ import logging
 
 from odoo import api, fields, models
 
+try:
+    from odoo.http import request
+except ImportError:
+    # Graceful handling when http module is not available (e.g., during module installation)
+    request = None
+
 _logger = logging.getLogger(__name__)
 
 
@@ -152,13 +158,12 @@ class PaymentMethod(models.Model):
                 if order.exists():
                     amount = order.amount_total
                     _logger.debug("Using amount %s from sale order %s", amount, order.name)
-            except Exception as e:
+            except (ValueError, TypeError, AttributeError) as e:
                 _logger.error("Error getting amount from sale order: %s", str(e))
 
         if amount is None:
             _logger.debug("Amount not found in kwargs, checking request parameters")
             try:
-                from odoo.http import request
                 if request and hasattr(request, 'httprequest') and hasattr(request.httprequest, 'args'):
                     amount_str = request.httprequest.args.get('amount')
                     if amount_str:
@@ -169,7 +174,7 @@ class PaymentMethod(models.Model):
                             _logger.error("Could not convert URL amount parameter to float: %s", amount_str)
             except ImportError:
                 _logger.error("Could not import request object to get URL parameters")
-            except Exception as e:
+            except (AttributeError, KeyError) as e:
                 _logger.error("Error getting amount from request: %s", str(e))
 
         # Apply amount filtering and report results
@@ -193,16 +198,15 @@ class PaymentMethod(models.Model):
                 payment_methods = filtered_by_amount
                 _logger.debug("Applied amount filtering for amount: %s", amount)
                 
-        except Exception as e:
+        except (TypeError, ValueError, AttributeError) as e:
             _logger.error("Error applying amount filtering: %s", str(e))
             # Continue without amount filtering to avoid breaking the checkout process
 
         # Apply pricelist filtering automatically if we have access to the current order
         try:
-            from odoo.http import request
-            if request and hasattr(request, 'cart') and request.cart:
+            if request and hasattr(request, 'cart') and request.cart and request.cart.exists():
                 pricelist = request.cart.pricelist_id
-                if pricelist:
+                if pricelist and pricelist.exists():
                     multisafepay_methods_before_pricelist = payment_methods.filtered(lambda method: method.only_multisafepay)
                     payment_methods = payment_methods._filter_by_pricelist(pricelist)
                     multisafepay_methods_after_pricelist = payment_methods.filtered(lambda method: method.only_multisafepay)
@@ -217,7 +221,7 @@ class PaymentMethod(models.Model):
                             )
                     
                     _logger.debug("Applied pricelist filtering for pricelist: %s", pricelist.name)
-        except (ImportError, AttributeError, RuntimeError) as e:
+        except (ImportError, AttributeError) as e:
             # No request context or cart available, skip pricelist filtering
             _logger.debug("No request context available for pricelist filtering: %s", str(e))
 
@@ -266,22 +270,7 @@ class PaymentMethod(models.Model):
                 len(allowed_multisafepay_methods),
                 pricelist.name,
                 ', '.join(allowed_method_names)
-            )
-        
-        # Store filtering info in context for potential use in templates
-        try:
-            from odoo.http import request
-            if request and hasattr(request, 'session'):
-                request.session['pricelist_filter_info'] = {
-                    'pricelist_name': pricelist.name,
-                    'total_multisafepay_methods': len(multisafepay_methods),
-                    'allowed_multisafepay_methods': len(allowed_multisafepay_methods),
-                    'filtered_out_multisafepay_methods': len(filtered_out_methods),
-                    'filtered_out_method_names': [m.name for m in filtered_out_methods],
-                    'other_methods_count': len(other_methods),
-                }
-        except (ImportError, AttributeError):
-            pass  # No request context available
+            ) 
         
         # Return all non-MultiSafepay methods plus filtered MultiSafepay methods
         return other_methods + allowed_multisafepay_methods
