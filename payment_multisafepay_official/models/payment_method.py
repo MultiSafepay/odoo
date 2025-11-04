@@ -19,6 +19,10 @@ _logger = logging.getLogger(__name__)
 class PaymentMethod(models.Model):
     _inherit = 'payment.method'
 
+    # ===================================
+    # FIELDS
+    # ===================================
+    
     main_currency_id = fields.Many2one(
         'res.currency',
         string="Main Currency",
@@ -29,14 +33,16 @@ class PaymentMethod(models.Model):
 
     minimum_amount = fields.Float(
         string="Minimum Amount (EUR)",
-        help="The minimum payment amount in EUR that this payment provider is available for. Leave 0 to make it available for any payment amount.",
+        help="The minimum payment amount in EUR that this payment provider is available for. "
+             "Leave 0 to make it available for any payment amount.",
         default=0.0,
         digits=(16, 2),
     )
 
     maximum_amount = fields.Float(
         string="Maximum Amount (EUR)",
-        help="The maximum payment amount in EUR that this payment provider is available for. Leave 0 to make it available for any payment amount.",
+        help="The maximum payment amount in EUR that this payment provider is available for. "
+             "Leave 0 to make it available for any payment amount.",
         default=0.0,
         digits=(16, 2),
     )
@@ -44,6 +50,7 @@ class PaymentMethod(models.Model):
     only_multisafepay = fields.Boolean(
         compute='_compute_is_multisafepay',
         store=False,
+        help="Technical field to identify if this payment method has MultiSafepay as one of its providers.",
     )
 
     pricelist_ids = fields.Many2many(
@@ -54,82 +61,42 @@ class PaymentMethod(models.Model):
         string='Allowed Pricelists',
         help="Restrict this payment method to specific pricelists. "
              "If empty, the payment method will be available for all pricelists. "
-             "When set, this payment method will only be visible for orders using one of the selected pricelists."
+             "When set, this payment method will only be visible for orders using one of the selected pricelists.",
     )
 
-    # Depends
+    # ===================================
+    # COMPUTED FIELDS
+    # ===================================
+
     @api.depends('provider_ids.code')
     def _compute_is_multisafepay(self):
+        """Compute if this payment method has MultiSafepay as one of its providers."""
         for method in self:
             providers = method.provider_ids
-            method.only_multisafepay = (
-                len(providers) == 1 and (
-                    providers[0].code == 'multisafepay'
-                )
+            # Check if ANY provider is MultiSafepay (not just if it's the only one)
+            method.only_multisafepay = any(
+                provider.code == 'multisafepay' for provider in providers
             )
 
     @api.depends('provider_ids.main_currency_id')
     def _compute_main_currency_id(self):
+        """Compute the main currency from the first provider."""
         for method in self:
             provider = method.provider_ids[:1]
             method.main_currency_id = provider.main_currency_id if provider else False
 
-
-    # === HELPER METHODS FOR AVAILABILITY REPORT ===#
-    def _add_method_to_availability_report(self, report, method, reason, available=False):
-        """Add or update a payment method entry in the availability report.
-        
-        Args:
-            report (dict): The availability report dictionary
-            method (payment.method): The payment method to add/update
-            reason (str): The reason why the method is/isn't available
-            available (bool): Whether the method is available
-        """
-        if report is None:
-            return
-            
-        if 'payment_methods' not in report:
-            report['payment_methods'] = {}
-            
-        if method in report['payment_methods']:
-            # Update existing entry - combine reasons
-            existing_reason = report['payment_methods'][method].get('reason', '')
-            if existing_reason:
-                report['payment_methods'][method]['reason'] = f"{existing_reason}; {reason}"
-            else:
-                report['payment_methods'][method]['reason'] = reason
-            report['payment_methods'][method]['available'] = available
-        else:
-            # Create new entry
-            report['payment_methods'][method] = {
-                'available': available,
-                'reason': reason,
-                'supported_providers': [(provider, True) for provider in method.provider_ids]
-            }
-    
-    def _generate_amount_filter_reasons(self, method, amount):
-        """Generate reason messages for amount filtering.
-        
-        Args:
-            method (payment.method): The payment method
-            amount (float): The payment amount
-            
-        Returns:
-            list: List of reason strings
-        """
-        reason_parts = []
-        if method.minimum_amount and amount < method.minimum_amount:
-            reason_parts.append(f"Amount {amount} below minimum {method.minimum_amount}")
-        if method.maximum_amount and amount > method.maximum_amount:
-            reason_parts.append(f"Amount {amount} above maximum {method.maximum_amount}")
-        return reason_parts
-
-    # === OVERRIDES ===#
+    # ===================================
+    # ODOO CORE OVERRIDES
+    # ===================================#
     def _get_compatible_payment_methods(
         self, provider_ids, partner_id, currency_id=None, force_tokenization=False,
         is_express_checkout=False, report=None, **kwargs):
-        """
-        Override to filter payment methods based on minimum and maximum amounts and generate availability report.
+        """Override core method to add amount and pricelist filtering for MultiSafepay payment methods.
+        
+        This method extends Odoo's standard payment method filtering to support:
+        - Amount-based filtering (minimum/maximum amount restrictions)
+        - Pricelist-based filtering (restrict methods to specific pricelists)
+        - Availability reporting for debugging
         :param provider_ids: List of provider IDs to filter payment methods.
         :param partner_id: ID of the partner for whom the payment methods are being fetched.
         :param currency_id: ID of the currency for which the payment methods are being fetched.
@@ -177,30 +144,15 @@ class PaymentMethod(models.Model):
             except (AttributeError, KeyError) as e:
                 _logger.error("Error getting amount from request: %s", str(e))
 
-        # Apply amount filtering and report results
-        try:
-            if amount is not None:
-                filtered_by_amount = payment_methods.filtered(
-                    lambda pm: (not pm.minimum_amount or amount >= pm.minimum_amount) and
-                            (not pm.maximum_amount or amount <= pm.maximum_amount)
-                )
-                
-                # Add amount filtering information to report
-                if report is not None:
-                    for method in original_multisafepay_methods:
-                        if method not in filtered_by_amount:
-                            reason_parts = self._generate_amount_filter_reasons(method, amount)
-                            if reason_parts:
-                                self._add_method_to_availability_report(
-                                    report, method, '; '.join(reason_parts), available=False
-                                )
-                
-                payment_methods = filtered_by_amount
-                _logger.debug("Applied amount filtering for amount: %s", amount)
-                
-        except (TypeError, ValueError, AttributeError) as e:
-            _logger.error("Error applying amount filtering: %s", str(e))
-            # Continue without amount filtering to avoid breaking the checkout process
+        # Apply amount filtering
+        if amount is not None:
+            methods_before_amount = payment_methods.filtered(lambda m: m.only_multisafepay)
+            payment_methods = payment_methods._filter_by_amount(amount)
+            methods_after_amount = payment_methods.filtered(lambda m: m.only_multisafepay)
+            
+            # Report filtered methods
+            filtered_out = methods_before_amount - methods_after_amount
+            self._report_filtered_methods(report, filtered_out, 'amount', {'amount': amount})
 
         # Apply pricelist filtering automatically if we have access to the current order
         try:
@@ -226,6 +178,49 @@ class PaymentMethod(models.Model):
             _logger.debug("No request context available for pricelist filtering: %s", str(e))
 
         return payment_methods
+
+    # ===================================
+    # FILTERING HELPER METHODS
+    # ===================================
+
+    def _filter_by_amount(self, amount):
+        """Filter payment methods based on amount restrictions.
+        
+        Only applies amount filtering to MultiSafepay payment methods.
+        Other payment providers are not affected by amount restrictions.
+        
+        Args:
+            amount (float): The payment amount to filter by
+            
+        Returns:
+            recordset: Filtered payment methods that are allowed for the given amount
+        """
+        if amount is None:
+            return self
+        
+        # Separate MultiSafepay methods from other payment methods
+        multisafepay_methods = self.filtered(lambda method: method.only_multisafepay)
+        other_methods = self.filtered(lambda method: not method.only_multisafepay)
+        
+        # Apply amount filtering only to MultiSafepay methods
+        allowed_multisafepay_methods = multisafepay_methods.filtered(
+            lambda method: (not method.minimum_amount or amount >= method.minimum_amount) and
+                          (not method.maximum_amount or amount <= method.maximum_amount)
+        )
+        
+        # Log filtering information
+        filtered_out_methods = multisafepay_methods - allowed_multisafepay_methods
+        if filtered_out_methods:
+            filtered_method_names = [m.name for m in filtered_out_methods]
+            _logger.info(
+                "Amount filtering: %d MultiSafepay methods filtered out for amount %.2f: %s",
+                len(filtered_out_methods),
+                amount,
+                ', '.join(filtered_method_names)
+            )
+        
+        # Return all non-MultiSafepay methods plus filtered MultiSafepay methods
+        return other_methods + allowed_multisafepay_methods
 
     def _filter_by_pricelist(self, pricelist):
         """Filter payment methods based on pricelist restrictions.
@@ -275,6 +270,10 @@ class PaymentMethod(models.Model):
         # Return all non-MultiSafepay methods plus filtered MultiSafepay methods
         return other_methods + allowed_multisafepay_methods
 
+    # ===================================
+    # PUBLIC API METHODS
+    # ===================================
+
     @api.model
     def _get_compatible_payment_methods_with_pricelist(
         self, provider_ids, partner_id, currency_id=None, force_tokenization=False,
@@ -308,4 +307,105 @@ class PaymentMethod(models.Model):
             
         return methods
 
+    # ===================================
+    # AVAILABILITY REPORT HELPERS
+    # ===================================
+    
+    def _add_method_to_availability_report(self, report, method, reason, available=False):
+        """Add or update a payment method entry in the availability report.
+        
+        Args:
+            report (dict): The availability report dictionary
+            method (payment.method): The payment method to add/update
+            reason (str): The reason why the method is/isn't available
+            available (bool): Whether the method is available
+        """
+        if report is None:
+            return
+            
+        if 'payment_methods' not in report:
+            report['payment_methods'] = {}
+            
+        if method in report['payment_methods']:
+            # Update existing entry - combine reasons
+            existing_reason = report['payment_methods'][method].get('reason', '')
+            if existing_reason:
+                report['payment_methods'][method]['reason'] = f"{existing_reason}; {reason}"
+            else:
+                report['payment_methods'][method]['reason'] = reason
+            report['payment_methods'][method]['available'] = available
+        else:
+            # Create new entry
+            report['payment_methods'][method] = {
+                'available': available,
+                'reason': reason,
+                'supported_providers': [(provider, True) for provider in method.provider_ids]
+            }
+    
+    def _report_filtered_methods(self, report, filtered_methods, filter_type, context):
+        """
+        Add filtered methods to availability report with appropriate reasons.
+        
+        Args:
+            report: Availability report dictionary (can be None)
+            filtered_methods: Recordset of methods that were filtered out
+            filter_type: Type of filter ('amount' or 'pricelist')
+            context: Dictionary with context data (e.g., {'amount': 100.0} or {'pricelist': recordset})
+        """
+        if report is None or not filtered_methods:
+            return
+            
+        for method in filtered_methods:
+            if filter_type == 'amount':
+                reason_parts = self._generate_amount_filter_reasons(method, context.get('amount'))
+            elif filter_type == 'pricelist':
+                reason_parts = self._generate_pricelist_filter_reasons(method, context.get('pricelist'))
+            else:
+                reason_parts = [f"Filtered by {filter_type}"]
+            
+            if reason_parts:
+                self._add_method_to_availability_report(
+                    report, method, '; '.join(reason_parts), available=False
+                )
+    
+    def _generate_amount_filter_reasons(self, method, amount):
+        """Generate reason messages for amount filtering.
+        
+        Args:
+            method (payment.method): The payment method
+            amount (float): The payment amount
+            
+        Returns:
+            list: List of reason strings
+        """
+        reason_parts = []
+        if method.minimum_amount and amount < method.minimum_amount:
+            reason_parts.append(f"Amount {amount} below minimum {method.minimum_amount}")
+        if method.maximum_amount and amount > method.maximum_amount:
+            reason_parts.append(f"Amount {amount} above maximum {method.maximum_amount}")
+        return reason_parts
 
+    def _generate_pricelist_filter_reasons(self, method, pricelist):
+        """
+        Generate human-readable reasons why a payment method was filtered by pricelist.
+        
+        Args:
+            method: Payment method record
+            pricelist: Pricelist record
+            
+        Returns:
+            List of reason strings
+        """
+        reason_parts = []
+        
+        if not pricelist:
+            return reason_parts
+            
+        if method.pricelist_ids and pricelist not in method.pricelist_ids:
+            allowed_names = ', '.join(method.pricelist_ids.mapped('name'))
+            reason_parts.append(
+                f"Not allowed for pricelist '{pricelist.name}' "
+                f"(allowed: {allowed_names})"
+            )
+        
+        return reason_parts
