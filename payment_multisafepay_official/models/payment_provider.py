@@ -27,7 +27,6 @@ class PaymentProvider(models.Model):
         help="The API key for the Multisafepay account. This is used to authenticate requests to the Multisafepay API.",
     )
 
-
     def write(self, vals):
         """Override to handle MultiSafepay provider configuration changes.
 
