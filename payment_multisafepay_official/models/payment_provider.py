@@ -109,8 +109,11 @@ class PaymentProvider(models.Model):
                 _logger.error(f"Error in MultiSafepay configuration change handling: {error_msg}")
 
     def _on_provider_disabled(self):
-        """Actions when provider is disabled."""
+        """
+        Actions when provider is disabled.
 
+        :return: This method does not return a value.
+        """
         self._cleanup_multisafepay_payment_methods()
         _logger.debug("MultiSafepay provider disabled")
 
