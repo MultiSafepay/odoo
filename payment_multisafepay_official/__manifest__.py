@@ -19,6 +19,7 @@
         'payment',
         'stock',
         'sale',
+        'sale_stock',
         'website_sale',
     ],
     'external_dependencies': {'python': ['multisafepay']},

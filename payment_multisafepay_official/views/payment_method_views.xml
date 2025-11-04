@@ -5,6 +5,7 @@
         <field name="model">payment.method</field>
         <field name="inherit_id" ref="payment.payment_method_form" />
         <field name="arch" type="xml">
+            <!-- Add fields in the main group -->
             <xpath expr="//form/sheet/group" position="inside">
                 <field
                     name="maximum_amount"
@@ -16,7 +17,14 @@
                     invisible="only_multisafepay == False or primary_payment_method_id != False"
                     readonly="1"
                 />
+                <!-- Add pricelist field at the end of the main group -->
+                <field name="pricelist_ids" widget="many2many_tags"
+                       invisible="only_multisafepay == False"
+                       placeholder="Leave empty to allow all pricelists"
+                       help="Restrict this payment method to specific pricelists. If empty, the payment method will be available for all pricelists."/>
             </xpath>
+            
+            <!-- Add editable amount fields in configuration tab -->
             <xpath
                 expr="//form/sheet/notebook/page[@name='configuration']"
                 position="inside"
@@ -30,6 +38,10 @@
                         name="minimum_amount"
                         invisible="only_multisafepay == False or primary_payment_method_id != False"
                     />
+                    <field name="pricelist_ids" widget="many2many_tags"
+                           invisible="only_multisafepay == False"
+                           placeholder="Leave empty to allow all pricelists"
+                           help="Restrict this payment method to specific pricelists. If empty, the payment method will be available for all pricelists."/>
                 </group>
             </xpath>
         </field>
