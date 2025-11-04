@@ -340,7 +340,7 @@ class PaymentProvider(models.Model):
                         existing_brand.write(brand_api_vals)
 
                         if self.id not in existing_brand.provider_ids.ids:
-                            existing_brand.write({'provider_ids': [(4, self.id)]})
+                            existing_brand.write({'provider_ids': [(4, self.id, 0)]})
                             _logger.info(f"Associated brand with provider: {existing_brand.name}")
                         else:
                             _logger.debug(f"Updated brand (already associated): {existing_brand.name}")
