@@ -87,7 +87,8 @@ class PaymentMethod(models.Model):
 
     # ===================================
     # ODOO CORE OVERRIDES
-    # ===================================#
+    # ===================================
+    
     def _get_compatible_payment_methods(
         self, provider_ids, partner_id, currency_id=None, force_tokenization=False,
         is_express_checkout=False, report=None, **kwargs):
@@ -97,14 +98,15 @@ class PaymentMethod(models.Model):
         - Amount-based filtering (minimum/maximum amount restrictions)
         - Pricelist-based filtering (restrict methods to specific pricelists)
         - Availability reporting for debugging
-        :param provider_ids: List of provider IDs to filter payment methods.
-        :param partner_id: ID of the partner for whom the payment methods are being fetched.
-        :param currency_id: ID of the currency for which the payment methods are being fetched.
-        :param force_tokenization: Boolean indicating if tokenization is forced.
-        :param is_express_checkout: Boolean indicating if the request is for express checkout.
-        :param report: Dictionary to store availability report information.
-        :param kwargs: Additional keyword arguments.
-        :return: Filtered payment methods based on the provided criteria.
+        
+        :param provider_ids: List of provider IDs to filter payment methods
+        :param partner_id: ID of the partner for whom the payment methods are being fetched
+        :param currency_id: ID of the currency for which the payment methods are being fetched
+        :param force_tokenization: Boolean indicating if tokenization is forced
+        :param is_express_checkout: Boolean indicating if the request is for express checkout
+        :param report: Dictionary to store availability report information
+        :param kwargs: Additional keyword arguments (amount, sale_order_id, etc.)
+        :return: Filtered payment methods based on the provided criteria
         :rtype: recordset of `payment.method`
         """
 
@@ -189,11 +191,9 @@ class PaymentMethod(models.Model):
         Only applies amount filtering to MultiSafepay payment methods.
         Other payment providers are not affected by amount restrictions.
         
-        Args:
-            amount (float): The payment amount to filter by
-            
-        Returns:
-            recordset: Filtered payment methods that are allowed for the given amount
+        :param amount: The payment amount to filter by
+        :return: Filtered payment methods that are allowed for the given amount
+        :rtype: recordset
         """
         if amount is None:
             return self
@@ -228,11 +228,9 @@ class PaymentMethod(models.Model):
         Only applies pricelist filtering to MultiSafepay payment methods.
         Other payment providers are not affected by pricelist restrictions.
         
-        Args:
-            pricelist (product.pricelist): The pricelist to filter by
-            
-        Returns:
-            recordset: Filtered payment methods that are allowed for the given pricelist
+        :param pricelist: The pricelist to filter by
+        :return: Filtered payment methods that are allowed for the given pricelist
+        :rtype: recordset
         """
         if not pricelist:
             return self
@@ -282,17 +280,15 @@ class PaymentMethod(models.Model):
         
         This method extends the standard method filtering to include pricelist-based restrictions.
         
-        Args:
-            provider_ids: Provider IDs for filtering
-            partner_id: Partner ID for filtering  
-            currency_id: Currency ID for filtering
-            force_tokenization: Force tokenization flag
-            is_express_checkout: Express checkout flag
-            pricelist_id: Pricelist ID for filtering
-            **kwargs: Additional filtering criteria
-            
-        Returns:
-            recordset: Compatible payment methods
+        :param provider_ids: Provider IDs for filtering
+        :param partner_id: Partner ID for filtering  
+        :param currency_id: Currency ID for filtering
+        :param force_tokenization: Force tokenization flag
+        :param is_express_checkout: Express checkout flag
+        :param pricelist_id: Pricelist ID for filtering
+        :param kwargs: Additional filtering criteria
+        :return: Compatible payment methods
+        :rtype: recordset
         """
         # Get standard compatible methods
         methods = self._get_compatible_payment_methods(
@@ -314,11 +310,10 @@ class PaymentMethod(models.Model):
     def _add_method_to_availability_report(self, report, method, reason, available=False):
         """Add or update a payment method entry in the availability report.
         
-        Args:
-            report (dict): The availability report dictionary
-            method (payment.method): The payment method to add/update
-            reason (str): The reason why the method is/isn't available
-            available (bool): Whether the method is available
+        :param report: The availability report dictionary
+        :param method: The payment method to add/update
+        :param reason: The reason why the method is/isn't available
+        :param available: Whether the method is available
         """
         if report is None:
             return
@@ -343,14 +338,12 @@ class PaymentMethod(models.Model):
             }
     
     def _report_filtered_methods(self, report, filtered_methods, filter_type, context):
-        """
-        Add filtered methods to availability report with appropriate reasons.
+        """Add filtered methods to availability report with appropriate reasons.
         
-        Args:
-            report: Availability report dictionary (can be None)
-            filtered_methods: Recordset of methods that were filtered out
-            filter_type: Type of filter ('amount' or 'pricelist')
-            context: Dictionary with context data (e.g., {'amount': 100.0} or {'pricelist': recordset})
+        :param report: Availability report dictionary (can be None)
+        :param filtered_methods: Recordset of methods that were filtered out
+        :param filter_type: Type of filter ('amount' or 'pricelist')
+        :param context: Dictionary with context data (e.g., {'amount': 100.0} or {'pricelist': recordset})
         """
         if report is None or not filtered_methods:
             return
@@ -371,12 +364,10 @@ class PaymentMethod(models.Model):
     def _generate_amount_filter_reasons(self, method, amount):
         """Generate reason messages for amount filtering.
         
-        Args:
-            method (payment.method): The payment method
-            amount (float): The payment amount
-            
-        Returns:
-            list: List of reason strings
+        :param method: The payment method
+        :param amount: The payment amount
+        :return: List of reason strings
+        :rtype: list
         """
         reason_parts = []
         if method.minimum_amount and amount < method.minimum_amount:
@@ -386,15 +377,12 @@ class PaymentMethod(models.Model):
         return reason_parts
 
     def _generate_pricelist_filter_reasons(self, method, pricelist):
-        """
-        Generate human-readable reasons why a payment method was filtered by pricelist.
+        """Generate human-readable reasons why a payment method was filtered by pricelist.
         
-        Args:
-            method: Payment method record
-            pricelist: Pricelist record
-            
-        Returns:
-            List of reason strings
+        :param method: Payment method record
+        :param pricelist: Pricelist record
+        :return: List of reason strings
+        :rtype: list
         """
         reason_parts = []
         
