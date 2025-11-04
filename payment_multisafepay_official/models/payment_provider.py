@@ -364,9 +364,10 @@ class PaymentProvider(models.Model):
 
         if not country_codes:
             return []
+
         all_countries = self.env['res.country'].search([])
-        return [c.id for code in country_codes
-                if (c := all_countries.filtered(lambda r: r.code == code))]
+        country_map = {c.code: c.id for c in all_countries}
+        return [country_map[code] for code in country_codes if code in country_map]
 
     def _get_currency_ids(self, currency_codes):
         """Convert ISO currency codes to Odoo currency record IDs.
@@ -381,9 +382,10 @@ class PaymentProvider(models.Model):
 
         if not currency_codes:
             return []
+
         all_currencies = self.env['res.currency'].with_context(active_test=False).search([])
-        return [c.id for code in currency_codes
-                if (c := all_currencies.filtered(lambda r: r.name == code))]
+        currency_map = {c.name: c.id for c in all_currencies}
+        return [currency_map[code] for code in currency_codes if code in currency_map]
 
     def pull_merchant_payment_methods(self):
         """Manual sync trigger for merchant payment methods.
