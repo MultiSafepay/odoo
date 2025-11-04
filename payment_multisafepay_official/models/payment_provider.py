@@ -108,18 +108,6 @@ class PaymentProvider(models.Model):
             except Exception as e:
                 _logger.error(f"Error syncing: {e}")
 
-    def _on_provider_disabled(self):
-        """Clean up when provider is disabled.
-
-        Deactivates or removes all payment methods associated with this provider.
-
-        :return: None
-        :rtype: None
-        """
-
-        self._on_disable_deactivate_all_methods()
-        _logger.debug("MultiSafepay provider disabled")
-
     def _get_supported_currencies(self):
         """Override of `payment` to return supported currencies for MultiSafepay.
 
