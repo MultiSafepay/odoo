@@ -37,7 +37,12 @@ class PaymentTransaction(models.Model):
 
 
     def _get_specific_processing_values(self, processing_values):
-        """ Override to return specific processing values for MultiSafepay. """
+        """Override to return specific processing values for MultiSafepay.
+        
+        :param processing_values: Processing values dictionary
+        :return: Updated processing values
+        :rtype: dict
+        """
         self.ensure_one()
 
         res = super()._get_specific_processing_values(processing_values)
@@ -57,7 +62,12 @@ class PaymentTransaction(models.Model):
 
 
     def _get_specific_rendering_values(self, processing_values):
-        """ Override to return specific rendering values for MultiSafepay. """
+        """Override to return specific rendering values for MultiSafepay.
+        
+        :param processing_values: Processing values dictionary
+        :return: Rendering values
+        :rtype: dict
+        """
         self.ensure_one()
 
         res = super()._get_specific_rendering_values(processing_values)
@@ -89,7 +99,10 @@ class PaymentTransaction(models.Model):
         return tx
 
     def _process_notification_data(self, notification_data):
-        """ Override of `payment` to process the transaction based on MultiSafepay data. """
+        """Override of `payment` to process the transaction based on MultiSafepay data.
+        
+        :param notification_data: Notification data from MultiSafepay
+        """
         self.ensure_one()
 
         # Fix: Odoo 19 compatibility - parent class doesn't have _process_notification_data
@@ -169,6 +182,11 @@ class PaymentTransaction(models.Model):
         """Override to add the MultiSafepay refund reason when creating a refund transaction.
         
         The reason can come from context (set by the wizard).
+        
+        :param amount: Amount for the child transaction
+        :param is_refund: Whether this is a refund transaction
+        :param custom_create_values: Additional values for transaction creation
+        :return: The created child transaction
         """
         # Get the refund reason from the context (set by the wizard)
         if is_refund and self.provider_code == 'multisafepay':
@@ -187,7 +205,10 @@ class PaymentTransaction(models.Model):
 
 
     def _send_refund_request(self, amount_to_refund=0.0):
-        """ Override of payment to send a refund request to Multisafepay. """
+        """Override of payment to send a refund request to MultiSafepay.
+        
+        :param amount_to_refund: Amount to refund (0.0 for full refund)
+        """
         self.ensure_one()
 
         if self.provider_code != 'multisafepay':

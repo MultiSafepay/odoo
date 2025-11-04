@@ -22,7 +22,10 @@ class StockPicking(models.Model):
 
 
     def _action_done(self):
-        """Override to detect when pickings are marked as done."""
+        """Override to detect when pickings are marked as done and notify MultiSafepay.
+        
+        :return: Result from parent method
+        """
         # Call original method first
         result = super(StockPicking, self)._action_done()
 

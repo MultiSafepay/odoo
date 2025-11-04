@@ -21,7 +21,10 @@ class AccountMove(models.Model):
     )
 
     def action_post(self):
-        """Override to detect when invoices are validated/posted."""
+        """Override to detect when invoices are validated/posted and notify MultiSafepay.
+        
+        :return: Result from parent method
+        """
         result = super().action_post()
 
         # Check if the invoice is an outgoing invoice
