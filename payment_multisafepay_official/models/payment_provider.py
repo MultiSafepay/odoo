@@ -28,16 +28,14 @@ class PaymentProvider(models.Model):
     )
 
     def write(self, vals):
-        """Override to handle MultiSafepay provider configuration changes
+        """Override to handle MultiSafepay provider configuration changes.
 
         Detects changes to provider state and API key, then triggers appropriate
         sync or cleanup operations to maintain payment method consistency.
 
-        Args:
-            vals (dict): Dictionary of field values to write
-
-        Returns:
-            bool: Result from parent write() method
+        :param dict vals: Dictionary of field values to write
+        :return: Result from parent write() method
+        :rtype: bool
         """
 
         old_states = {record.id: record.state for record in self}
@@ -67,22 +65,20 @@ class PaymentProvider(models.Model):
         return result
 
     def _on_multisafepay_config_changed(self, old_state, new_state, state_changed, new_api_key, api_key_changed):
-        """Handle MultiSafepay configuration changes (state and/or API key)
+        """Handle MultiSafepay configuration changes (state and/or API key).
 
         This method processes state and API key changes to:
         - Clean up payment methods when provider is disabled
         - Sync payment methods when provider is enabled/test with valid API key
         - Avoid duplicate operations when both state and API key change simultaneously
 
-        Args:
-            old_state (str): Previous provider state
-            new_state (str): New provider state ('enabled', 'test', 'disabled')
-            state_changed (bool): Whether the state field changed
-            new_api_key (str): New API key value
-            api_key_changed (bool): Whether the API key field changed
-
-        Returns:
-            None
+        :param str old_state: Previous provider state
+        :param str new_state: New provider state ('enabled', 'test', 'disabled')
+        :param bool state_changed: Whether the state field changed
+        :param str new_api_key: New API key value
+        :param bool api_key_changed: Whether the API key field changed
+        :return: None
+        :rtype: None
         """
 
         self.ensure_one()
@@ -113,25 +109,25 @@ class PaymentProvider(models.Model):
                 _logger.error(f"Error syncing: {e}")
 
     def _on_provider_disabled(self):
-        """Clean up when provider is disabled
+        """Clean up when provider is disabled.
 
         Deactivates or removes all payment methods associated with this provider.
 
-        Returns:
-            None
+        :return: None
+        :rtype: None
         """
 
         self._on_disable_deactivate_all_methods()
         _logger.debug("MultiSafepay provider disabled")
 
     def _get_supported_currencies(self):
-        """Override of `payment` to return supported currencies for MultiSafepay
+        """Override of `payment` to return supported currencies for MultiSafepay.
 
         Filters the parent method's currency list to only include currencies
         supported by the MultiSafepay payment provider (defined in const.SUPPORTED_CURRENCIES).
 
-        Returns:
-            recordset: res.currency records containing only MultiSafepay-supported currencies
+        :return: res.currency records containing only MultiSafepay-supported currencies
+        :rtype: recordset
         """
 
         supported_currencies = super()._get_supported_currencies()
@@ -142,16 +138,14 @@ class PaymentProvider(models.Model):
         return supported_currencies
 
     def _on_sync_deactivate_obsolete_methods(self, valid_codes):
-        """Deactivate payment methods no longer available in API
+        """Deactivate payment methods no longer available in API.
 
         When a payment method is no longer returned by the MultiSafepay API,
         it is deactivated to preserve transaction history.
 
-        Args:
-            valid_codes (set): Set of payment method codes currently returned by API
-
-        Returns:
-            None
+        :param set valid_codes: Set of payment method codes currently returned by API
+        :return: None
+        :rtype: None
         """
 
         self.ensure_one()
@@ -173,13 +167,13 @@ class PaymentProvider(models.Model):
             _logger.debug(f"  - {method.name} (code: {method.code})")
 
     def _on_disable_deactivate_all_methods(self):
-        """Deactivate all payment methods when provider is disabled
+        """Deactivate all payment methods when provider is disabled.
 
         When the MultiSafepay provider is disabled, all associated payment methods
         are deactivated to prevent their use while preserving transaction history.
 
-        Returns:
-            dict: Summary with count of deactivated methods
+        :return: Summary with count of deactivated methods
+        :rtype: dict
         """
 
         self.ensure_one()
@@ -207,7 +201,7 @@ class PaymentProvider(models.Model):
             return {'deactivated': 0}
 
     def _fetch_merchant_payment_methods(self):
-        """Sync merchant payment methods from MultiSafepay API
+        """Sync merchant payment methods from MultiSafepay API.
 
         This method:
         - Fetches available payment methods (gateways and brands) from the API
@@ -215,10 +209,10 @@ class PaymentProvider(models.Model):
         - Associates methods with this provider
         - Removes obsolete methods that are no longer in the API
 
-        Note: User configurations like 'active' status are preserved on updates.
+        .. note:: User configurations like 'active' status are preserved on updates.
 
-        Returns:
-            None: Logs sync results (count of new and updated methods)
+        :return: None (Logs sync results: count of new and updated methods)
+        :rtype: None
         """
 
         self.ensure_one()
@@ -361,13 +355,11 @@ class PaymentProvider(models.Model):
             _logger.error("Error loading payment methods: %s", e)
 
     def _get_country_ids(self, country_codes):
-        """Convert ISO country codes to Odoo country record IDs
+        """Convert ISO country codes to Odoo country record IDs.
 
-        Args:
-            country_codes (list): List of ISO 3166-1 alpha-2 country codes (e.g., ['US', 'GB'])
-
-        Returns:
-            list: List of res.country record IDs matching the provided codes
+        :param list country_codes: List of ISO 3166-1 alpha-2 country codes (e.g., ['US', 'GB'])
+        :return: List of res.country record IDs matching the provided codes
+        :rtype: list
         """
 
         if not country_codes:
@@ -377,16 +369,14 @@ class PaymentProvider(models.Model):
                 if (c := all_countries.filtered(lambda r: r.code == code))]
 
     def _get_currency_ids(self, currency_codes):
-        """Convert ISO currency codes to Odoo currency record IDs
+        """Convert ISO currency codes to Odoo currency record IDs.
 
         Searches for currencies regardless of their active status to support
         temporarily inactive currencies that may be reactivated.
 
-        Args:
-            currency_codes (list): List of ISO 4217 currency codes (e.g., ['EUR', 'USD'])
-
-        Returns:
-            list: List of res.currency record IDs matching the provided codes
+        :param list currency_codes: List of ISO 4217 currency codes (e.g., ['EUR', 'USD'])
+        :return: List of res.currency record IDs matching the provided codes
+        :rtype: list
         """
 
         if not currency_codes:
@@ -396,20 +386,20 @@ class PaymentProvider(models.Model):
                 if (c := all_currencies.filtered(lambda r: r.name == code))]
 
     def pull_merchant_payment_methods(self):
-        """Manual sync trigger for merchant payment methods
+        """Manual sync trigger for merchant payment methods.
 
         This is a button action that triggers the full sync process from the API.
         It calls _fetch_merchant_payment_methods() to perform the actual sync.
 
-        Returns:
-            None
+        :return: None
+        :rtype: None
         """
 
         self._fetch_merchant_payment_methods()
         _logger.debug("MultiSafepay payment methods sync completed")
 
     def _compute_feature_support_fields(self):
-        """Override to define MultiSafepay-specific feature support
+        """Override to define MultiSafepay-specific feature support.
 
         Configures which payment features are supported by MultiSafepay:
         - Express checkout: Enabled
@@ -417,8 +407,8 @@ class PaymentProvider(models.Model):
         - Refunds: Partial refunds supported
         - Tokenization: Enabled for recurring payments
 
-        Returns:
-            None
+        :return: None
+        :rtype: None
         """
 
         super()._compute_feature_support_fields()
@@ -430,13 +420,13 @@ class PaymentProvider(models.Model):
         })
 
     def get_multisafepay_sdk(self):
-        """Get MultiSafepay SDK instance for API operations
+        """Get MultiSafepay SDK instance for API operations.
 
         Creates an SDK client configured with the provider's API key and environment
         (production or test mode based on provider state).
 
-        Returns:
-            Sdk: Configured MultiSafepay SDK instance for making API requests
+        :return: Configured MultiSafepay SDK instance for making API requests
+        :rtype: Sdk
         """
 
         return Sdk(
@@ -445,14 +435,11 @@ class PaymentProvider(models.Model):
         )
 
     def _map_multisafepay_to_odoo_code(self, multisafepay_code):
-        """
-        Map MultiSafepay payment method code to Odoo code with multisafepay_ prefix.
+        """Map MultiSafepay payment method code to Odoo code with multisafepay_ prefix.
 
-        Args:
-            multisafepay_code (str): Payment method code from MultiSafepay (e.g., 'MISTERCASH', 'mistercash')
-
-        Returns:
-            str: Odoo code with multisafepay_ prefix (e.g., 'multisafepay_mistercash')
+        :param str multisafepay_code: Payment method code from MultiSafepay (e.g., 'MISTERCASH', 'mistercash')
+        :return: Odoo code with multisafepay_ prefix (e.g., 'multisafepay_mistercash')
+        :rtype: str
         """
 
         if not multisafepay_code:
@@ -462,14 +449,11 @@ class PaymentProvider(models.Model):
         return f"{const.PAYMENT_METHOD_PREFIX}{msp_code_lower}"
 
     def _map_odoo_to_multisafepay_code(self, odoo_code):
-        """
-        Map Odoo payment method code to MultiSafepay code, handling multisafepay_ prefix.
+        """Map Odoo payment method code to MultiSafepay code, handling multisafepay_ prefix.
 
-        Args:
-            odoo_code (str): Odoo internal payment method code (e.g., 'multisafepay_mistercash')
-
-        Returns:
-            str: MultiSafepay code in uppercase (e.g., 'MISTERCASH')
+        :param str odoo_code: Odoo internal payment method code (e.g., 'multisafepay_mistercash')
+        :return: MultiSafepay code in uppercase (e.g., 'MISTERCASH')
+        :rtype: str
         """
 
         if not odoo_code:
