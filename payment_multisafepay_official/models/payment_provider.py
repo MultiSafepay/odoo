@@ -88,23 +88,19 @@ class PaymentProvider(models.Model):
         self.ensure_one()
 
         if new_state == 'disabled':
-            # Only cleanup when disabled
             self._on_disable_deactivate_all_methods()
+            _logger.debug("MultiSafepay provider disabled")
             return
 
         mode_label = "PRODUCTION" if new_state == 'enabled' else "TEST"
 
         if state_changed and api_key_changed:
             _logger.debug(f"MultiSafepay provider {self.name}: state changed {old_state} → {new_state} "
-                        f"and API key changed in {mode_label} environment")
+                          f"and API key changed in {mode_label} environment")
         elif state_changed:
             _logger.debug(f"MultiSafepay provider {self.name}: state changed {old_state} → {new_state}")
         elif api_key_changed:
             _logger.debug(f"MultiSafepay API key changed for {mode_label} environment")
-
-        if new_state == 'disabled':
-            self._on_provider_disabled()
-            return
 
         if new_state in ['enabled', 'test']:
             try:
