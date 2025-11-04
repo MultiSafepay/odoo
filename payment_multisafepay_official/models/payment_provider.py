@@ -249,7 +249,7 @@ class PaymentProvider(models.Model):
 
                 # New methods are active by default, except if is a branded method
                 creation_only_vals = {
-                    'active': True,
+                    'active': False,
                 }
 
                 # Optional values from API (update if present)
