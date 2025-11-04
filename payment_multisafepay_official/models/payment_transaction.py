@@ -187,6 +187,7 @@ class PaymentTransaction(models.Model):
         :param is_refund: Whether this is a refund transaction
         :param custom_create_values: Additional values for transaction creation
         :return: The created child transaction
+        :rtype: recordset
         """
         # Get the refund reason from the context (set by the wizard)
         if is_refund and self.provider_code == 'multisafepay':
