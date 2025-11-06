@@ -101,7 +101,6 @@ class PaymentProvider(models.Model):
             try:
                 if new_api_key:
                     self._fetch_merchant_payment_methods()
-                    _logger.debug("MultiSafepay configuration synced successfully")
                 else:
                     _logger.debug(f"No API key found. Please configure your API key to fetch payment methods in {mode_label} environment.")
             except Exception as e:
@@ -205,6 +204,7 @@ class PaymentProvider(models.Model):
         """
 
         self.ensure_one()
+
         _logger.debug('Syncing merchant payment methods')
 
         if not self.multisafepay_api_key:
