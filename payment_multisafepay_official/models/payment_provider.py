@@ -124,13 +124,13 @@ class PaymentProvider(models.Model):
             )
         return supported_currencies
 
-    def _on_sync_deactivate_obsolete_methods(self, valid_codes):
+    def _on_sync_deactivate_obsolete_methods(self, synced_payment_method_codes):
         """Deactivate payment methods no longer available in API.
 
         When a payment method is no longer returned by the MultiSafepay API,
         it is deactivated to preserve transaction history.
 
-        :param set valid_codes: Set of payment method codes currently returned by API
+        :param set synced_payment_method_codes: Set of payment method codes currently returned by API
         :return: None
         :rtype: None
         """
@@ -142,7 +142,7 @@ class PaymentProvider(models.Model):
             ('code', '=like', f'{const.PAYMENT_METHOD_PREFIX}%')
         ])
 
-        obsolete_methods = all_provider_methods.filtered(lambda m: m.code not in valid_codes)
+        obsolete_methods = all_provider_methods.filtered(lambda m: m.code not in synced_payment_method_codes)
 
         if not obsolete_methods:
             return
@@ -221,7 +221,7 @@ class PaymentProvider(models.Model):
                 return
 
             # Track codes from API to identify obsolete methods later
-            api_codes = set()
+            synced_payment_method_codes = set()
 
             count_new = 0
             count_updated = 0
@@ -231,7 +231,7 @@ class PaymentProvider(models.Model):
                 multisafepay_code = gateway.id.lower()
                 unique_code = self._map_multisafepay_to_odoo_code(multisafepay_code)
                 _logger.debug("Mapping MultiSafepay '%s' to Odoo code '%s'", multisafepay_code, unique_code)
-                api_codes.add(unique_code)
+                synced_payment_method_codes.add(unique_code)
 
                 # Prepare values that can be safely updated
                 country_ids = self._get_country_ids(gateway.allowed_countries)
@@ -289,7 +289,7 @@ class PaymentProvider(models.Model):
 
                     multisafepay_brand_code = brand.id.lower()
                     brand_code = self._map_multisafepay_to_odoo_code(multisafepay_brand_code)
-                    api_codes.add(brand_code)
+                    synced_payment_method_codes.add(brand_code)
 
                     existing_brand = payment_method.with_context(active_test=False).search([
                         ('code', '=', brand_code)
@@ -336,7 +336,7 @@ class PaymentProvider(models.Model):
 
                         count_updated += 1
 
-            self._on_sync_deactivate_obsolete_methods(api_codes)
+            self._on_sync_deactivate_obsolete_methods(synced_payment_method_codes)
 
             _logger.debug(f'Successfully synchronized {count_new} new methods, {count_updated} methods updated')
 
