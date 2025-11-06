@@ -123,7 +123,7 @@ class PaymentProvider(models.Model):
             )
         return supported_currencies
 
-    def _on_sync_deactivate_obsolete_methods(self, synced_payment_method_codes):
+    def _on_sync_deactivate_unavailable_payment_method_codes(self, synced_payment_method_codes):
         """Deactivate payment methods no longer available in API.
 
         When a payment method is no longer returned by the MultiSafepay API,
@@ -141,15 +141,15 @@ class PaymentProvider(models.Model):
             ('code', '=like', f'{const.PAYMENT_METHOD_PREFIX}%')
         ])
 
-        obsolete_methods = all_provider_methods.filtered(lambda m: m.code not in synced_payment_method_codes)
+        unavailable_payment_method_codes = all_provider_methods.filtered(lambda m: m.code not in synced_payment_method_codes)
 
-        if not obsolete_methods:
+        if not unavailable_payment_method_codes:
             return
 
-        obsolete_methods.write({'active': False})
+        unavailable_payment_method_codes.write({'active': False})
 
-        _logger.debug(f"Deactivated {len(obsolete_methods)} obsolete payment methods:")
-        for method in obsolete_methods:
+        _logger.debug(f"Deactivated {len(unavailable_payment_method_codes)} unavailable payment methods:")
+        for method in unavailable_payment_method_codes:
             _logger.debug(f"  - {method.name} (code: {method.code})")
 
     def _on_disable_deactivate_all_methods(self):
@@ -195,7 +195,7 @@ class PaymentProvider(models.Model):
         - Fetches available payment methods (gateways and brands) from the API
         - Creates new methods or updates existing ones preserving user configurations
         - Associates methods with this provider
-        - Removes obsolete methods that are no longer in the API
+        - Removes unavailable methods that are no longer in the API
 
         .. note:: User configurations like 'active' status are preserved on updates.
 
@@ -219,7 +219,7 @@ class PaymentProvider(models.Model):
                 _logger.warning('No payment methods found')
                 return
 
-            # Track codes from API to identify obsolete methods later
+            # Track codes from API to identify unavailable methods later
             synced_payment_method_codes = set()
 
             count_new = 0
@@ -335,7 +335,7 @@ class PaymentProvider(models.Model):
 
                         count_updated += 1
 
-            self._on_sync_deactivate_obsolete_methods(synced_payment_method_codes)
+            self._on_sync_deactivate_unavailable_payment_method_codes(synced_payment_method_codes)
 
             _logger.debug(f'Successfully synchronized {count_new} new methods, {count_updated} methods updated')
 
