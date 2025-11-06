@@ -247,7 +247,7 @@ class PaymentProvider(models.Model):
                     'support_refund': 'partial',
                 }
 
-                # New methods are disabled by default, except if it is a branded method
+                # New methods are disabled by default
                 creation_only_vals = {
                     'active': False,
                 }
