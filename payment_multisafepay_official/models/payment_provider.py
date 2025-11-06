@@ -158,7 +158,7 @@ class PaymentProvider(models.Model):
         When the MultiSafepay provider is disabled, all associated payment methods
         are deactivated to prevent their use while preserving transaction history.
 
-        :return: Summary with count of deactivated methods
+        :return: None
         :rtype: dict
         """
 
@@ -172,7 +172,7 @@ class PaymentProvider(models.Model):
 
         if not multisafepay_methods:
             _logger.debug("No payment methods found for this MultiSafepay provider")
-            return {'deactivated': 0}
+            return
 
         try:
             multisafepay_methods.write({'active': False})
@@ -182,11 +182,10 @@ class PaymentProvider(models.Model):
             for method in multisafepay_methods:
                 _logger.debug(f"  - {method.name} (code: {method.code})")
 
-            return {'deactivated': deactivated_count}
+            return
 
         except Exception as e:
             _logger.error(f"Error deactivating methods: {e}")
-            return {'deactivated': 0}
 
     def _fetch_merchant_payment_methods(self):
         """Sync merchant payment methods from MultiSafepay API.
