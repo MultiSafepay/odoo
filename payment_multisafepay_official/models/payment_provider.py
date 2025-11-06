@@ -85,7 +85,6 @@ class PaymentProvider(models.Model):
 
         if new_state == 'disabled':
             self._on_disable_deactivate_all_methods()
-            _logger.debug("MultiSafepay provider disabled")
             return
 
         mode_label = "PRODUCTION" if new_state == 'enabled' else "TEST"
@@ -165,6 +164,8 @@ class PaymentProvider(models.Model):
         """
 
         self.ensure_one()
+
+        _logger.debug("MultiSafepay provider disabled - deactivating all associated payment methods")
 
         multisafepay_methods = self.env['payment.method'].with_context(active_test=False).search([
             ('provider_ids', 'in', [self.id])
