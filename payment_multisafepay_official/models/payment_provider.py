@@ -159,7 +159,7 @@ class PaymentProvider(models.Model):
         are deactivated to prevent their use while preserving transaction history.
 
         :return: None
-        :rtype: dict
+        :rtype: None
         """
 
         self.ensure_one()
