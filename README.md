@@ -16,7 +16,7 @@ MultiSafepay is a Dutch payment services provider, which takes care of contracts
 Before installing the MultiSafepay module suite, ensure you have:
 
 - Odoo 18.0 or compatible version
-- Active MultiSafepay Account. Consider a test account first. [Sign up here](https://testmerchant.multisafepay.com/signup) if you don't have one.
+- Active MultiSafepay account. Consider a test account first. [Sign up here](https://testmerchant.multisafepay.com/signup) if you don't have one.
 - API Credentials from your MultiSafepay Control Panel
 - Python 3.9+
 - Administrative access to your Odoo installation
@@ -29,38 +29,52 @@ Before installing the MultiSafepay module suite, ensure you have:
 
 The module can be installed in two ways:
 
-### Manual Installation from the Odoo Interface
+## Installation on a Self-Hosted or Docker Odoo Instance
 
-1. Sign in to your Odoo <Glossary>backend</Glossary> as **Administrator**.
-2. Go to **Apps** > **Update Apps List**.
-3. Go to **Apps** > **Import module**.
-4. Select the ZIP file of the module "payment_multisafepay_official".
-5. After uploading, search for **MultiSafepay** in the Apps list.
-6. Click **Install**.
-7. Go to **Apps** > **MultiSafepay** and click Activate.
+This method applies to administrators with direct access to the Odoo server.
+Unlike the manual upload through the backend, the module must be deployed directly on the server. You can use an existing custom addons directory, or create a new one.
 
-### Server Installation
-
-This installation method is intended for administrators who have access to the server where Odoo is running.
-Unlike the manual upload, the module must be placed on the server inside an existing custom addons directory or in a new directory that you add to Odoo’s configuration file.
-
-1. Edit your odoo.conf file to find (or define a new one) directory where the module is located:
-    ```
-    # In your odoo.conf file
-    addons_path = /path/to/odoo/addons,/path/to/custom_addons
-    ```
+1. Edit the configuration file (`odoo.conf`). Add (or update) the `addons_path` entry to include the directory where the module is located:
+   ```
+   # In your odoo.conf file
+   addons_path = /path/to/odoo/addons,/path/to/custom_addons
+   ```
 2. Copy the module into the `custom_addons` directory:
-    ```
-    cd /path/to/custom_addons
-    cp -r /path/to/payment_multisafepay_official .
-    ```
+   ```
+   cd /path/to/custom_addons
+   cp -r /path/to/payment_multisafepay_official .
+   ```
 3. Restart your Odoo server:
-    - Docker: `docker-compose restart odoo`
-    - Systemd: `sudo systemctl restart odoo`
+    * Docker: `docker-compose restart odoo`
+    * Systemd: `sudo systemctl restart odoo`
 4. Sign in to your Odoo backend as **Administrator** and go to **Apps** > **Update Apps List**.
-5. Search for the **MultiSafepay** in the Apps list.
+5. Search for **MultiSafepay** in the Apps list.
 6. Click **Install**.
 7. Go to **Apps** > **MultiSafepay** and click Activate.
+8. Go to **Invoicing** > **Payment Providers** to activate and configure MultiSafepay.
+
+## Installation on Odoo.sh
+
+1. In your **Odoo.sh** project, open the Git repository connected to your instance.
+2. Clone the repository locally:
+  ```
+  git clone <your-odoo-sh-repository-url>
+  cd <your-odoo-sh-project>
+  ```
+3. Add the official MultiSafepay Odoo connector as a Git submodule inside your addons folder:
+  ```
+  git submodule add https://github.com/MultiSafepay/odoo.git <your-addons-directory>/payment_multisafepay_official
+  ```
+4. Commit and push your changes:
+    ```
+    git add .
+    git commit -m "Add MultiSafepay module"
+    git push origin main
+    ```
+5. Odoo.sh will automatically build and deploy your changes.
+6. Sign in to your Odoo backend as **Administrator** and go to **Apps** > **Update Apps List**.
+7. Go to **Apps** > **MultiSafepay** and click Activate.
+8. Go to **Invoicing** > **Payment Providers** to activate and configure MultiSafepay.
 
 ## Configuration
 
