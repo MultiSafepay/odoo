@@ -115,9 +115,6 @@ class PaymentMethod(models.Model):
             report=report, **kwargs
         )
 
-        # Store original methods for reporting
-        original_multisafepay_methods = payment_methods.filtered(lambda method: method.only_multisafepay)
-
         amount = kwargs.get('amount')
 
         sale_order_id = kwargs.get('sale_order_id')
