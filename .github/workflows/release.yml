@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build project
-        run: ./bin/release.sh ${{ env.VERSION }}
+        run: ./release.sh ${{ env.VERSION }}
 
       - name: Create Release
         id: create_release

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- ENHANCED: Add pricelist_ids field to payment methods (custom feature) -->
+    <!-- Inherits from CORE which already displays minimum_amount/maximum_amount -->
+    <record id="payment_method_form_enhanced" model="ir.ui.view">
+        <field name="name">payment.method.form.inherit.multisafepay.enhanced</field>
+        <field name="model">payment.method</field>
+        <field name="inherit_id" ref="payment_multisafepay.payment_method_form" />
+        <field name="arch" type="xml">
+            <!-- Add pricelist field after maximum_amount in main group -->
+            <xpath expr="//field[@name='maximum_amount']" position="after">
+                <field name="pricelist_ids" widget="many2many_tags"
+                       invisible="only_multisafepay == False"
+                       placeholder="Leave empty to allow all pricelists"
+                       help="Restrict this payment method to specific pricelists. If empty, the payment method will be available for all pricelists."/>
+            </xpath>
+            
+            <!-- Add pricelist field in configuration page after maximum_amount -->
+            <xpath expr="//page[@name='configuration']//field[@name='maximum_amount']" position="after">
+                <field name="pricelist_ids" widget="many2many_tags"
+                       invisible="only_multisafepay == False"
+                       placeholder="Leave empty to allow all pricelists"
+                       help="Restrict this payment method to specific pricelists. If empty, the payment method will be available for all pricelists."/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
