@@ -19,7 +19,7 @@ exclude: |
   # Ignore test files in addons
   /tests/samples/.*|
   # You don't usually want a bot to modify your legal texts
-  (LICENSE.*|COPYING.*|CHANGELOG.*|CODE_OF_CONDUCT.*|DISCLAIMER.*|bin/*.sh|requirements.txt)
+  (LICENSE.*|COPYING.*|CHANGELOG.*|CODE_OF_CONDUCT.*|DISCLAIMER.*)
 default_language_version:
   python: python3
   node: "22.9.0"
