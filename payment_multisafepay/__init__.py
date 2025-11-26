@@ -9,9 +9,10 @@ from . import utils
 
 import odoo.addons.payment as payment
 
+
 def post_init_hook(env):
-    payment.setup_provider(env, 'multisafepay')
+    payment.setup_provider(env, "multisafepay")
 
 
 def uninstall_hook(env):
-    payment.reset_payment_provider(env, 'multisafepay')
+    payment.reset_payment_provider(env, "multisafepay")

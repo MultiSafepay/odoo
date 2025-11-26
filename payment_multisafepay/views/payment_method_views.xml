@@ -18,12 +18,15 @@
                     invisible="only_multisafepay == False or primary_payment_method_id != False"
                     readonly="1"
                 />
-                
+
                 <!-- Add pricelist field at the end of the main group -->
-                <field name="pricelist_ids" widget="many2many_tags"
-                       invisible="only_multisafepay == False"
-                       placeholder="Leave empty to allow all pricelists"
-                       help="Restrict this payment method to specific pricelists. If empty, the payment method will be available for all pricelists."/>
+                <field
+                    name="pricelist_ids"
+                    widget="many2many_tags"
+                    invisible="only_multisafepay == False"
+                    placeholder="Leave empty to allow all pricelists"
+                    help="Restrict this payment method to specific pricelists. If empty, the payment method will be available for all pricelists."
+                />
             </xpath>
             <xpath
                 expr="//form/sheet/notebook/page[@name='configuration']"
@@ -39,10 +42,13 @@
                         name="maximum_amount"
                         invisible="only_multisafepay == False or primary_payment_method_id != False"
                     />
-                     <field name="pricelist_ids" widget="many2many_tags"
-                           invisible="only_multisafepay == False"
-                           placeholder="Leave empty to allow all pricelists"
-                           help="Restrict this payment method to specific pricelists. If empty, the payment method will be available for all pricelists."/>
+                    <field
+                        name="pricelist_ids"
+                        widget="many2many_tags"
+                        invisible="only_multisafepay == False"
+                        placeholder="Leave empty to allow all pricelists"
+                        help="Restrict this payment method to specific pricelists. If empty, the payment method will be available for all pricelists."
+                    />
                 </group>
             </xpath>
         </field>

@@ -9,18 +9,27 @@
         <field name="arch" type="xml">
             <!-- Add pricelist field after maximum_amount in main group -->
             <xpath expr="//field[@name='maximum_amount']" position="after">
-                <field name="pricelist_ids" widget="many2many_tags"
-                       invisible="only_multisafepay == False"
-                       placeholder="Leave empty to allow all pricelists"
-                       help="Restrict this payment method to specific pricelists. If empty, the payment method will be available for all pricelists."/>
+                <field
+                    name="pricelist_ids"
+                    widget="many2many_tags"
+                    invisible="only_multisafepay == False"
+                    placeholder="Leave empty to allow all pricelists"
+                    help="Restrict this payment method to specific pricelists. If empty, the payment method will be available for all pricelists."
+                />
             </xpath>
-            
+
             <!-- Add pricelist field in configuration page after maximum_amount -->
-            <xpath expr="//page[@name='configuration']//field[@name='maximum_amount']" position="after">
-                <field name="pricelist_ids" widget="many2many_tags"
-                       invisible="only_multisafepay == False"
-                       placeholder="Leave empty to allow all pricelists"
-                       help="Restrict this payment method to specific pricelists. If empty, the payment method will be available for all pricelists."/>
+            <xpath
+                expr="//page[@name='configuration']//field[@name='maximum_amount']"
+                position="after"
+            >
+                <field
+                    name="pricelist_ids"
+                    widget="many2many_tags"
+                    invisible="only_multisafepay == False"
+                    placeholder="Leave empty to allow all pricelists"
+                    help="Restrict this payment method to specific pricelists. If empty, the payment method will be available for all pricelists."
+                />
             </xpath>
         </field>
     </record>

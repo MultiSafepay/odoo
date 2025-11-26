@@ -8,37 +8,42 @@ from odoo.tests.common import TransactionCase
 
 
 class TestPaymentTransaction(TransactionCase):
-
     def setUp(self):
         super().setUp()
-        self.provider = self.env['payment.provider'].create({
-            'name': 'MultiSafepay Test',
-            'code': 'multisafepay',
-            'state': 'test',
-        })
+        self.provider = self.env["payment.provider"].create(
+            {
+                "name": "MultiSafepay Test",
+                "code": "multisafepay",
+                "state": "test",
+            }
+        )
 
-        self.partner = self.env['res.partner'].create({
-            'name': 'Test Customer',
-            'email': 'test@example.com',
-        })
+        self.partner = self.env["res.partner"].create(
+            {
+                "name": "Test Customer",
+                "email": "test@example.com",
+            }
+        )
 
-        self.currency = self.env['res.currency'].search([('name', '=', 'EUR')], limit=1)
+        self.currency = self.env["res.currency"].search([("name", "=", "EUR")], limit=1)
         if not self.currency:
-            self.currency = self.env['res.currency'].create({
-                'name': 'EUR',
-                'symbol': '€',
-                'rate': 1.0,
-            })
+            self.currency = self.env["res.currency"].create(
+                {
+                    "name": "EUR",
+                    "symbol": "€",
+                    "rate": 1.0,
+                }
+            )
 
     def test_compute_reference(self):
         """Test _compute_reference method for MultiSafepay transactions"""
 
-        reference = self.env['payment.transaction']._compute_reference('multisafepay')
+        reference = self.env["payment.transaction"]._compute_reference("multisafepay")
 
         print(f"🔍 Generated reference: {reference}")
 
-        self.assertTrue(reference.startswith('MSP-'))
-        parts = reference.split('-')
+        self.assertTrue(reference.startswith("MSP-"))
+        parts = reference.split("-")
         self.assertEqual(len(parts), 3)  # MSP-timestamp-uuid
 
         timestamp = parts[1]

@@ -15,14 +15,15 @@
                 </group>
             </xpath>
 
-           <xpath expr="//a[@name='action_view_payment_methods']" position="after">
-                <a invisible="code != 'multisafepay' or code == 'multisafepay' and state == 'disabled'"
+            <xpath expr="//a[@name='action_view_payment_methods']" position="after">
+                <a
+                    invisible="code != 'multisafepay' or code == 'multisafepay' and state == 'disabled'"
                     type="object"
                     name="pull_merchant_payment_methods"
                     class="btn btn-link pl-2"
                     role="button"
                 >
-                    <i class="fa fa-refresh"/> Sync Payment Methods
+                    <i class="fa fa-refresh" /> Sync Payment Methods
                 </a>
             </xpath>
             <xpath expr="//field[@name='allow_tokenization']" position="attributes">
@@ -34,7 +35,6 @@
             <xpath expr="//field[@name='allow_express_checkout']" position="attributes">
                 <attribute name="readonly">code == 'multisafepay'</attribute>
             </xpath>
-
         </field>
     </record>
 </odoo>

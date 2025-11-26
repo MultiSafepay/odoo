@@ -1,19 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo noupdate="0">
     <record id="payment_provider_multisafepay" model="payment.provider">
         <field name="name">MultiSafepay</field>
         <field name="code">multisafepay</field>
 
-        <field name="redirect_form_view_id" ref="multisafepay_form"/>
+        <field name="redirect_form_view_id" ref="multisafepay_form" />
 
-        <field name="image_128" type="base64" file="payment_multisafepay/static/description/icon.png"/>
-        <field name="module_id" ref="base.module_payment_multisafepay"/>
+        <field
+            name="image_128"
+            type="base64"
+            file="payment_multisafepay/static/description/icon.png"
+        />
+        <field name="module_id" ref="base.module_payment_multisafepay" />
 
         <field name="support_refund">partial</field>
-    
-        <field name="allow_tokenization" eval="False"/>
-        <field name="capture_manually" eval="False"/>
-        <field name="allow_express_checkout" eval="False"/>
-        
+
+        <field name="allow_tokenization" eval="False" />
+        <field name="capture_manually" eval="False" />
+        <field name="allow_express_checkout" eval="False" />
     </record>
 </odoo>

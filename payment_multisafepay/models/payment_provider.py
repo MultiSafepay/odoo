@@ -18,24 +18,24 @@ _logger = logging.getLogger(__name__)
 
 class PaymentProvider(models.Model):
     """MultiSafepay Payment Provider.
-    
+
     Extends Odoo's payment.provider model to add MultiSafepay-specific functionality
     including API integration, payment method synchronization, and provider configuration.
     """
 
-    _inherit = 'payment.provider'
+    _inherit = "payment.provider"
 
     # ===================================
     # FIELDS
     # ===================================
 
     code = fields.Selection(
-        selection_add=[('multisafepay', "Multisafepay")], 
-        ondelete={'multisafepay': 'set default'}
+        selection_add=[("multisafepay", "Multisafepay")],
+        ondelete={"multisafepay": "set default"},
     )
 
     multisafepay_api_key = fields.Char(
-        string='API Key',
+        string="API Key",
         help="The API key for the Multisafepay account. This is used to authenticate requests to the Multisafepay API.",
         copy=False,
     )
@@ -60,7 +60,7 @@ class PaymentProvider(models.Model):
 
         result = super().write(vals)
 
-        multisafepay_records = self.filtered(lambda r: r.code == 'multisafepay')
+        multisafepay_records = self.filtered(lambda r: r.code == "multisafepay")
 
         for record in multisafepay_records:
             old_state = old_states.get(record.id)
@@ -68,16 +68,24 @@ class PaymentProvider(models.Model):
             new_state = record.state
             new_api_key = record.multisafepay_api_key
 
-            state_changed = 'state' in vals and old_state != new_state
-            api_key_changed = 'multisafepay_api_key' in vals and old_api_key != new_api_key
+            state_changed = "state" in vals and old_state != new_state
+            api_key_changed = (
+                "multisafepay_api_key" in vals and old_api_key != new_api_key
+            )
 
             try:
                 if state_changed or api_key_changed:
                     record._on_multisafepay_config_changed(
-                        old_state, new_state, state_changed, new_api_key, api_key_changed
+                        old_state,
+                        new_state,
+                        state_changed,
+                        new_api_key,
+                        api_key_changed,
                     )
             except Exception as e:
-                _logger.error(f"Error in MultiSafepay configuration change handling: {e}")
+                _logger.error(
+                    f"Error in MultiSafepay configuration change handling: {e}"
+                )
 
         return result
 
@@ -89,7 +97,7 @@ class PaymentProvider(models.Model):
         """Override to define MultiSafepay-specific feature support.
 
         Configures which payment features are supported by MultiSafepay:
-        
+
         - Express checkout: Enabled
         - Manual capture: Full amount only
         - Refunds: Partial refunds supported
@@ -99,12 +107,14 @@ class PaymentProvider(models.Model):
         """
 
         super()._compute_feature_support_fields()
-        self.filtered(lambda p: p.code == 'multisafepay').update({
-            'support_express_checkout': True,
-            'support_manual_capture': 'full_only',
-            'support_refund': 'partial',
-            'support_tokenization': True,
-        })
+        self.filtered(lambda p: p.code == "multisafepay").update(
+            {
+                "support_express_checkout": True,
+                "support_manual_capture": "full_only",
+                "support_refund": "partial",
+                "support_tokenization": True,
+            }
+        )
 
     # ===================================
     # BUSINESS METHODS (ODOO)
@@ -121,7 +131,7 @@ class PaymentProvider(models.Model):
         """
 
         supported_currencies = super()._get_supported_currencies()
-        if self.code == 'multisafepay':
+        if self.code == "multisafepay":
             supported_currencies = supported_currencies.filtered(
                 lambda c: c.name in const.SUPPORTED_CURRENCIES
             )
@@ -147,11 +157,13 @@ class PaymentProvider(models.Model):
     # MULTISAFEPAY - Configuration
     # ===================================
 
-    def _on_multisafepay_config_changed(self, old_state, new_state, state_changed, new_api_key, api_key_changed):
+    def _on_multisafepay_config_changed(
+        self, old_state, new_state, state_changed, new_api_key, api_key_changed
+    ):
         """Handle MultiSafepay configuration changes (state and/or API key).
 
         This method processes state and API key changes to:
-        
+
         - Clean up payment methods when provider is disabled
         - Sync payment methods when provider is enabled/test with valid API key
         - Avoid duplicate operations when both state and API key change simultaneously
@@ -166,26 +178,32 @@ class PaymentProvider(models.Model):
 
         self.ensure_one()
 
-        if new_state == 'disabled':
+        if new_state == "disabled":
             self._on_disable_deactivate_all_methods()
             return
 
-        mode_label = "PRODUCTION" if new_state == 'enabled' else "TEST"
+        mode_label = "PRODUCTION" if new_state == "enabled" else "TEST"
 
         if state_changed and api_key_changed:
-            _logger.debug(f"MultiSafepay provider {self.name}: state changed {old_state} → {new_state} "
-                          f"and API key changed in {mode_label} environment")
+            _logger.debug(
+                f"MultiSafepay provider {self.name}: state changed {old_state} → {new_state} "
+                f"and API key changed in {mode_label} environment"
+            )
         elif state_changed:
-            _logger.debug(f"MultiSafepay provider {self.name}: state changed {old_state} → {new_state}")
+            _logger.debug(
+                f"MultiSafepay provider {self.name}: state changed {old_state} → {new_state}"
+            )
         elif api_key_changed:
             _logger.debug(f"MultiSafepay API key changed for {mode_label} environment")
 
-        if new_state in ['enabled', 'test']:
+        if new_state in ["enabled", "test"]:
             try:
                 if new_api_key:
                     self._fetch_merchant_payment_methods()
                 else:
-                    _logger.debug(f"No API key found. Please configure your API key to fetch payment methods in {mode_label} environment.")
+                    _logger.debug(
+                        f"No API key found. Please configure your API key to fetch payment methods in {mode_label} environment."
+                    )
             except Exception as e:
                 _logger.error(f"Error syncing: {e}")
 
@@ -200,15 +218,16 @@ class PaymentProvider(models.Model):
         """
 
         return Sdk(
-            api_key=self.multisafepay_api_key,
-            is_production=(self.state == 'enabled')
+            api_key=self.multisafepay_api_key, is_production=(self.state == "enabled")
         )
 
     # ===================================
     # MULTISAFEPAY - Synchronization
     # ===================================
 
-    def _on_sync_deactivate_unavailable_payment_method_codes(self, synced_payment_method_codes):
+    def _on_sync_deactivate_unavailable_payment_method_codes(
+        self, synced_payment_method_codes
+    ):
         """Deactivate payment methods no longer available in API.
 
         When a payment method is no longer returned by the MultiSafepay API,
@@ -221,19 +240,29 @@ class PaymentProvider(models.Model):
 
         self.ensure_one()
 
-        all_provider_methods = self.env['payment.method'].with_context(active_test=False).search([
-            ('provider_ids', 'in', [self.id]),
-            ('code', '=like', f'{const.PAYMENT_METHOD_PREFIX}%')
-        ])
+        all_provider_methods = (
+            self.env["payment.method"]
+            .with_context(active_test=False)
+            .search(
+                [
+                    ("provider_ids", "in", [self.id]),
+                    ("code", "=like", f"{const.PAYMENT_METHOD_PREFIX}%"),
+                ]
+            )
+        )
 
-        unavailable_payment_method_codes = all_provider_methods.filtered(lambda m: m.code not in synced_payment_method_codes)
+        unavailable_payment_method_codes = all_provider_methods.filtered(
+            lambda m: m.code not in synced_payment_method_codes
+        )
 
         if not unavailable_payment_method_codes:
             return
 
-        unavailable_payment_method_codes.write({'active': False})
+        unavailable_payment_method_codes.write({"active": False})
 
-        _logger.debug(f"Deactivated {len(unavailable_payment_method_codes)} unavailable payment methods:")
+        _logger.debug(
+            f"Deactivated {len(unavailable_payment_method_codes)} unavailable payment methods:"
+        )
         for method in unavailable_payment_method_codes:
             _logger.debug(f"  - {method.name} (code: {method.code})")
 
@@ -248,18 +277,22 @@ class PaymentProvider(models.Model):
 
         self.ensure_one()
 
-        _logger.debug("MultiSafepay provider disabled - deactivating all associated payment methods")
+        _logger.debug(
+            "MultiSafepay provider disabled - deactivating all associated payment methods"
+        )
 
-        multisafepay_methods = self.env['payment.method'].with_context(active_test=False).search([
-            ('provider_ids', 'in', [self.id])
-        ])
+        multisafepay_methods = (
+            self.env["payment.method"]
+            .with_context(active_test=False)
+            .search([("provider_ids", "in", [self.id])])
+        )
 
         if not multisafepay_methods:
             _logger.debug("No payment methods found for this MultiSafepay provider")
             return
 
         try:
-            multisafepay_methods.write({'active': False})
+            multisafepay_methods.write({"active": False})
             deactivated_count = len(multisafepay_methods)
 
             _logger.debug(f"Deactivated {deactivated_count} payment methods:")
@@ -275,13 +308,13 @@ class PaymentProvider(models.Model):
         """Sync merchant payment methods from MultiSafepay API.
 
         This method:
-        
+
         - Fetches available payment methods (gateways and brands) from the API
         - Creates new methods or updates existing ones preserving user configurations
         - Associates methods with this provider
         - Removes unavailable methods that are no longer in the API
 
-        .. note:: 
+        .. note::
             User configurations like 'active' status are preserved on updates.
 
         :return: None (Logs sync results: count of new and updated methods)
@@ -289,10 +322,10 @@ class PaymentProvider(models.Model):
 
         self.ensure_one()
 
-        _logger.debug('Syncing merchant payment methods')
+        _logger.debug("Syncing merchant payment methods")
 
         if not self.multisafepay_api_key:
-            _logger.warning('No API key found. Please configure your API key first.')
+            _logger.warning("No API key found. Please configure your API key first.")
             return
 
         try:
@@ -301,7 +334,7 @@ class PaymentProvider(models.Model):
             custom_response = gateway_manager.get_payment_methods()
             gateways = custom_response.get_data()
             if not gateways or len(gateways) == 0:
-                _logger.warning('No payment methods found')
+                _logger.warning("No payment methods found")
                 return
 
             # Track codes from API to identify unavailable methods later
@@ -309,61 +342,67 @@ class PaymentProvider(models.Model):
 
             count_new = 0
             count_updated = 0
-            payment_method = self.env['payment.method']
+            payment_method = self.env["payment.method"]
 
             for gateway in gateways:
                 multisafepay_code = gateway.id.lower()
                 unique_code = self._map_multisafepay_to_odoo_code(multisafepay_code)
-                _logger.debug("Mapping MultiSafepay '%s' to Odoo code '%s'", multisafepay_code, unique_code)
+                _logger.debug(
+                    "Mapping MultiSafepay '%s' to Odoo code '%s'",
+                    multisafepay_code,
+                    unique_code,
+                )
                 synced_payment_method_codes.add(unique_code)
 
                 # Prepare values that can be safely updated
                 country_ids = self._get_country_ids(gateway.allowed_countries)
                 currency_ids = self._get_currency_ids(gateway.allowed_currencies)
 
-                existing = payment_method.with_context(active_test=False).search([
-                    ('code', '=', unique_code)
-                ], limit=1)
+                existing = payment_method.with_context(active_test=False).search(
+                    [("code", "=", unique_code)], limit=1
+                )
 
                 # Values that are ALWAYS updated from API
                 api_vals = {
-                    'name': gateway.name or gateway.id,
-                    'code': unique_code,
-                    'support_refund': 'partial',
+                    "name": gateway.name or gateway.id,
+                    "code": unique_code,
+                    "support_refund": "partial",
                 }
 
                 # New methods are disabled by default
                 creation_only_vals = {
-                    'active': False,
+                    "active": False,
                 }
 
                 # Optional values from API (update if present)
                 if gateway.allowed_amount:
                     if gateway.allowed_amount.min:
                         min_decimal = Decimal(str(gateway.allowed_amount.min))
-                        api_vals['minimum_amount'] = float(min_decimal / Decimal('100'))
+                        api_vals["minimum_amount"] = float(min_decimal / Decimal("100"))
                     if gateway.allowed_amount.max:
                         max_decimal = Decimal(str(gateway.allowed_amount.max))
-                        api_vals['maximum_amount'] = float(max_decimal / Decimal('100'))
+                        api_vals["maximum_amount"] = float(max_decimal / Decimal("100"))
 
                 if country_ids:
-                    api_vals['supported_country_ids'] = [(6, 0, country_ids)]
+                    api_vals["supported_country_ids"] = [(6, 0, country_ids)]
 
                 if currency_ids:
-                    api_vals['supported_currency_ids'] = [(6, 0, currency_ids)]
+                    api_vals["supported_currency_ids"] = [(6, 0, currency_ids)]
 
                 if gateway.icon_urls and gateway.icon_urls.large:
-                    api_vals['image'] = _get_image_base64(url=gateway.icon_urls.large)
+                    api_vals["image"] = _get_image_base64(url=gateway.icon_urls.large)
 
                 if not existing:
                     # Use all values: api_vals and creation_only_vals
-                    main_method = payment_method.create({**api_vals, **creation_only_vals})
-                    main_method.write({'provider_ids': [(4, self.id, 0)]})
+                    main_method = payment_method.create(
+                        {**api_vals, **creation_only_vals}
+                    )
+                    main_method.write({"provider_ids": [(4, self.id, 0)]})
                     count_new += 1
                 else:
                     existing.write(api_vals)
                     if self.id not in existing.provider_ids.ids:
-                        existing.write({'provider_ids': [(4, self.id, 0)]})
+                        existing.write({"provider_ids": [(4, self.id, 0)]})
                     main_method = existing
                     count_updated += 1
 
@@ -372,57 +411,79 @@ class PaymentProvider(models.Model):
                         continue
 
                     multisafepay_brand_code = brand.id.lower()
-                    brand_code = self._map_multisafepay_to_odoo_code(multisafepay_brand_code)
+                    brand_code = self._map_multisafepay_to_odoo_code(
+                        multisafepay_brand_code
+                    )
                     synced_payment_method_codes.add(brand_code)
 
-                    existing_brand = payment_method.with_context(active_test=False).search([
-                        ('code', '=', brand_code)
-                    ], limit=1)
+                    existing_brand = payment_method.with_context(
+                        active_test=False
+                    ).search([("code", "=", brand_code)], limit=1)
 
                     # Values that are ALWAYS updated from API
                     brand_api_vals = {
-                        'name': brand.name or brand.id,
-                        'code': brand_code,
-                        'primary_payment_method_id': main_method.id,
-                        'support_refund': 'partial',
+                        "name": brand.name or brand.id,
+                        "code": brand_code,
+                        "primary_payment_method_id": main_method.id,
+                        "support_refund": "partial",
                     }
 
                     # Brands are inactive by default when created
                     brand_creation_vals = {
-                        'active': False,
+                        "active": False,
                     }
 
                     if brand.icon_urls and brand.icon_urls.large:
-                        brand_api_vals['image'] = _get_image_base64(brand.icon_urls.large)
+                        brand_api_vals["image"] = _get_image_base64(
+                            brand.icon_urls.large
+                        )
 
-                    brand_currency_ids = self._get_currency_ids(gateway.allowed_currencies)
+                    brand_currency_ids = self._get_currency_ids(
+                        gateway.allowed_currencies
+                    )
                     if brand_currency_ids:
-                        brand_api_vals['supported_currency_ids'] = [(6, 0, brand_currency_ids)]
+                        brand_api_vals["supported_currency_ids"] = [
+                            (6, 0, brand_currency_ids)
+                        ]
 
                     brand_country_ids = self._get_country_ids(brand.allowed_countries)
                     if brand_country_ids:
-                        brand_api_vals['supported_country_ids'] = [(6, 0, brand_country_ids)]
+                        brand_api_vals["supported_country_ids"] = [
+                            (6, 0, brand_country_ids)
+                        ]
 
                     if not existing_brand:
-                        brand_method = payment_method.create({**brand_api_vals, **brand_creation_vals})
-                        brand_method.write({'provider_ids': [(4, self.id, 0)]})
+                        brand_method = payment_method.create(
+                            {**brand_api_vals, **brand_creation_vals}
+                        )
+                        brand_method.write({"provider_ids": [(4, self.id, 0)]})
                         count_new += 1
-                        _logger.debug(f"Created new brand: {brand_method.name} (code: {brand_method.code})")
+                        _logger.debug(
+                            f"Created new brand: {brand_method.name} (code: {brand_method.code})"
+                        )
 
                     else:
                         existing_brand.write(brand_api_vals)
 
                         if self.id not in existing_brand.provider_ids.ids:
-                            existing_brand.write({'provider_ids': [(4, self.id, 0)]})
-                            _logger.info(f"Associated brand with provider: {existing_brand.name}")
+                            existing_brand.write({"provider_ids": [(4, self.id, 0)]})
+                            _logger.info(
+                                f"Associated brand with provider: {existing_brand.name}"
+                            )
                         else:
-                            _logger.debug(f"Updated brand (already associated): {existing_brand.name}")
+                            _logger.debug(
+                                f"Updated brand (already associated): {existing_brand.name}"
+                            )
 
                         count_updated += 1
 
-            self._on_sync_deactivate_unavailable_payment_method_codes(synced_payment_method_codes)
+            self._on_sync_deactivate_unavailable_payment_method_codes(
+                synced_payment_method_codes
+            )
 
-            _logger.debug(f'Successfully synchronized {count_new} new methods, {count_updated} methods updated')
+            _logger.debug(
+                f"Successfully synchronized {count_new} new methods, {count_updated} methods updated"
+            )
 
         except Exception as e:
             _logger.error("Error loading payment methods: %s", e)
@@ -442,7 +503,7 @@ class PaymentProvider(models.Model):
         if not country_codes:
             return []
 
-        all_countries = self.env['res.country'].search([])
+        all_countries = self.env["res.country"].search([])
         country_map = {c.code: c.id for c in all_countries}
         return [country_map[code] for code in country_codes if code in country_map]
 
@@ -460,7 +521,9 @@ class PaymentProvider(models.Model):
         if not currency_codes:
             return []
 
-        all_currencies = self.env['res.currency'].with_context(active_test=False).search([])
+        all_currencies = (
+            self.env["res.currency"].with_context(active_test=False).search([])
+        )
         currency_map = {c.name: c.id for c in all_currencies}
         return [currency_map[code] for code in currency_codes if code in currency_map]
 
@@ -473,7 +536,7 @@ class PaymentProvider(models.Model):
         """
 
         if not multisafepay_code:
-            return ''
+            return ""
 
         msp_code_lower = multisafepay_code.lower()
         return f"{const.PAYMENT_METHOD_PREFIX}{msp_code_lower}"
@@ -487,10 +550,10 @@ class PaymentProvider(models.Model):
         """
 
         if not odoo_code:
-            return ''
+            return ""
 
         clean_code = odoo_code
         if odoo_code.startswith(const.PAYMENT_METHOD_PREFIX):
-            clean_code = odoo_code[len(const.PAYMENT_METHOD_PREFIX):]
+            clean_code = odoo_code[len(const.PAYMENT_METHOD_PREFIX) :]
 
         return clean_code.upper()
