@@ -10,7 +10,7 @@
     'website': 'https://www.multisafepay.com',
     'license': 'AGPL-3',
     'category': 'eCommerce',
-    'version': '18.0.1.2.0',
+    'version': '18.0.1.3.0',
     'application': True,
     'post_init_hook': 'post_init_hook',
     'uninstall_hook': 'uninstall_hook',
