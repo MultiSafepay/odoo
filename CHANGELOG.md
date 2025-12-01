@@ -9,6 +9,16 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [19.0.1.2.0] - 2025-12-01
+### Added
+- ODOO-122: Add pricelist filter to payment method list (#1)
+
+### Changed
+- ODOO-155: Refactor cleanup logic preserving user configuration (#3)
+
+### Fixed
+- ODOO-162: Fix installation instructions in README.md file (#6)
+
 ## [19.0.1.1.0] - 2025-10-31
 ### Added
 - ODOO-123: Refund reason field for better transaction tracking
