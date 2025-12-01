@@ -11,13 +11,13 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [18.0.1.3.0] - 2025-12-01
 ### Added
-- ODOO-154: Add pricelist filter to payment method list (#8)
+- ODOO-154: Add pricelist filter to payment method list
 
 ### Changed
-- ODOO-156: Refactor cleanup logic preserving user configuration (#5)
+- ODOO-156: Refactor cleanup logic preserving user configuration
 
 ### Fixed
-- ODOO-164: Fix installation instructions in README.md file (#7)
+- ODOO-164: Fix installation instructions in README.md file
 
 ## [18.0.1.2.0] - 2025-10-31
 ### Added
