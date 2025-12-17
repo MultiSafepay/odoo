@@ -197,7 +197,6 @@
         <script type="text/javascript">
 // Auto-submit form
 document.addEventListener("DOMContentLoaded", function () {
-    console.log("Auto-submitting MultiSafepay form...");
     var form = document.forms["multisafepay_payment_form"];
     if (form) {
         form.submit();
