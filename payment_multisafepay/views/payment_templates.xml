@@ -200,7 +200,6 @@ document.addEventListener("DOMContentLoaded", function () {
     var form = document.forms["multisafepay_payment_form"];
     if (form) {
         form.submit();
-    } else {
     }
 });
         </script>
