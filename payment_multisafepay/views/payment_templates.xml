@@ -201,7 +201,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if (form) {
         form.submit();
     } else {
-        console.error("Form not found!");
     }
 });
         </script>
