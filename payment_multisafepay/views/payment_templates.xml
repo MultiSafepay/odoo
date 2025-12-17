@@ -176,7 +176,6 @@
     <template id="multisafepay_form" name="MultiSafepay Payment Form">
         <!-- Basic debug -->
         <script type="text/javascript">
-console.log("MultiSafepay Form Processing...");
         </script>
 
         <!-- POST form to internal controller -->
