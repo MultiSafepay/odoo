@@ -59,7 +59,6 @@ class PaymentMethod(models.Model):
         help="Technical field to identify if this payment method has MultiSafepay as one of its providers.",
     )
 
-    # Note: pricelist_ids field moved to payment_multisafepay_enhaced module (custom feature)
 
     # ===================================
     # COMPUTE METHODS (ODOO)
