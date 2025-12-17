@@ -7,4 +7,3 @@ from . import payment_provider
 from . import payment_method
 from . import payment_transaction
 
-# Note: stock_picking moved to payment_multisafepay_enhaced (requires stock module)
