@@ -774,7 +774,7 @@ class MultiSafepayController(http.Controller):
             ),
         )
 
-        # ⚠️ SALE MODULE INTEGRATION - Shipping Address
+        # SALE MODULE INTEGRATION - Shipping Address
         # If sale order exists and has different shipping address, use it
         # Otherwise, use invoice address for delivery (standard fallback)
         use_delivery_as_billing = False
