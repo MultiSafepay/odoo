@@ -40,7 +40,6 @@ class TestPaymentTransaction(TransactionCase):
 
         reference = self.env["payment.transaction"]._compute_reference("multisafepay")
 
-        print(f"🔍 Generated reference: {reference}")
 
         self.assertTrue(reference.startswith("MSP-"))
         parts = reference.split("-")
