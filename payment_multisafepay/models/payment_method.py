@@ -234,7 +234,6 @@ class PaymentMethod(models.Model):
         return other_methods + allowed_multisafepay_methods
 
     # Note: _filter_by_pricelist() method moved to payment_multisafepay_enhaced module (custom feature)
-    # Note: _get_compatible_payment_methods_with_pricelist() method moved to payment_multisafepay_enhaced module (custom feature)
 
     # ===================================
     # MULTISAFEPAY - Availability Report
