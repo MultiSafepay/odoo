@@ -8,4 +8,3 @@ from . import payment_method
 from . import payment_transaction
 
 # Note: stock_picking moved to payment_multisafepay_enhaced (requires stock module)
-# Note: account_move moved to payment_multisafepay_enhaced (requires account module)
