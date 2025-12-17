@@ -185,7 +185,6 @@ class PaymentMethod(models.Model):
                 report, filtered_out, "amount", {"amount": amount}
             )
 
-        # Note: Pricelist filtering moved to payment_multisafepay_enhaced module (custom feature)
 
         return payment_methods
 
