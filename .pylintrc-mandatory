@@ -11,7 +11,9 @@ license-allowed=AGPL-3,GPL-2,GPL-2 or any later version,GPL-3,GPL-3 or any later
 valid-odoo-versions=18.0
 
 [MESSAGES CONTROL]
-disable=all
+disable=all,
+    manifest-required-author,
+    missing-readme
 
 enable=anomalous-backslash-in-string,
     api-one-deprecated,

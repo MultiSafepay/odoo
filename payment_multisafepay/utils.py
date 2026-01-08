@@ -14,9 +14,10 @@ _logger = logging.getLogger(__name__)
 def _get_image_base64(url):
     try:
         _logger.debug("URL %s", url)
-        response = requests.get(url)
+        # Add timeout to external request
+        response = requests.get(url, timeout=10)
         if response.status_code == 200:
             return base64.b64encode(response.content)
     except Exception as e:
-        _logger.warning(f"Could not fetch image from {url}: {e}")
+        _logger.warning("Could not fetch image from %s: %s", url, e)
     return False

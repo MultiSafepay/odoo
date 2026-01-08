@@ -40,8 +40,7 @@ class TestPaymentTransaction(TransactionCase):
 
         reference = self.env["payment.transaction"]._compute_reference("multisafepay")
 
-        print(f"🔍 Generated reference: {reference}")
-
+        # Use simple assertion without print
         self.assertTrue(reference.startswith("MSP-"))
         parts = reference.split("-")
         self.assertEqual(len(parts), 3)  # MSP-timestamp-uuid

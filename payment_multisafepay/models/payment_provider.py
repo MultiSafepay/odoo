@@ -105,7 +105,6 @@ class PaymentProvider(models.Model):
 
         :return: None
         """
-
         super()._compute_feature_support_fields()
         self.filtered(lambda p: p.code == "multisafepay").update(
             {
@@ -115,6 +114,7 @@ class PaymentProvider(models.Model):
                 "support_tokenization": True,
             }
         )
+        return
 
     # ===================================
     # BUSINESS METHODS (ODOO)
