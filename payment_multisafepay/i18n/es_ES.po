@@ -1,0 +1,333 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* payment_multisafepay
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-11-17 09:38+0000\n"
+"PO-Revision-Date: 2025-11-17 09:38+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: payment_multisafepay
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay.payment_provider_form_multisafepay
+msgid "<i class=\"fa fa-refresh\"/> Sync Payment Methods"
+msgstr "<i class=\"fa fa-refresh\"/> Sincronizar Métodos de Pago"
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_provider__multisafepay_api_key
+msgid "API Key"
+msgstr "Clave API"
+
+#. module: payment_multisafepay
+#. odoo-python
+#: code:addons/payment_multisafepay/controllers/main.py:0
+msgid "An unexpected error occurred. Please try again."
+msgstr "Ocurrió un error inesperado. Por favor, inténtelo de nuevo."
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_provider__code
+msgid "Code"
+msgstr "Código"
+
+#. module: payment_multisafepay
+#. odoo-python
+#: code:addons/payment_multisafepay/models/payment_transaction.py:0
+msgid ""
+"Could not connect to MultiSafepay API for transaction %s.\n"
+"\n"
+"Error: %s"
+msgstr ""
+"No se pudo conectar a la API de MultiSafepay para la transacción %s.\n"
+"\n"
+"Error: %s"
+
+#. module: payment_multisafepay
+#. odoo-python
+#: code:addons/payment_multisafepay/models/payment_transaction.py:0
+msgid ""
+"Could not retrieve order information from MultiSafepay for transaction %s.\n"
+"\n"
+"Reference: %s\n"
+"Provider: %s\n"
+"\n"
+"Please check your internet connection and try again later."
+msgstr ""
+"No se pudo recuperar la información del pedido de MultiSafepay para la transacción %s.\n"
+"\n"
+"Referencia: %s\n"
+"Proveedor: %s\n"
+"\n"
+"Por favor, verifique su conexión a Internet e inténtelo de nuevo más tarde."
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_method__display_name
+#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_provider__display_name
+#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_transaction__display_name
+msgid "Display Name"
+msgstr "Nombre para mostrar"
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_method__id
+#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_provider__id
+#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_transaction__id
+msgid "ID"
+msgstr "ID"
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_method__main_currency_id
+msgid "Main Currency"
+msgstr "Moneda Principal"
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_method__maximum_amount
+msgid "Maximum Amount (EUR)"
+msgstr "Monto Máximo (EUR)"
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_method__minimum_amount
+msgid "Minimum Amount (EUR)"
+msgstr "Monto Mínimo (EUR)"
+
+#. module: payment_multisafepay
+#: model:payment.provider,name:payment_multisafepay.payment_provider_multisafepay
+msgid "MultiSafepay"
+msgstr "MultiSafepay"
+
+#. module: payment_multisafepay
+#. odoo-python
+#: code:addons/payment_multisafepay/controllers/main.py:0
+msgid ""
+"MultiSafepay API error: Transaction not found. Please refresh and try again."
+msgstr ""
+"Error de API de MultiSafepay: Transacción no encontrada. Por favor, actualice e inténtelo de nuevo."
+
+#. module: payment_multisafepay
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay.payment_provider_form_multisafepay
+msgid "MultiSafepay Credentials"
+msgstr "Credenciales de MultiSafepay"
+
+#. module: payment_multisafepay
+#. odoo-python
+#: code:addons/payment_multisafepay/controllers/main.py:0
+msgid "MultiSafepay SDK is not initialized."
+msgstr "El SDK de MultiSafepay no está inicializado."
+
+#. module: payment_multisafepay
+#: model:ir.model.fields.selection,name:payment_multisafepay.selection__payment_provider__code__multisafepay
+msgid "Multisafepay"
+msgstr "Multisafepay"
+
+#. module: payment_multisafepay
+#. odoo-python
+#: code:addons/payment_multisafepay/controllers/main.py:0
+msgid "No customer info partner associated."
+msgstr "No hay información de cliente asociada."
+
+#. module: payment_multisafepay
+#. odoo-python
+#: code:addons/payment_multisafepay/models/payment_transaction.py:0
+msgid ""
+"No response received from MultiSafepay when attempting to refund transaction %s.\n"
+"\n"
+"Please check your internet connection and try again later."
+msgstr ""
+"No se recibió respuesta de MultiSafepay al intentar reembolsar la transacción %s.\n"
+"\n"
+"Por favor, verifique su conexión a Internet e inténtelo de nuevo más tarde."
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_method__only_multisafepay
+msgid "Only Multisafepay"
+msgstr "Solo Multisafepay"
+
+#. module: payment_multisafepay
+#: model:ir.model,name:payment_multisafepay.model_payment_method
+msgid "Payment Method"
+msgstr "Método de pago"
+
+#. module: payment_multisafepay
+#: model:ir.model,name:payment_multisafepay.model_payment_provider
+msgid "Payment Provider"
+msgstr "Proveedor de pago"
+
+#. module: payment_multisafepay
+#: model:ir.model,name:payment_multisafepay.model_payment_transaction
+msgid "Payment Transaction"
+msgstr "Transacción de pago"
+
+#. module: payment_multisafepay
+#. odoo-python
+#: code:addons/payment_multisafepay/controllers/main.py:0
+msgid "Payment provider not found."
+msgstr "Proveedor de pago no encontrado."
+
+#. module: payment_multisafepay
+#. odoo-python
+#: code:addons/payment_multisafepay/controllers/main.py:0
+msgid "Payment reference is missing. Please try again."
+msgstr "Falta la referencia de pago. Por favor, inténtelo de nuevo."
+
+#. module: payment_multisafepay
+#. odoo-python
+#: code:addons/payment_multisafepay/models/payment_transaction.py:0
+msgid ""
+"Refund amount exceeds available amount.\n"
+"\n"
+"Transaction: %s\n"
+"Requested Refund: %.2f %s\n"
+"Maximum Available: %.2f %s\n"
+"Already Refunded: %.2f %s\n"
+"\n"
+"Please adjust the refund amount."
+msgstr ""
+"El monto del reembolso excede el monto disponible.\n"
+"\n"
+"Transacción: %s\n"
+"Reembolso Solicitado: %.2f %s\n"
+"Máximo Disponible: %.2f %s\n"
+"Ya Reembolsado: %.2f %s\n"
+"\n"
+"Por favor, ajuste el monto del reembolso."
+
+#. module: payment_multisafepay
+#. odoo-python
+#: code:addons/payment_multisafepay/models/payment_transaction.py:0
+msgid "Refund failed at MultiSafepay: %s\n"
+msgstr "El reembolso falló en MultiSafepay: %s\n"
+
+#. module: payment_multisafepay
+#. odoo-python
+#: code:addons/payment_multisafepay/models/payment_transaction.py:0
+msgid ""
+"Refunds can only be processed from a refund transaction linked to an "
+"original payment transaction."
+msgstr ""
+"Los reembolsos solo se pueden procesar desde una transacción de reembolso vinculada a una "
+"transacción de pago original."
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,help:payment_multisafepay.field_payment_method__only_multisafepay
+msgid ""
+"Technical field to identify if this payment method has MultiSafepay as one "
+"of its providers."
+msgstr ""
+"Campo técnico para identificar si este método de pago tiene MultiSafepay como uno "
+"de sus proveedores."
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,help:payment_multisafepay.field_payment_provider__multisafepay_api_key
+msgid ""
+"The API key for the Multisafepay account. This is used to authenticate "
+"requests to the Multisafepay API."
+msgstr ""
+"La clave API para la cuenta de Multisafepay. Se utiliza para autenticar "
+"solicitudes a la API de Multisafepay."
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,help:payment_multisafepay.field_payment_method__main_currency_id
+msgid "The main currency of the first provider linked to this payment method."
+msgstr "La moneda principal del primer proveedor vinculado a este método de pago."
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,help:payment_multisafepay.field_payment_method__maximum_amount
+msgid ""
+"The maximum payment amount in EUR that this payment provider is available "
+"for. Leave 0 to make it available for any payment amount."
+msgstr ""
+"El monto máximo de pago en EUR para el que está disponible este proveedor de pago. "
+"Deje 0 para que esté disponible para cualquier monto de pago."
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,help:payment_multisafepay.field_payment_method__minimum_amount
+msgid ""
+"The minimum payment amount in EUR that this payment provider is available "
+"for. Leave 0 to make it available for any payment amount."
+msgstr ""
+"El monto mínimo de pago en EUR para el que está disponible este proveedor de pago. "
+"Deje 0 para que esté disponible para cualquier monto de pago."
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,help:payment_multisafepay.field_payment_provider__code
+msgid "The technical code of this payment provider."
+msgstr "El código técnico de este proveedor de pagos."
+
+#. module: payment_multisafepay
+#. odoo-python
+#: code:addons/payment_multisafepay/controllers/main.py:0
+msgid ""
+"There was a problem processing your payment. Possible reasons could be: "
+"\"insufficient funds\", or \"verification failed\"."
+msgstr ""
+"Hubo un problema al procesar su pago. Las razones posibles podrían ser: "
+"\"fondos insuficientes\" o \"verificación fallida\"."
+
+#. module: payment_multisafepay
+#. odoo-python
+#: code:addons/payment_multisafepay/models/payment_transaction.py:0
+msgid ""
+"This order has already been fully refunded.\n"
+"\n"
+"Transaction: %s\n"
+"Order Status: %s\n"
+"Original Amount: %.2f %s\n"
+"\n"
+"No additional refunds can be processed."
+msgstr ""
+"Este pedido ya ha sido reembolsado completamente.\n"
+"\n"
+"Transacción: %s\n"
+"Estado del Pedido: %s\n"
+"Monto Original: %.2f %s\n"
+"\n"
+"No se pueden procesar reembolsos adicionales."
+
+#. module: payment_multisafepay
+#. odoo-python
+#: code:addons/payment_multisafepay/controllers/main.py:0
+msgid "Transaction amount is missing or invalid."
+msgstr "El monto de la transacción falta o no es válido."
+
+#. module: payment_multisafepay
+#. odoo-python
+#: code:addons/payment_multisafepay/controllers/main.py:0
+msgid "Transaction currency is missing or invalid."
+msgstr "La moneda de la transacción falta o no es válida."
+
+#. module: payment_multisafepay
+#. odoo-python
+#: code:addons/payment_multisafepay/controllers/main.py:0
+msgid "Transaction not found. Please refresh and try again."
+msgstr "Transacción no encontrada. Por favor, actualice e inténtelo de nuevo."
+
+#. module: payment_multisafepay
+#. odoo-python
+#: code:addons/payment_multisafepay/controllers/main.py:0
+msgid "Transaction reference is missing."
+msgstr "Falta la referencia de la transacción."
+
+#. module: payment_multisafepay
+#: model_terms:payment.provider,auth_msg:payment_multisafepay.payment_provider_multisafepay
+msgid "Your payment has been authorized."
+msgstr "Su pago ha sido autorizado."
+
+#. module: payment_multisafepay
+#: model_terms:payment.provider,cancel_msg:payment_multisafepay.payment_provider_multisafepay
+msgid "Your payment has been cancelled."
+msgstr "Su pago ha sido cancelado."
+
+#. module: payment_multisafepay
+#: model_terms:payment.provider,pending_msg:payment_multisafepay.payment_provider_multisafepay
+msgid "Your payment has been processed but is waiting for approval."
+msgstr "Su pago ha sido procesado pero está esperando aprobación."
+
+#. module: payment_multisafepay
+#: model_terms:payment.provider,done_msg:payment_multisafepay.payment_provider_multisafepay
+msgid "Your payment has been processed."
+msgstr "Su pago ha sido procesado."

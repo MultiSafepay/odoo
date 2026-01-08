@@ -5,9 +5,13 @@ fix = true
 extend-select = [
     "B",
     "C90",
-    "E501",  # line too long (default 88)
+    # "E501",  # line too long (default 88)
     "I",  # isort
     "UP",  # pyupgrade
+]
+ignore = [
+    "C901",  # Function is too complex
+    "B904",  # Use `raise ... from err` within except clause
 ]
 extend-safe-fixes = ["UP008"]
 exclude = ["setup/*"]
