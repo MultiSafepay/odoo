@@ -702,7 +702,7 @@ class MultiSafepayController(http.Controller):
         :rtype: str
         """
         if value is None:
-            return None
+            return '***'
         str_value = str(value)
         if len(str_value) < 4:
             return '***'
