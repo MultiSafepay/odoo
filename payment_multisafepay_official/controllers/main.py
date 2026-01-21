@@ -704,7 +704,7 @@ class MultiSafepayController(http.Controller):
         if value is None:
             return '***'
         str_value = str(value)
-        if len(str_value) < 4:
+        if len(str_value) <= 4:
             return '***'
         return str_value[:2] + '*' * (len(str_value) - 4) + str_value[-2:]
 
