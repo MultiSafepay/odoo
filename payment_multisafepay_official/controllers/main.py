@@ -643,6 +643,9 @@ class MultiSafepayController(http.Controller):
         _order_id = getattr(order, 'order_id', None)
 
         if not _order_id:
+            # Log the order request at error level for troubleshooting
+            _logger.error("Order request: %s", order_request.to_dict())
+
             # Provide a precise message; caller will redirect with it
             raise ValidationError(_('There was a problem processing your payment. Possible reasons could be: "insufficient funds", or "verification failed".'))
 
