@@ -9,8 +9,8 @@ Handles redirect flow for MultiSafepay payments
 """
 from decimal import Decimal
 import logging
-import pprint
 import json
+import copy
 
 from werkzeug.exceptions import Forbidden
 from typing import cast
@@ -19,7 +19,6 @@ from urllib.parse import quote_plus
 from odoo import http, _
 from odoo.http import request
 from odoo.exceptions import ValidationError, UserError
-from odoo.addons.payment.controllers.post_processing import PaymentPostProcessing
 
 from multisafepay.value_object.weight import Weight
 from multisafepay.api.shared.cart.cart_item import CartItem
@@ -743,7 +742,6 @@ class MultiSafepayController(http.Controller):
         :return: Sanitized copy of the order data safe for logging
         :rtype: dict
         """
-        import copy
 
         sensitive_fields = {
             'email', 'phone', 'ip_address', 'forwarded_ip',
