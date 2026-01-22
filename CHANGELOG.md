@@ -9,6 +9,10 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [18.0.1.3.1] - 2026-01-22
+### Added
+- ODOO-174: Add error-level logging for failed MultiSafepay order requests
+
 ## [18.0.1.3.0] - 2025-12-01
 ### Added
 - ODOO-154: Add pricelist filter to payment method list
