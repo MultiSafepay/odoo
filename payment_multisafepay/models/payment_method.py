@@ -59,7 +59,6 @@ class PaymentMethod(models.Model):
         help="Technical field to identify if this payment method has MultiSafepay as one of its providers.",
     )
 
-
     # ===================================
     # COMPUTE METHODS (ODOO)
     # ===================================
@@ -185,7 +184,6 @@ class PaymentMethod(models.Model):
                 report, filtered_out, "amount", {"amount": amount}
             )
 
-
         return payment_methods
 
     # ===================================
@@ -231,7 +229,6 @@ class PaymentMethod(models.Model):
 
         # Return all non-MultiSafepay methods plus filtered MultiSafepay methods
         return other_methods + allowed_multisafepay_methods
-
 
     # ===================================
     # MULTISAFEPAY - Availability Report
