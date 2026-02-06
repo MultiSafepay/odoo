@@ -174,10 +174,6 @@
     </template>
 
     <template id="multisafepay_form" name="MultiSafepay Payment Form">
-        <!-- Basic debug -->
-        <script type="text/javascript">
-        </script>
-
         <!-- POST form to internal controller -->
         <form
             name="multisafepay_payment_form"
