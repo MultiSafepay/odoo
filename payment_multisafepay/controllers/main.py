@@ -8,6 +8,7 @@ MultiSafepay Payment Controller
 Handles redirect flow for MultiSafepay payments
 """
 
+import copy
 import json
 import logging
 from decimal import Decimal
@@ -1110,7 +1111,16 @@ class MultiSafepayController(http.Controller):
         _order_id = getattr(order, "order_id", None)
 
         if not _order_id:
-            # Order creation failed - provide user-friendly error message
+            # Sanitize order request for logging
+            sanitized_request = self._sanitize_order_request_for_logging(
+                order_request.to_dict()
+            )
+            _logger.error(
+                "Order request failed to create a transaction. Order request: %s",
+                sanitized_request,
+            )
+
+            # Provide a precise message; caller will redirect with it
             raise ValidationError(
                 _(
                     'There was a problem processing your payment. Possible reasons could be: "insufficient funds", or "verification failed".'
@@ -1167,3 +1177,72 @@ class MultiSafepayController(http.Controller):
             "Falling back to request URL root (may be localhost): %s", base_url
         )
         return base_url
+
+    def _mask_sensitive_value(self, value) -> str:
+        """
+        Mask a sensitive value for safe logging.
+
+        :param value: The value to mask
+        :return: Masked string representation of the value
+        :rtype: str
+        """
+        if value is None:
+            return "***"
+        str_value = str(value)
+        if len(str_value) <= 4:
+            return "***"
+        return str_value[:2] + "*" * (len(str_value) - 4) + str_value[-2:]
+
+    def _sanitize_dict_recursive(self, d, sensitive_fields) -> dict:
+        """
+        Recursively sanitize a dictionary by masking sensitive fields.
+
+        :param d: The dictionary to sanitize
+        :param sensitive_fields: Set of field names to mask
+        :return: Sanitized dictionary
+        :rtype: dict
+        """
+        if not isinstance(d, dict):
+            return d
+        result = {}
+        for key, value in d.items():
+            if key.lower() in sensitive_fields:
+                result[key] = self._mask_sensitive_value(value)
+            elif isinstance(value, dict):
+                result[key] = self._sanitize_dict_recursive(value, sensitive_fields)
+            elif isinstance(value, list):
+                result[key] = [
+                    self._sanitize_dict_recursive(i, sensitive_fields)
+                    if isinstance(i, dict)
+                    else i
+                    for i in value
+                ]
+            else:
+                result[key] = value
+        return result
+
+    def _sanitize_order_request_for_logging(self, order_data: dict) -> dict:
+        """
+        Sanitize order request data for safe logging by masking sensitive PII fields.
+
+        :param order_data: The order request dictionary to sanitize
+        :return: Sanitized copy of the order data safe for logging
+        :rtype: dict
+        """
+
+        sensitive_fields = {
+            "email",
+            "phone",
+            "ip_address",
+            "forwarded_ip",
+            "first_name",
+            "last_name",
+            "address1",
+            "address2",
+            "house_number",
+            "zip_code",
+        }
+
+        return self._sanitize_dict_recursive(
+            copy.deepcopy(order_data), sensitive_fields
+        )
