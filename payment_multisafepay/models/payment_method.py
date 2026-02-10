@@ -108,7 +108,7 @@ class PaymentMethod(models.Model):
         - Availability reporting for debugging
 
         .. note::
-            Pricelist filtering moved to payment_multisafepay_enhaced module (custom feature)
+            Pricelist filtering moved to payment_multisafepay_enhanced module (custom feature)
 
         :param provider_ids: List of provider IDs to filter payment methods
         :param partner_id: ID of the partner for whom the payment methods are being fetched
@@ -331,4 +331,4 @@ class PaymentMethod(models.Model):
             )
         return reason_parts
 
-    # Note: _generate_pricelist_filter_reasons() method moved to payment_multisafepay_enhaced module (custom feature)
+    # Note: _generate_pricelist_filter_reasons() method moved to payment_multisafepay_enhanced module (custom feature)

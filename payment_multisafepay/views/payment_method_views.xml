@@ -19,7 +19,7 @@
                     readonly="1"
                 />
 
-                <!-- Note: pricelist_ids field moved to payment_multisafepay_enhaced module -->
+                <!-- Note: pricelist_ids field moved to payment_multisafepay_enhanced module -->
             </xpath>
             <xpath
                 expr="//form/sheet/notebook/page[@name='configuration']"
@@ -35,7 +35,7 @@
                         name="maximum_amount"
                         invisible="only_multisafepay == False or primary_payment_method_id != False"
                     />
-                    <!-- Note: pricelist_ids field moved to payment_multisafepay_enhaced module -->
+                    <!-- Note: pricelist_ids field moved to payment_multisafepay_enhanced module -->
                 </group>
             </xpath>
         </field>

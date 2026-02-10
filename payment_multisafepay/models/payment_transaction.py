@@ -36,7 +36,7 @@ class PaymentTransaction(models.Model):
     # FIELDS
     # ===================================
 
-    # Note: multisafepay_refund_reason field moved to payment_multisafepay_enhaced (custom feature)
+    # Note: multisafepay_refund_reason field moved to payment_multisafepay_enhanced (custom feature)
 
     # ===================================
     # BUSINESS METHODS (ODOO)
@@ -194,7 +194,7 @@ class PaymentTransaction(models.Model):
 
         _logger.info("Transaction %s updated to state '%s'", self.reference, odoo_state)
 
-    # Note: _create_child_transaction override moved to payment_multisafepay_enhaced
+    # Note: _create_child_transaction override moved to payment_multisafepay_enhanced
     # (handles multisafepay_refund_reason custom field)
 
     def _send_refund_request(self, amount_to_refund=0.0):

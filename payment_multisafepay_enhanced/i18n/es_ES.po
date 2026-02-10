@@ -1,6 +1,6 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* payment_multisafepay_enhaced
+# 	* payment_multisafepay_enhanced
 #
 msgid ""
 msgstr ""
@@ -15,106 +15,106 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
 
-#. module: payment_multisafepay_enhaced
-#: model:ir.model.fields,field_description:payment_multisafepay_enhaced.field_payment_method__pricelist_ids
+#. module: payment_multisafepay_enhanced
+#: model:ir.model.fields,field_description:payment_multisafepay_enhanced.field_payment_method__pricelist_ids
 msgid "Allowed Pricelists"
 msgstr "Listas de precios permitidas"
 
-#. module: payment_multisafepay_enhaced
-#: model:ir.model.fields,field_description:payment_multisafepay_enhaced.field_account_move__display_name
-#: model:ir.model.fields,field_description:payment_multisafepay_enhaced.field_payment_method__display_name
-#: model:ir.model.fields,field_description:payment_multisafepay_enhaced.field_payment_refund_wizard__display_name
-#: model:ir.model.fields,field_description:payment_multisafepay_enhaced.field_payment_transaction__display_name
-#: model:ir.model.fields,field_description:payment_multisafepay_enhaced.field_stock_picking__display_name
+#. module: payment_multisafepay_enhanced
+#: model:ir.model.fields,field_description:payment_multisafepay_enhanced.field_account_move__display_name
+#: model:ir.model.fields,field_description:payment_multisafepay_enhanced.field_payment_method__display_name
+#: model:ir.model.fields,field_description:payment_multisafepay_enhanced.field_payment_refund_wizard__display_name
+#: model:ir.model.fields,field_description:payment_multisafepay_enhanced.field_payment_transaction__display_name
+#: model:ir.model.fields,field_description:payment_multisafepay_enhanced.field_stock_picking__display_name
 msgid "Display Name"
 msgstr "Nombre para mostrar"
 
-#. module: payment_multisafepay_enhaced
-#: model:ir.model.fields,field_description:payment_multisafepay_enhaced.field_account_move__id
-#: model:ir.model.fields,field_description:payment_multisafepay_enhaced.field_payment_method__id
-#: model:ir.model.fields,field_description:payment_multisafepay_enhaced.field_payment_refund_wizard__id
-#: model:ir.model.fields,field_description:payment_multisafepay_enhaced.field_payment_transaction__id
-#: model:ir.model.fields,field_description:payment_multisafepay_enhaced.field_stock_picking__id
+#. module: payment_multisafepay_enhanced
+#: model:ir.model.fields,field_description:payment_multisafepay_enhanced.field_account_move__id
+#: model:ir.model.fields,field_description:payment_multisafepay_enhanced.field_payment_method__id
+#: model:ir.model.fields,field_description:payment_multisafepay_enhanced.field_payment_refund_wizard__id
+#: model:ir.model.fields,field_description:payment_multisafepay_enhanced.field_payment_transaction__id
+#: model:ir.model.fields,field_description:payment_multisafepay_enhanced.field_stock_picking__id
 msgid "ID"
 msgstr "ID"
 
-#. module: payment_multisafepay_enhaced
-#: model:ir.model.fields,help:payment_multisafepay_enhaced.field_account_bank_statement_line__multisafepay_notified
-#: model:ir.model.fields,help:payment_multisafepay_enhaced.field_account_move__multisafepay_notified
+#. module: payment_multisafepay_enhanced
+#: model:ir.model.fields,help:payment_multisafepay_enhanced.field_account_bank_statement_line__multisafepay_notified
+#: model:ir.model.fields,help:payment_multisafepay_enhanced.field_account_move__multisafepay_notified
 msgid "Indicates whether MultiSafepay has been notified about this invoice"
 msgstr "Indica si MultiSafepay ha sido notificado sobre esta factura"
 
-#. module: payment_multisafepay_enhaced
-#: model:ir.model.fields,help:payment_multisafepay_enhaced.field_stock_picking__multisafepay_notified
+#. module: payment_multisafepay_enhanced
+#: model:ir.model.fields,help:payment_multisafepay_enhanced.field_stock_picking__multisafepay_notified
 msgid "Indicates whether MultiSafepay has been notified about this shipment"
 msgstr "Indica si MultiSafepay ha sido notificado sobre este envío"
 
-#. module: payment_multisafepay_enhaced
-#: model:ir.model,name:payment_multisafepay_enhaced.model_account_move
+#. module: payment_multisafepay_enhanced
+#: model:ir.model,name:payment_multisafepay_enhanced.model_account_move
 msgid "Journal Entry"
 msgstr "Asiento contable"
 
-#. module: payment_multisafepay_enhaced
-#: model_terms:ir.ui.view,arch_db:payment_multisafepay_enhaced.payment_method_form_enhanced
+#. module: payment_multisafepay_enhanced
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_enhanced.payment_method_form_enhanced
 msgid "Leave empty to allow all pricelists"
 msgstr "Dejar vacío para permitir todas las listas de precios"
 
-#. module: payment_multisafepay_enhaced
-#: model:ir.model.fields,field_description:payment_multisafepay_enhaced.field_account_bank_statement_line__multisafepay_notified
-#: model:ir.model.fields,field_description:payment_multisafepay_enhaced.field_account_move__multisafepay_notified
-#: model:ir.model.fields,field_description:payment_multisafepay_enhaced.field_stock_picking__multisafepay_notified
+#. module: payment_multisafepay_enhanced
+#: model:ir.model.fields,field_description:payment_multisafepay_enhanced.field_account_bank_statement_line__multisafepay_notified
+#: model:ir.model.fields,field_description:payment_multisafepay_enhanced.field_account_move__multisafepay_notified
+#: model:ir.model.fields,field_description:payment_multisafepay_enhanced.field_stock_picking__multisafepay_notified
 msgid "MultiSafepay Notified"
 msgstr "MultiSafepay notificado"
 
-#. module: payment_multisafepay_enhaced
-#: model_terms:ir.ui.view,arch_db:payment_multisafepay_enhaced.payment_transaction_form_multisafepay
+#. module: payment_multisafepay_enhanced
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_enhanced.payment_transaction_form_multisafepay
 msgid "MultiSafepay Refund Information"
 msgstr "Información de reembolso MultiSafepay"
 
-#. module: payment_multisafepay_enhaced
-#: model:ir.model.fields,help:payment_multisafepay_enhaced.field_payment_refund_wizard__multisafepay_refund_reason
+#. module: payment_multisafepay_enhanced
+#: model:ir.model.fields,help:payment_multisafepay_enhanced.field_payment_refund_wizard__multisafepay_refund_reason
 msgid "Optional reason for the refund (specific to MultiSafepay)"
 msgstr "Motivo opcional para el reembolso (específico de MultiSafepay)"
 
-#. module: payment_multisafepay_enhaced
-#: model_terms:ir.ui.view,arch_db:payment_multisafepay_enhaced.payment_refund_wizard_form_multisafepay
+#. module: payment_multisafepay_enhanced
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_enhanced.payment_refund_wizard_form_multisafepay
 msgid "Optional: e.g., Customer requested, Damaged product..."
 msgstr "Opcional: p. ej., Solicitado por el cliente, Producto dañado..."
 
-#. module: payment_multisafepay_enhaced
-#: model:ir.model,name:payment_multisafepay_enhaced.model_payment_method
+#. module: payment_multisafepay_enhanced
+#: model:ir.model,name:payment_multisafepay_enhanced.model_payment_method
 msgid "Payment Method"
 msgstr "Método de pago"
 
-#. module: payment_multisafepay_enhaced
-#: model:ir.model,name:payment_multisafepay_enhaced.model_payment_refund_wizard
+#. module: payment_multisafepay_enhanced
+#: model:ir.model,name:payment_multisafepay_enhanced.model_payment_refund_wizard
 msgid "Payment Refund Wizard"
 msgstr "Asistente de reembolso de pago"
 
-#. module: payment_multisafepay_enhaced
-#: model:ir.model,name:payment_multisafepay_enhaced.model_payment_transaction
+#. module: payment_multisafepay_enhanced
+#: model:ir.model,name:payment_multisafepay_enhanced.model_payment_transaction
 msgid "Payment Transaction"
 msgstr "Transacción de pago"
 
-#. module: payment_multisafepay_enhaced
-#: model:ir.model.fields,field_description:payment_multisafepay_enhaced.field_payment_refund_wizard__provider_code
+#. module: payment_multisafepay_enhanced
+#: model:ir.model.fields,field_description:payment_multisafepay_enhanced.field_payment_refund_wizard__provider_code
 msgid "Provider Code"
 msgstr "Código del proveedor"
 
-#. module: payment_multisafepay_enhaced
-#: model:ir.model.fields,help:payment_multisafepay_enhaced.field_payment_transaction__multisafepay_refund_reason
+#. module: payment_multisafepay_enhanced
+#: model:ir.model.fields,help:payment_multisafepay_enhanced.field_payment_transaction__multisafepay_refund_reason
 msgid "Reason for the refund (MultiSafepay specific)"
 msgstr "Motivo del reembolso (específico de MultiSafepay)"
 
-#. module: payment_multisafepay_enhaced
-#: model:ir.model.fields,field_description:payment_multisafepay_enhaced.field_payment_refund_wizard__multisafepay_refund_reason
-#: model:ir.model.fields,field_description:payment_multisafepay_enhaced.field_payment_transaction__multisafepay_refund_reason
-#: model_terms:ir.ui.view,arch_db:payment_multisafepay_enhaced.payment_refund_wizard_form_multisafepay
+#. module: payment_multisafepay_enhanced
+#: model:ir.model.fields,field_description:payment_multisafepay_enhanced.field_payment_refund_wizard__multisafepay_refund_reason
+#: model:ir.model.fields,field_description:payment_multisafepay_enhanced.field_payment_transaction__multisafepay_refund_reason
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_enhanced.payment_refund_wizard_form_multisafepay
 msgid "Refund Reason"
 msgstr "Motivo del reembolso"
 
-#. module: payment_multisafepay_enhaced
-#: model_terms:ir.ui.view,arch_db:payment_multisafepay_enhaced.payment_method_form_enhanced
+#. module: payment_multisafepay_enhanced
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_enhanced.payment_method_form_enhanced
 msgid ""
 "Restrict this payment method to specific pricelists. If empty, the payment "
 "method will be available for all pricelists."
@@ -122,8 +122,8 @@ msgstr ""
 "Restringir este método de pago a listas de precios específicas. Si está vacío, el método de pago "
 "estará disponible para todas las listas de precios."
 
-#. module: payment_multisafepay_enhaced
-#: model:ir.model.fields,help:payment_multisafepay_enhaced.field_payment_method__pricelist_ids
+#. module: payment_multisafepay_enhanced
+#: model:ir.model.fields,help:payment_multisafepay_enhanced.field_payment_method__pricelist_ids
 msgid ""
 "Restrict this payment method to specific pricelists. If empty, the payment "
 "method will be available for all pricelists. When set, this payment method "
@@ -133,12 +133,12 @@ msgstr ""
 "estará disponible para todas las listas de precios. Cuando se establece, este método de pago "
 "solo será visible para pedidos que utilicen una de las listas de precios seleccionadas."
 
-#. module: payment_multisafepay_enhaced
-#: model:ir.model,name:payment_multisafepay_enhaced.model_stock_picking
+#. module: payment_multisafepay_enhanced
+#: model:ir.model,name:payment_multisafepay_enhanced.model_stock_picking
 msgid "Transfer"
 msgstr "Traslado"
 
-#. module: payment_multisafepay_enhaced
-#: model_terms:ir.ui.view,arch_db:payment_multisafepay_enhaced.payment_transaction_form_multisafepay
+#. module: payment_multisafepay_enhanced
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_enhanced.payment_transaction_form_multisafepay
 msgid "e.g., Customer requested, Damaged product, etc."
 msgstr "p. ej., Solicitado por el cliente, Producto dañado, etc."
