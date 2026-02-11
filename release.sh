@@ -4,36 +4,39 @@
 set -eo pipefail
 
 RELEASE_VERSION=$1
-REPOSITORY_SRC="src"
-FILENAME_PREFIX="payment_multisafepay_official_"
-FOLDER_PREFIX="payment_multisafepay_official"
 RELEASE_FOLDER=".dist"
+OUTPUT_FOLDER="multisafepay"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # If tag is not supplied, latest tag is used
-if [ -z "$RELEASE_VERSION" ]
-then
+if [ -z "$RELEASE_VERSION" ]; then
   RELEASE_VERSION=$(git describe --tags --abbrev=0)
 fi
 
-# Remove old folder
+echo "Creating release for version: $RELEASE_VERSION"
+
+# Remove old release folder
 rm -rf "$RELEASE_FOLDER"
+mkdir -p "$RELEASE_FOLDER/$OUTPUT_FOLDER"
 
-# Get the release via git archive
-mkdir "$RELEASE_FOLDER"
-git archive --format zip -9 --prefix="$FOLDER_PREFIX"/ --output "$RELEASE_FOLDER"/"$FILENAME_PREFIX""$RELEASE_VERSION".zip "$RELEASE_VERSION"
+# Find all directories that don't start with '.'
+for dir in "$SCRIPT_DIR"/*/; do
+  dir_name=$(basename "$dir")
 
+  # Skip hidden directories (starting with .)
+  if [[ "$dir_name" == .* ]]; then
+    continue
+  fi
+
+  echo "Adding directory: $dir_name"
+  cp -r "$dir" "$RELEASE_FOLDER/$OUTPUT_FOLDER/$dir_name"
+done
+
+# Create the zip file
 cd "$RELEASE_FOLDER"
-unzip "$FILENAME_PREFIX""$RELEASE_VERSION".zip -d "$REPOSITORY_SRC"
+zip -9 -r "${OUTPUT_FOLDER}_${RELEASE_VERSION}.zip" "$OUTPUT_FOLDER"
 
-# Change directory to the extracted folder
-mv "$REPOSITORY_SRC"/"$FOLDER_PREFIX"/"$FOLDER_PREFIX" ./"$FOLDER_PREFIX"
+# Clean up the temporary folder
+rm -rf "$OUTPUT_FOLDER"
 
-# Remove the archive zip file
-rm "$FILENAME_PREFIX""$RELEASE_VERSION".zip
-rm -rf "$REPOSITORY_SRC"
-
-# Zip everything
-zip -9 -r "$FILENAME_PREFIX""$RELEASE_VERSION".zip "$FOLDER_PREFIX"
-
-# Remove the remaining directory
-rm -rf "$FOLDER_PREFIX"
+echo "Release created: $RELEASE_FOLDER/${OUTPUT_FOLDER}_${RELEASE_VERSION}.zip"
