@@ -1,47 +1,42 @@
 #!/usr/bin/env bash
+
 # Exit if any command fails
 set -eo pipefail
 
 RELEASE_VERSION=$1
 RELEASE_FOLDER=".dist"
-ZIP_NAME="payment_multisafepay_${RELEASE_VERSION}.zip"
+OUTPUT_FOLDER="multisafepay"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# If tag is not supplied, use string "HEAD" or git describe
+# If tag is not supplied, latest tag is used
 if [ -z "$RELEASE_VERSION" ]; then
-    RELEASE_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "HEAD")
-    ZIP_NAME="payment_multisafepay_${RELEASE_VERSION}.zip"
+  RELEASE_VERSION=$(git describe --tags --abbrev=0)
 fi
 
-echo "Building release for version: $RELEASE_VERSION"
+echo "Creating release for version: $RELEASE_VERSION"
 
-# Clean up old build folder
+# Remove old release folder
 rm -rf "$RELEASE_FOLDER"
-mkdir -p "$RELEASE_FOLDER"
+mkdir -p "$RELEASE_FOLDER/$OUTPUT_FOLDER"
 
-# Create a temporary working directory
-TEMP_DIR="$RELEASE_FOLDER/temp"
-mkdir -p "$TEMP_DIR"
+# Find all directories that don't start with '.'
+for dir in "$SCRIPT_DIR"/*/; do
+  dir_name=$(basename "$dir")
 
-# Archive the source code from the specified version/tag
-# We use tar to piping to avoid creating an intermediate zip of the whole repo
-git archive --format=tar "$RELEASE_VERSION" | tar -x -C "$TEMP_DIR"
+  # Skip hidden directories (starting with .)
+  if [[ "$dir_name" == .* ]]; then
+    continue
+  fi
 
-# Navigate to temp dir to zip relative paths
-pushd "$TEMP_DIR" > /dev/null
+  echo "Adding directory: $dir_name"
+  cp -r "$dir" "$RELEASE_FOLDER/$OUTPUT_FOLDER/$dir_name"
+done
 
-# Zip the two module directories
-# we check if they exist to avoid errors if the structure is different in the tag
-if [ -d "payment_multisafepay" ] && [ -d "payment_multisafepay_enhaced" ]; then
-    zip -9 -r "../$ZIP_NAME" payment_multisafepay payment_multisafepay_enhaced
-else
-    echo "Error: Module directories not found in archive content."
-    ls -la
-    exit 1
-fi
+# Create the zip file
+cd "$RELEASE_FOLDER"
+zip -9 -r "${OUTPUT_FOLDER}_${RELEASE_VERSION}.zip" "$OUTPUT_FOLDER"
 
-popd > /dev/null
+# Clean up the temporary folder
+rm -rf "$OUTPUT_FOLDER"
 
-# Clean up temp dir
-rm -rf "$TEMP_DIR"
-
-echo "Successfully created $RELEASE_FOLDER/$ZIP_NAME"
+echo "Release created: $RELEASE_FOLDER/${OUTPUT_FOLDER}_${RELEASE_VERSION}.zip"
