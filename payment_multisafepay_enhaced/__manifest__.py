@@ -4,7 +4,7 @@
     "author": "MultiSafepay",
     "website": "https://github.com//multisafepay",
     "license": "AGPL-3",
-    "category": "eCommerce",
+    "category": "Sales",
     "version": "18.0.2.0.0",
     "application": True,
     "depends": [
