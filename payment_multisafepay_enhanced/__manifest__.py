@@ -20,7 +20,7 @@
         "sale_stock",
         "sale_management",
     ],
-    "external_dependencies": {"python": ["multisafepay=2.2.0"]},
+    "external_dependencies": {"python": ["multisafepay==2.2.0"]},
     "data": [
         "views/payment_method_views.xml",
         "views/payment_transaction_views.xml",
