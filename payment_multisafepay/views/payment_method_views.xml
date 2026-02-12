@@ -33,7 +33,7 @@
                         name="maximum_amount"
                         invisible="only_multisafepay == False or primary_payment_method_id != False"
                     />
-                    <!-- Note: pricelist_ids field moved to payment_multisafepay_enhaced module -->
+                    <!-- Note: pricelist_ids field moved to payment_multisafepay_enhanced module -->
                 </group>
             </xpath>
         </field>
