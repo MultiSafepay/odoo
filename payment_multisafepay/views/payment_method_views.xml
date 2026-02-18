@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- CORE: Display minimum_amount and maximum_amount fields (synced from MultiSafepay API) -->
+    <record id="payment_method_form" model="ir.ui.view">
+        <field name="name">payment.method.form.inherit.multisafepay</field>
+        <field name="model">payment.method</field>
+        <field name="inherit_id" ref="payment.payment_method_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//form/sheet/group" position="inside">
+                <!-- Fields from MultiSafepay API (gateway.allowed_amount.min/max) -->
+                <field
+                    name="minimum_amount"
+                    invisible="only_multisafepay == False or primary_payment_method_id != False"
+                    readonly="1"
+                />
+                <field
+                    name="maximum_amount"
+                    invisible="only_multisafepay == False or primary_payment_method_id != False"
+                    readonly="1"
+                />
+            </xpath>
+            <xpath
+                expr="//form/sheet/notebook/page[@name='configuration']"
+                position="inside"
+            >
+                <group>
+                    <!-- Fields from MultiSafepay API (gateway.allowed_amount.min/max) -->
+                    <field
+                        name="minimum_amount"
+                        invisible="only_multisafepay == False or primary_payment_method_id != False"
+                    />
+                    <field
+                        name="maximum_amount"
+                        invisible="only_multisafepay == False or primary_payment_method_id != False"
+                    />
+                    <!-- Note: pricelist_ids field moved to payment_multisafepay_enhanced module -->
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>
