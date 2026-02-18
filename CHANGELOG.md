@@ -9,6 +9,10 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [18.0.2.0.0] - 2026-02-18
+### Changed
+- ODOO-160: Refactor module structure by separating core and enhanced features, reducing dependencies
+
 ## [18.0.1.3.1] - 2026-01-22
 ### Added
 - ODOO-174: Add error-level logging for failed MultiSafepay order requests
