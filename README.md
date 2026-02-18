@@ -39,8 +39,7 @@ The modules can be installed in two ways:
 
 ## Installation on a Self-Hosted or Docker Odoo Instance
 
-This method applies to administrators with direct access to the Odoo server.
-Unlike the manual upload through the backend, the module must be deployed directly on the server. You can use an existing custom addons directory, or create a new one.
+This method applies to administrators with direct access to the Odoo server. In this case, the module must be deployed directly on the server. You can use an existing custom addons directory, or create a new one.
 
 1. Edit the configuration file (`odoo.conf`). Add (or update) the `addons_path` entry to include the directory where the module is located:
    ```
@@ -50,9 +49,9 @@ Unlike the manual upload through the backend, the module must be deployed direct
 2. Copy the module into the `custom_addons` directory:
    ```
    cd /path/to/custom_addons
-  cp -r /path/to/payment_multisafepay .
-  # Optional (adds extra business logic/features)
-  cp -r /path/to/payment_multisafepay_enhanced .
+   cp -r /path/to/payment_multisafepay .
+   # Optional (adds extra business logic/features)
+   cp -r /path/to/payment_multisafepay_enhanced .
    ```
 3. Restart your Odoo server:
     * Docker: `docker-compose restart odoo`
