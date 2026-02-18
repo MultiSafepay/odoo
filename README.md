@@ -37,7 +37,7 @@ The previous functionality has been split into two Odoo addons:
 
 The modules can be installed in two ways:
 
-## Installation on a Self-Hosted or Docker Odoo Instance
+### Installation on a Self-Hosted or Docker Odoo Instance
 
 This method applies to administrators with direct access to the Odoo server. In this case, the module must be deployed directly on the server. You can use an existing custom addons directory, or create a new one.
 
@@ -63,7 +63,7 @@ This method applies to administrators with direct access to the Odoo server. In 
 8. Go to **Apps** > **MultiSafepay** and click Activate.
 9. Go to **Invoicing** > **Payment Providers** to activate and configure MultiSafepay.
 
-## Installation on Odoo.sh
+### Installation on Odoo.sh
 
 1. In your **Odoo.sh** project, open the Git repository connected to your instance.
 2. Clone the repository locally:
