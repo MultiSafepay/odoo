@@ -12,7 +12,7 @@
     "depends": [
         "payment",
     ],
-    "external_dependencies": {"python": ["multisafepay==2.2.0"]},
+    "external_dependencies": {"python": ["multisafepay==2.2.0", "requests"]},
     "data": [
         "views/payment_templates.xml",
         "views/payment_provider_views.xml",
