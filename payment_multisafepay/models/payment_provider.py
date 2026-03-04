@@ -7,11 +7,12 @@ import logging
 from decimal import Decimal
 
 from multisafepay.sdk import Sdk
+from multisafepay.transport import RequestsTransport
 
 from odoo import fields, models
 
 from .. import const
-from ..utils import _get_image_base64
+from ..utils import _get_image_base64, _get_requests_session
 
 _logger = logging.getLogger(__name__)
 
@@ -217,8 +218,13 @@ class PaymentProvider(models.Model):
         :rtype: Sdk
         """
 
+        custom_session = _get_requests_session()
+        transport = RequestsTransport(session=custom_session)
+
         return Sdk(
-            api_key=self.multisafepay_api_key, is_production=(self.state == "enabled")
+            api_key=self.multisafepay_api_key,
+            is_production=(self.state == "enabled"),
+            transport=transport,
         )
 
     # ===================================

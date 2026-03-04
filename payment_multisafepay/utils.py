@@ -21,3 +21,7 @@ def _get_image_base64(url):
     except Exception as e:
         _logger.warning("Could not fetch image from %s: %s", url, e)
     return False
+
+
+def _get_requests_session():
+    return requests.Session()
