@@ -5,6 +5,7 @@
 
 import base64
 import logging
+from functools import lru_cache
 
 import requests
 
@@ -23,5 +24,8 @@ def _get_image_base64(url):
     return False
 
 
+@lru_cache(maxsize=1)
 def _get_requests_session():
+    """Return the shared requests session used by MultiSafepay SDK transports."""
+
     return requests.Session()
