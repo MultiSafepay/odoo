@@ -10,13 +10,14 @@ from functools import lru_cache
 import requests
 
 _logger = logging.getLogger(__name__)
+DEFAULT_REQUEST_TIMEOUT = 10  # seconds
 
 
 def _get_image_base64(url):
     try:
         _logger.debug("URL %s", url)
-        # Add timeout to external request
-        response = requests.get(url, timeout=10)
+        # Reuse shared session (with default timeout) to avoid creating new connections.
+        response = _get_requests_session().get(url)
         if response.status_code == 200:
             return base64.b64encode(response.content)
     except Exception as e:
@@ -28,4 +29,12 @@ def _get_image_base64(url):
 def _get_requests_session():
     """Return the shared requests session used by MultiSafepay SDK transports."""
 
-    return requests.Session()
+    session = requests.Session()
+    original_request = session.request
+
+    def request_with_default_timeout(method, url, **kwargs):
+        kwargs.setdefault("timeout", DEFAULT_REQUEST_TIMEOUT)
+        return original_request(method, url, **kwargs)
+
+    session.request = request_with_default_timeout
+    return session
