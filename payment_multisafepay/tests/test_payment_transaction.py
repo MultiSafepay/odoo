@@ -25,10 +25,15 @@ class TestPaymentTransaction(TransactionCase):
             }
         )
 
-        self.currency = self.env["res.currency"].with_context(active_test=False).search(
-            [("name", "=", "EUR")],
-            limit=1,
+        self.currency = (
+            self.env["res.currency"]
+            .with_context(active_test=False)
+            .search(
+                [("name", "=", "EUR")],
+                limit=1,
+            )
         )
+
         if not self.currency:
             self.currency = self.env["res.currency"].create(
                 {
