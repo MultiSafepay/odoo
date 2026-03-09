@@ -30,7 +30,7 @@ class TestPaymentTransaction(TransactionCase):
             .with_context(active_test=False)
             .search(
                 [("name", "=", "EUR")],
-                limit = 1,
+                limit=1,
             )
         )
 
