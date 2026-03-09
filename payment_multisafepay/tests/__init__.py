@@ -4,5 +4,4 @@
 # See the DISCLAIMER.md file for disclaimer details
 
 from . import test_common
-from . import test_payment_method
 from . import test_payment_transaction
