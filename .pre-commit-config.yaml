@@ -58,7 +58,7 @@ repos:
           - --if-source-changed
           - --keep-source-digest
           - --convert-fragments-to-markdown
-      - id: oca-gen-external-dependencies
+      # - id: oca-gen-external-dependencies # Removed temporarily as it is not yet ready for use
   - repo: https://github.com/OCA/odoo-pre-commit-hooks
     rev: v0.0.33
     hooks:
