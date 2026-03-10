@@ -9,6 +9,10 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [18.0.2.1.0] - 2026-03-10
+### Changed
+- ODOO-188: Use RequestsTransport with custom session
+
 ## [18.0.2.0.0] - 2026-02-18
 ### Changed
 - ODOO-160: Refactor module structure by separating core and enhanced features, reducing dependencies
