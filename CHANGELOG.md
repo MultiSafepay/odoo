@@ -9,6 +9,11 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [18.0.2.1.1] - 2026-03-12
+### Fixed
+- ODOO-199: Fix shopping cart unit prices when taxes are configured as "Price Included"
+- ODOO-198: Fix shop version, within MultiSafepay order request
+
 ## [18.0.2.1.0] - 2026-03-10
 ### Changed
 - ODOO-188: Use RequestsTransport with custom session
