@@ -1078,10 +1078,7 @@ class MultiSafepayController(http.Controller):
             )
 
             # Log create_response for debugging
-            _logger.error(
-                "API response: %s",
-                create_response.get_raw()
-            )
+            _logger.error("API response: %s", create_response.get_raw())
 
             # Order creation failed - provide user-friendly error message
             raise ValidationError(
