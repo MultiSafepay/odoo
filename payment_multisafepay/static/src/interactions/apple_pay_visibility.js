@@ -5,7 +5,7 @@ function isApplePaySupported() {
         return false;
     }
     if (typeof window.ApplePaySession.canMakePayments !== 'function') {
-        return true;
+        return false;
     }
     try {
         return window.ApplePaySession.canMakePayments();
@@ -37,12 +37,11 @@ function getFallbackRadio(rootElement, excludedRadios = []) {
         if (radio.disabled) {
             return false;
         }
-        const option = radio.closest('[name="o_payment_option"]');
-        return !!option && !option.classList.contains('d-none');
+        return true;
     });
 }
 
-function hideApplePayIfUnsupported() {
+function disableApplePayIfUnsupported() {
     const paymentForm = document.querySelector('#o_payment_form');
     if (!paymentForm) {
         return false;
@@ -67,7 +66,6 @@ function hideApplePayIfUnsupported() {
         radio.disabled = true;
         const option = radio.closest('[name="o_payment_option"]');
         option?.setAttribute('aria-disabled', 'true');
-        option?.classList.remove('d-none');
     });
 
     if (hadCheckedApplePay && fallbackRadio) {
@@ -79,10 +77,10 @@ function hideApplePayIfUnsupported() {
 }
 
 function applyApplePayVisibility() {
-    return hideApplePayIfUnsupported();
+    return disableApplePayIfUnsupported();
 }
 
-window.mspHideApplePayIfUnsupported = hideApplePayIfUnsupported;
+window.mspDisableApplePayIfUnsupported = disableApplePayIfUnsupported;
 window.mspApplePayVisibilityLoaded = true;
 
 if (document.readyState === 'loading') {
