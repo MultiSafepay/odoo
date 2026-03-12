@@ -1128,10 +1128,7 @@ class MultiSafepayController(http.Controller):
             )
 
             # Log create_response for debugging
-            _logger.error(
-                "API response: %s",
-                create_response.get_raw()
-            )
+            _logger.error("API response: %s", create_response.get_raw())
 
             # Provide a precise message; caller will redirect with it
             raise ValidationError(
