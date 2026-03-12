@@ -1004,7 +1004,7 @@ class MultiSafepayController(http.Controller):
 
             # Calculate unit price WITHOUT taxes (price_subtotal is always tax-exclusive)
             line_price_subtotal = getattr(line, "price_subtotal", 0.0)
-            if line_quantity and line_quantity != 0:
+            if line_quantity:
                 line_price_unit = line_price_subtotal / line_quantity
             else:
                 line_price_unit = getattr(line, "price_unit", 0.0)
