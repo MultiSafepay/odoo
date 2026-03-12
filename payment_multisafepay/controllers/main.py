@@ -946,13 +946,18 @@ class MultiSafepayController(http.Controller):
             if product:
                 line_description = getattr(product, "description_sale", "") or ""
 
-            line_price_unit = getattr(line, "price_unit", 0.0)
-
             # Field mapping: sale.order.line uses 'product_uom_qty', invoice uses 'quantity'
             if is_invoice_line:
                 line_quantity = getattr(line, "quantity", 0)
             else:
                 line_quantity = getattr(line, "product_uom_qty", 0)
+
+            # Calculate unit price WITHOUT taxes (price_subtotal is always tax-exclusive)
+            line_price_subtotal = getattr(line, "price_subtotal", 0.0)
+            if line_quantity:
+                line_price_unit = line_price_subtotal / line_quantity
+            else:
+                line_price_unit = getattr(line, "price_unit", 0.0)
 
             # Weight: from product
             line_weight = 0.0
@@ -1065,9 +1070,17 @@ class MultiSafepayController(http.Controller):
             sanitized_request = self._sanitize_order_request_for_logging(
                 order_request.to_dict()
             )
+
+            # Log order request with sensitive data masked for debugging
             _logger.error(
                 "Order request failed to create a transaction. Order request: %s",
                 sanitized_request,
+            )
+
+            # Log create_response for debugging
+            _logger.error(
+                "API response: %s",
+                create_response.get_raw()
             )
 
             # Order creation failed - provide user-friendly error message
