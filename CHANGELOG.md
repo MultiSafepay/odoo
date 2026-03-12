@@ -9,6 +9,10 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [19.0.2.1.1] - 2026-03-12
+### Fixed
+- ODOO-200: Fix shopping cart unit prices when taxes are configured as "Price Included"
+
 ## [19.0.2.1.0] - 2026-03-10
 ### Changed
 - ODOO-187: Use RequestsTransport with custom session
