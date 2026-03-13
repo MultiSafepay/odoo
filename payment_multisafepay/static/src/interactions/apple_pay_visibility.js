@@ -25,6 +25,10 @@ function getApplePayRadios(rootElement) {
     });
 }
 
+function getPaymentOptionNode(radio) {
+    return radio.closest('[name="o_payment_option"]');
+}
+
 function getFallbackRadio(rootElement, excludedRadios = []) {
     const excluded = new Set(excludedRadios);
     const radios = rootElement.querySelectorAll(
@@ -41,18 +45,35 @@ function getFallbackRadio(rootElement, excludedRadios = []) {
     });
 }
 
-function disableApplePayIfUnsupported() {
+function revealPaymentForm() {
+    const loadingIndicators = document.querySelectorAll('[data-msp-applepay-loading="1"]');
+    loadingIndicators.forEach((indicator) => indicator.remove());
+
+    const paymentForm = document.querySelector('#o_payment_form[data-msp-applepay-pending="1"]');
+    if (paymentForm) {
+        paymentForm.style.visibility = '';
+        paymentForm.removeAttribute('data-msp-applepay-pending');
+        paymentForm.removeAttribute('aria-busy');
+        if (!paymentForm.getAttribute('style')) {
+            paymentForm.removeAttribute('style');
+        }
+    }
+}
+
+function hideApplePayIfUnsupported() {
     const paymentForm = document.querySelector('#o_payment_form');
     if (!paymentForm) {
         return false;
     }
 
     if (isApplePaySupported()) {
+        revealPaymentForm();
         return true;
     }
 
     const applePayRadios = getApplePayRadios(paymentForm);
     if (!applePayRadios.length) {
+        revealPaymentForm();
         return true;
     }
 
@@ -63,9 +84,12 @@ function disableApplePayIfUnsupported() {
         radio.checked = false;
         radio.defaultChecked = false;
         radio.removeAttribute('checked');
-        radio.disabled = true;
-        const option = radio.closest('[name="o_payment_option"]');
-        option?.setAttribute('aria-disabled', 'true');
+        const option = getPaymentOptionNode(radio);
+        if (option) {
+            option.remove();
+        } else {
+            radio.remove();
+        }
     });
 
     if (hadCheckedApplePay && fallbackRadio) {
@@ -73,30 +97,25 @@ function disableApplePayIfUnsupported() {
         fallbackRadio.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
+    revealPaymentForm();
     return true;
 }
 
-function applyApplePayVisibility() {
-    return disableApplePayIfUnsupported();
-}
-
-window.mspDisableApplePayIfUnsupported = disableApplePayIfUnsupported;
-window.mspApplePayVisibilityLoaded = true;
-
 if (document.readyState === 'loading') {
-    applyApplePayVisibility();
+    hideApplePayIfUnsupported();
 
     const observer = new MutationObserver(() => {
-        if (applyApplePayVisibility()) {
+        if (hideApplePayIfUnsupported()) {
             observer.disconnect();
         }
     });
     observer.observe(document.documentElement, { childList: true, subtree: true });
 
     document.addEventListener('DOMContentLoaded', () => {
-        applyApplePayVisibility();
-        observer.disconnect();
+        if (hideApplePayIfUnsupported()) {
+            observer.disconnect();
+        }
     });
 } else {
-    applyApplePayVisibility();
+    hideApplePayIfUnsupported();
 }
