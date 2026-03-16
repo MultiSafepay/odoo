@@ -3,6 +3,37 @@
     <!-- CORE MODULE: Basic payment form template for MultiSafepay redirect flow -->
     <!-- Note: shop_confirmation_multisafepay_info moved to payment_multisafepay_ecommerce (requires website_sale) -->
 
+    <!--
+        Hide payment form by default at render time to avoid first-paint flash of Apple Pay.
+        The JS interaction removes unsupported Apple Pay options and then clears this pending
+        visibility lock by removing the inline style/attributes.
+    -->
+    <template
+        id="payment_form_pending_visibility"
+        inherit_id="payment.form"
+        name="MultiSafepay: pending visibility lock"
+    >
+        <xpath expr="//form[@id='o_payment_form']" position="before">
+            <div
+                data-msp-applepay-loading="1"
+                class="mb-3"
+                aria-live="polite"
+            >
+                <p class="mb-3 h4 d-inline-flex align-items-center">
+                    Payment method
+                    <span class="spinner-border spinner-border-sm text-secondary ms-2" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </span>
+                </p>
+            </div>
+        </xpath>
+        <xpath expr="//form[@id='o_payment_form']" position="attributes">
+            <attribute name="style">display: none;</attribute>
+            <attribute name="data-msp-applepay-pending">1</attribute>
+            <attribute name="aria-busy">true</attribute>
+        </xpath>
+    </template>
+
     <!-- Extend payment status template to show errors (uses payment module, not website_sale) -->
     <template
         id="payment_status_error_message"

@@ -24,4 +24,9 @@
         "views/payment_method_views.xml",
         "data/payment_provider_data.xml",
     ],
+    "assets": {
+        "web.assets_frontend": [
+            "payment_multisafepay/static/src/interactions/apple_pay_visibility.js",
+        ],
+    },
 }
