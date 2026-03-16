@@ -112,9 +112,8 @@ if (document.readyState === 'loading') {
     observer.observe(document.documentElement, { childList: true, subtree: true });
 
     document.addEventListener('DOMContentLoaded', () => {
-        if (hideApplePayIfUnsupported()) {
-            observer.disconnect();
-        }
+        hideApplePayIfUnsupported();
+        observer.disconnect();
     });
 } else {
     hideApplePayIfUnsupported();
