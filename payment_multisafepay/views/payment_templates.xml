@@ -28,7 +28,7 @@
             </div>
         </xpath>
         <xpath expr="//form[@id='o_payment_form']" position="attributes">
-            <attribute name="style">display: none;</attribute>
+            <attribute name="style">visibility: hidden;</attribute>
             <attribute name="data-msp-applepay-pending">1</attribute>
             <attribute name="aria-busy">true</attribute>
         </xpath>
