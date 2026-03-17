@@ -14,16 +14,15 @@
         name="MultiSafepay: pending visibility lock"
     >
         <xpath expr="//form[@id='o_payment_form']" position="before">
-            <div
-                data-msp-applepay-loading="1"
-                class="mb-3"
-                aria-live="polite"
-            >
+            <div data-msp-applepay-loading="1" class="mb-3" aria-live="polite">
                 <p class="mb-3 h4 d-inline-flex align-items-center">
                     Payment method
-                    <span class="spinner-border spinner-border-sm text-secondary ms-2" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </span>
+                    <span
+                    class="spinner-border spinner-border-sm text-secondary ms-2"
+                    role="status"
+                >
+                    <span class="visually-hidden">Loading...</span>
+                </span>
                 </p>
             </div>
         </xpath>
