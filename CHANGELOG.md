@@ -9,6 +9,10 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [18.0.2.1.2] - 2026-03-18
+### Fixed
+- ODOO-204: Use state_message kwarg for state setters
+
 ## [18.0.2.1.1] - 2026-03-12
 ### Fixed
 - ODOO-199: Fix shopping cart unit prices when taxes are configured as "Price Included"
