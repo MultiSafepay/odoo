@@ -405,7 +405,7 @@ class MultiSafepayController(http.Controller):
                         transactionid,
                     )
                     payment_transaction._set_error(
-                        "Webhook validation failed: Invalid signature"
+                        state_message="Webhook validation failed: Invalid signature"
                     )
                     return request.make_response(
                         "Webhook validation failed", status=403
