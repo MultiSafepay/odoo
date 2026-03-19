@@ -44,6 +44,7 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.http import request
 
 from ..const import PAYMENT_METHOD_PENDING, PAYMENT_METHOD_PREFIX
+from .webhook_retry import process_notification_with_retry
 
 _logger = logging.getLogger(__name__)
 
@@ -439,14 +440,14 @@ class MultiSafepayController(http.Controller):
                     else None,
                 }
 
-                payment_transaction._process_notification_data(notification_data)
-
-                _logger.info(
-                    "Webhook processing completed for transaction %s with status %s",
-                    transactionid,
-                    order.status,
+                return process_notification_with_retry(
+                    payment_transaction=payment_transaction,
+                    notification_data=notification_data,
+                    new_status=order.status,
+                    transactionid=transactionid,
+                    duplicated_status_checker=self._duplicated_status,
+                    logger=_logger,
                 )
-                return request.make_response("OK", status=200)
 
             except Exception as validation_error:
                 _logger.error(
