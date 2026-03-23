@@ -996,28 +996,6 @@ class MultiSafepayController(http.Controller):
             currency_id,
         )
 
-        if (
-            not is_partial_payment_link
-            and source_type in ("invoice", "sale_order")
-            and source_total_amount is not None
-        ):
-            tx_units = money_to_minor_units(
-                getattr(payment_transaction, "amount", 0), currency_id
-            )
-            source_units = money_to_minor_units(
-                source_total_amount, currency_id
-            )
-
-            if tx_units != source_units:
-                is_partial_payment_link = True
-                _logger.debug(
-                    "Forcing partial payment-link mode due to invoice amount mismatch "
-                    "(ref=%s, tx_units=%s, source_units=%s)",
-                    payment_transaction.reference,
-                    tx_units,
-                    source_units,
-                )
-
         # Build cart items
         cart_items = []
 
