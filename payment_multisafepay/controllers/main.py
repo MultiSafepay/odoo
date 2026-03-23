@@ -11,7 +11,6 @@ Handles redirect flow for MultiSafepay payments
 import copy
 import json
 import logging
-from decimal import Decimal
 from typing import cast
 from urllib.parse import quote_plus
 
