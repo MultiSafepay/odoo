@@ -6,11 +6,42 @@
 import base64
 import logging
 from functools import lru_cache
+from decimal import Decimal
 
 import requests
 
 _logger = logging.getLogger(__name__)
 DEFAULT_REQUEST_TIMEOUT = 10  # seconds
+
+
+def get_currency_precision_digits(currency):
+    """Return decimal precision for currency from Odoo configuration."""
+    if not currency:
+        raise ValueError("Currency is required to determine decimal precision.")
+
+    decimal_places = getattr(currency, "decimal_places", None)
+    if decimal_places is None:
+        raise ValueError(
+            "Currency decimal_places is not defined on Odoo currency "
+            f"'{getattr(currency, 'name', 'unknown')}'."
+        )
+
+    return int(decimal_places)
+
+
+def money_to_minor_units(money, currency):
+    """Convert an amount in currency units to gateway units (integer)."""
+    decimal_places = get_currency_precision_digits(currency)
+    rounded_amount = currency.round(money or 0)
+    amount_decimal = Decimal(str(rounded_amount))
+    return int(amount_decimal.scaleb(decimal_places))
+
+
+def minor_units_to_money(amount_units, currency):
+    """Convert gateway units (integer) to amount in currency units."""
+    decimal_places = get_currency_precision_digits(currency)
+    amount_units_decimal = Decimal(str(amount_units or 0))
+    return float(amount_units_decimal.scaleb(-decimal_places))
 
 
 def _get_image_base64(url):

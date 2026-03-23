@@ -19,6 +19,7 @@ from odoo import _, models
 from odoo.exceptions import UserError
 
 from .. import const
+from ..utils import money_to_minor_units, minor_units_to_money
 
 _logger = logging.getLogger(__name__)
 
@@ -251,9 +252,6 @@ class PaymentTransaction(models.Model):
             )
 
         original_amount = abs(original_tx.amount)
-        decimal_places = self.currency_id.decimal_places or 2
-        currency_divisor = 10**decimal_places
-
         # Check order status
         order_status = getattr(order_data, "status", "")
 
@@ -280,8 +278,9 @@ class PaymentTransaction(models.Model):
 
             # Use Decimal for precise monetary calculations to avoid floating-point errors
             refunded_decimal = Decimal(str(order_data.amount_refunded))
-            divisor_decimal = Decimal(str(currency_divisor))
-            refunded_amount = float(refunded_decimal / divisor_decimal)
+            refunded_amount = minor_units_to_money(
+                refunded_decimal, self.currency_id
+            )
             remaining_amount = original_amount - refunded_amount
 
         if remaining_amount and amount_to_refund > remaining_amount:
@@ -307,10 +306,9 @@ class PaymentTransaction(models.Model):
             )
 
         try:
-            # Use Decimal for precise monetary calculations to avoid floating-point errors
-            amount_decimal = Decimal(str(abs(amount_to_refund)))
-            divisor_decimal = Decimal(str(currency_divisor))
-            amount_in_cents = int(amount_decimal * divisor_decimal)
+            amount_in_gateway_units = money_to_minor_units(
+                abs(amount_to_refund), self.currency_id
+            )
 
             refund_response = None
             is_bnpl = (
@@ -339,7 +337,7 @@ class PaymentTransaction(models.Model):
                 else:
                     refund_payload = (
                         RefundOrderRequest(**{})
-                        .add_amount(amount_in_cents)
+                        .add_amount(amount_in_gateway_units)
                         .add_currency(Currency(currency=self.currency_id.name).currency)
                         .add_description(
                             Description(**{}).add_description(

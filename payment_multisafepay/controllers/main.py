@@ -44,6 +44,7 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.http import request
 
 from ..const import PAYMENT_METHOD_PENDING, PAYMENT_METHOD_PREFIX
+from ..utils import money_to_minor_units
 
 _logger = logging.getLogger(__name__)
 
@@ -55,6 +56,28 @@ class MultiSafepayController(http.Controller):
     _webhook_url = "/payment/multisafepay/webhook"
     _return_url = "/payment/multisafepay/return"
     _cancel_url = "/payment/multisafepay/cancel"
+
+    def _format_api_exception_details(self, exc):
+        """Build a detailed log message for HTTP/API exceptions."""
+
+        response = getattr(exc, "response", None)
+        if not response:
+            return str(exc)
+
+        status_code = getattr(response, "status_code", "unknown")
+        reason = getattr(response, "reason", "")
+        request_url = getattr(response, "url", "")
+        response_text = getattr(response, "text", "")
+
+        if response_text and len(response_text) > 2000:
+            response_text = f"{response_text[:2000]}... [truncated]"
+
+        return (
+            f"{exc} | status_code={status_code}"
+            f" | reason={reason}"
+            f" | url={request_url}"
+            f" | response_body={response_text}"
+        )
 
     # ===================================
     # ROUTES (ODOO)
@@ -122,7 +145,11 @@ class MultiSafepayController(http.Controller):
                 return self._redirect_to_payment_with_error("validation_error", str(ve))
 
             except Exception as api_error:
-                _logger.error("Unexpected error: %s", str(api_error))
+                _logger.error(
+                    "Unexpected error while creating MultiSafepay order for transaction %s: %s",
+                    payment_transaction.reference,
+                    self._format_api_exception_details(api_error),
+                )
                 return self._redirect_to_payment_with_error(
                     "Unexpected error",
                     _("An unexpected error occurred. Please try again."),
@@ -623,29 +650,81 @@ class MultiSafepayController(http.Controller):
     def _prepare_amount_and_currency(self, payment_transaction):
         """Prepare amount and currency for MultiSafepay API
 
-        Converts amount to smallest currency unit (cents) to avoid floating-point
-        precision issues. Example: 100.00 EUR → 10000 cents
+        Converts amount to gateway units (integer) to avoid floating-point
+        precision issues. Example: 100.00 EUR → 10000 units
 
         :param payment_transaction: The payment transaction record
-        :return: Tuple of (Currency object, amount in cents as int, currency_id record)
+        :return: Tuple of (Currency object, amount in gateway units as int, currency_id record)
         :rtype: tuple
         """
         currency_id = payment_transaction.currency_id
         amount = payment_transaction.amount
 
-        decimal_places = getattr(currency_id, "decimal_places", 2)
-
-        # Use Decimal to avoid float precision errors (29.99 * 100 = 2998.999...)
-        multiplier = 10**decimal_places
-        amount_decimal = Decimal(str(amount))
-        multiplied_amount = amount_decimal * multiplier
-        normalized_amount = int(multiplied_amount)
+        normalized_amount = money_to_minor_units(amount, currency_id)
 
         # Create SDK value objects - these validate format internally
         amount_obj = Amount(amount=normalized_amount).amount
         currency_obj = Currency(currency=currency_id.name)
 
         return (currency_obj, amount_obj, currency_id)
+
+    def _is_partial_payment_link(
+        self,
+        payment_transaction,
+        source_total_amount,
+        source_residual_amount,
+        source_type,
+        currency_id,
+    ):
+        """Return True when this transaction belongs to a partial payment-link flow.
+
+        A transaction is considered part of a partial flow when all of these are true:
+        - cart source is invoice or sale_order
+        - transaction operation is online redirect/direct
+        - transaction targets exactly one source document
+        - and transaction amount differs from source total, or source residual already indicates
+          a previous partial payment (invoice flow)
+
+        :param payment_transaction: The payment transaction record
+        :param source_total_amount: Total amount from source document
+        :param source_residual_amount: Residual amount from source document (invoice)
+        :param source_type: Source model used to build cart (invoice/sale_order)
+        :param currency_id: Currency record used for decimal precision
+        :return: True when transaction is part of a partial payment-link flow
+        :rtype: bool
+        """
+        if source_type not in ("invoice", "sale_order") or source_total_amount is None:
+            return False
+
+        operation = getattr(payment_transaction, "operation", None)
+        if operation not in ("online_redirect", "online_direct"):
+            return False
+
+        if source_type == "invoice":
+            invoice_ids = getattr(payment_transaction, "invoice_ids", None)
+            if not invoice_ids or len(invoice_ids) != 1:
+                return False
+        else:
+            sale_order_ids = getattr(payment_transaction, "sale_order_ids", None)
+            if not sale_order_ids or len(sale_order_ids) != 1:
+                return False
+
+        transaction_units = money_to_minor_units(
+            getattr(payment_transaction, "amount", 0), currency_id
+        )
+        total_units = money_to_minor_units(
+            source_total_amount, currency_id
+        )
+        if source_type == "invoice" and source_residual_amount is not None:
+            residual_units = money_to_minor_units(
+                source_residual_amount, currency_id
+            )
+            # We intentionally omit residual_units > total_units: it indicates
+            # inconsistent accounting data and should not occur in normal flows.
+            if residual_units < total_units:
+                return True
+
+        return transaction_units != total_units
 
     def _get_partners_from_transaction(self, payment_transaction):
         """Get invoice and shipping partners from transaction
@@ -683,7 +762,7 @@ class MultiSafepayController(http.Controller):
 
         Orchestrates order creation by:
         1. Validating transaction data
-        2. Preparing amount/currency (converts to cents)
+        2. Preparing amount/currency (converts to gateway units)
         3. Extracting partners (from sale order or transaction)
         4. Building customer and delivery info
         5. Constructing shopping cart (from invoice or sale order lines)
@@ -701,7 +780,7 @@ class MultiSafepayController(http.Controller):
         # Validate transaction data
         self._validate_transaction(payment_transaction)
 
-        # Prepare amount and currency (convert to cents)
+        # Prepare amount and currency (convert to gateway units)
         currency, amount, currency_id = self._prepare_amount_and_currency(
             payment_transaction
         )
@@ -858,6 +937,7 @@ class MultiSafepayController(http.Controller):
         source_type = None
 
         # Try invoice lines first (most accurate - final prices and taxes)
+        invoice = None
         invoice_ids = getattr(payment_transaction, "invoice_ids", None)
         if invoice_ids and len(invoice_ids) > 0:
             invoice = invoice_ids[0]
@@ -901,10 +981,74 @@ class MultiSafepayController(http.Controller):
                     len(all_sale_lines),
                 )
 
+        source_total_amount = None
+        source_residual_amount = None
+        if source_type == "invoice" and invoice:
+            source_total_amount = getattr(invoice, "amount_total", None)
+            source_residual_amount = getattr(invoice, "amount_residual", None)
+        elif source_type == "sale_order" and sale_order:
+            source_total_amount = getattr(sale_order, "amount_total", None)
+
+        is_partial_payment_link = self._is_partial_payment_link(
+            payment_transaction,
+            source_total_amount,
+            source_residual_amount,
+            source_type,
+            currency_id,
+        )
+
+        if (
+            not is_partial_payment_link
+            and source_type in ("invoice", "sale_order")
+            and source_total_amount is not None
+        ):
+            tx_units = money_to_minor_units(
+                getattr(payment_transaction, "amount", 0), currency_id
+            )
+            source_units = money_to_minor_units(
+                source_total_amount, currency_id
+            )
+
+            if tx_units != source_units:
+                is_partial_payment_link = True
+                _logger.debug(
+                    "Forcing partial payment-link mode due to invoice amount mismatch "
+                    "(ref=%s, tx_units=%s, source_units=%s)",
+                    payment_transaction.reference,
+                    tx_units,
+                    source_units,
+                )
+
         # Build cart items
         cart_items = []
 
-        for line in order_lines:
+        if is_partial_payment_link:
+            installment_key = "odoo-partial-payment"
+            invoice_label = getattr(invoice, "name", None) if invoice else None
+
+            cart_item = (
+                CartItem(**{})
+                .add_name(installment_key)
+                .add_description(invoice_label or installment_key)
+                .add_unit_price(getattr(payment_transaction, "amount", 0.0))
+                .add_quantity(1)
+                .add_merchant_item_id(installment_key)
+                .add_weight(Weight(value=0.0, unit="kg"))
+            )
+            cart_item.add_tax_rate_percentage(0)
+            cart_items.append(cart_item)
+
+            _logger.debug(
+                "Using synthetic installment cart for partial payment link "
+                "(ref=%s, item=%s, source_total=%s, source_residual=%s, tx_amount=%s)",
+                payment_transaction.reference,
+                installment_key,
+                source_total_amount,
+                source_residual_amount,
+                payment_transaction.amount,
+            )
+
+        for line in order_lines if not is_partial_payment_link else []:
             product = getattr(line, "product_id", None)
 
             # Detect source to use correct field names (invoice vs sale order)
@@ -985,9 +1129,21 @@ class MultiSafepayController(http.Controller):
         shopping_cart = ShoppingCart(items=cart_items)
         # Generate checkout options from cart (includes tax tables)
         checkout_options = CheckoutOptions.generate_from_shopping_cart(shopping_cart)
+
         if checkout_options:
-            # Enable cart validation on MultiSafepay side
+            # Keep cart validation enabled for all flows.
+            # For partial payment links we send a synthetic installment item
+            # that matches the transaction amount to satisfy validation.
             checkout_options.add_validate_cart(True)
+
+            if is_partial_payment_link:
+                _logger.debug(
+                    "Cart validation enabled with synthetic installment cart "
+                    "(ref=%s, source_total=%s, tx_amount=%s)",
+                    payment_transaction.reference,
+                    source_total_amount,
+                    payment_transaction.amount,
+                )
 
         # Create a 0% tax rule as fallback for items without tax
         tax_rule = TaxRule(
