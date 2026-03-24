@@ -3,7 +3,6 @@
 # See the LICENSE.md file for more information.
 # See the DISCLAIMER.md file for disclaimer details
 
-from decimal import Decimal
 from unittest.mock import Mock, patch
 
 from odoo.tests.common import TransactionCase
@@ -177,7 +176,9 @@ class TestMinorUnitsToMoney(TransactionCase):
         """Test converting large amounts"""
         if self.eur:
             result = utils.minor_units_to_money(99999999, self.eur)
-            self.assertEqual(result, 999999.99, "99999999 units should be 999999.99 EUR")
+            self.assertEqual(
+                result, 999999.99, "99999999 units should be 999999.99 EUR"
+            )
 
     def test_minor_units_to_money_jpy_no_decimals(self):
         """Test JPY conversion (no decimal shift)"""
@@ -206,9 +207,7 @@ class TestRoundTripConversion(TransactionCase):
             original = 123.45
             units = utils.money_to_minor_units(original, self.eur)
             result = utils.minor_units_to_money(units, self.eur)
-            self.assertEqual(
-                result, original, f"Round trip should preserve {original}"
-            )
+            self.assertEqual(result, original, f"Round trip should preserve {original}")
 
     def test_round_trip_conversion_various_amounts(self):
         """Test round-trip conversion with various amounts"""
@@ -264,7 +263,7 @@ class TestGetRequestsSession(TransactionCase):
 
     def test_get_requests_session_timeout_applied(self):
         """Test that DEFAULT_REQUEST_TIMEOUT is applied to requests"""
-        with patch("requests.Session.request") as mock_request:
+        with patch("requests.Session.request"):
             session = utils._get_requests_session()
             # Note: This test verifies the wrapper behavior
             self.assertTrue(callable(session.request))

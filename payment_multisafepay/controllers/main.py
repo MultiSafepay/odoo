@@ -711,13 +711,9 @@ class MultiSafepayController(http.Controller):
         transaction_units = money_to_minor_units(
             getattr(payment_transaction, "amount", 0), currency_id
         )
-        total_units = money_to_minor_units(
-            source_total_amount, currency_id
-        )
+        total_units = money_to_minor_units(source_total_amount, currency_id)
         if source_type == "invoice" and source_residual_amount is not None:
-            residual_units = money_to_minor_units(
-                source_residual_amount, currency_id
-            )
+            residual_units = money_to_minor_units(source_residual_amount, currency_id)
             # We intentionally omit residual_units > total_units: it indicates
             # inconsistent accounting data and should not occur in normal flows.
             if residual_units < total_units:

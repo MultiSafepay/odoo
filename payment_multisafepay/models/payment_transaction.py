@@ -19,7 +19,7 @@ from odoo import _, models
 from odoo.exceptions import UserError
 
 from .. import const
-from ..utils import money_to_minor_units, minor_units_to_money
+from ..utils import minor_units_to_money, money_to_minor_units
 
 _logger = logging.getLogger(__name__)
 
@@ -278,9 +278,7 @@ class PaymentTransaction(models.Model):
 
             # Use Decimal for precise monetary calculations to avoid floating-point errors
             refunded_decimal = Decimal(str(order_data.amount_refunded))
-            refunded_amount = minor_units_to_money(
-                refunded_decimal, self.currency_id
-            )
+            refunded_amount = minor_units_to_money(refunded_decimal, self.currency_id)
             remaining_amount = original_amount - refunded_amount
 
         if remaining_amount and amount_to_refund > remaining_amount:
