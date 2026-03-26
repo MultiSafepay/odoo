@@ -152,7 +152,7 @@ class PaymentTransaction(models.Model):
                 status,
                 self.reference,
             )
-            self._set_done("Payment completed at MultiSafepay")
+            self._set_done(state_message="Payment completed at MultiSafepay")
 
         elif odoo_state == "cancel":
             _logger.debug(
@@ -160,7 +160,7 @@ class PaymentTransaction(models.Model):
                 status,
                 self.reference,
             )
-            self._set_canceled(f"Payment {status} at MultiSafepay")
+            self._set_canceled(state_message=f"Payment {status} at MultiSafepay")
 
         elif odoo_state == "error":
             _logger.debug(
@@ -168,7 +168,7 @@ class PaymentTransaction(models.Model):
                 status,
                 self.reference,
             )
-            self._set_error("Payment error at MultiSafepay")
+            self._set_error(state_message="Payment error at MultiSafepay")
 
         elif odoo_state == "pending":
             _logger.debug(
@@ -176,7 +176,7 @@ class PaymentTransaction(models.Model):
                 status,
                 self.reference,
             )
-            self._set_pending("Payment pending at MultiSafepay")
+            self._set_pending(state_message="Payment pending at MultiSafepay")
 
         elif odoo_state == "partial_refunded":
             _logger.debug(
@@ -184,7 +184,9 @@ class PaymentTransaction(models.Model):
                 status,
                 self.reference,
             )
-            self._set_done("Payment completed (partially refunded) at MultiSafepay")
+            self._set_done(
+                state_message="Payment completed (partially refunded) at MultiSafepay"
+            )
 
         _logger.info("Transaction %s updated to state '%s'", self.reference, odoo_state)
 

@@ -405,7 +405,7 @@ class MultiSafepayController(http.Controller):
                         transactionid,
                     )
                     payment_transaction._set_error(
-                        "Webhook validation failed: Invalid signature"
+                        state_message="Webhook validation failed: Invalid signature"
                     )
                     return request.make_response(
                         "Webhook validation failed", status=403
@@ -923,7 +923,7 @@ class MultiSafepayController(http.Controller):
         # Create a Plugin object with the necessary details
         plugin = (
             Plugin(**{})
-            .add_plugin_version("2.1.1")
+            .add_plugin_version("2.1.2")
             .add_shop("Odoo")
             .add_shop_version("18.0")
             .add_shop_root_url(url)
