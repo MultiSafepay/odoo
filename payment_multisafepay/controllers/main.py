@@ -971,11 +971,12 @@ class MultiSafepayController(http.Controller):
 
         if is_partial_payment_link:
             installment_key = "odoo-partial-payment"
+            installment_name = "Partial payment"
             invoice_label = getattr(invoice, "name", None) if invoice else None
 
             cart_item = (
                 CartItem(**{})
-                .add_name(installment_key)
+                .add_name(installment_name)
                 .add_description(invoice_label or installment_key)
                 .add_unit_price(getattr(payment_transaction, "amount", 0.0))
                 .add_quantity(1)
