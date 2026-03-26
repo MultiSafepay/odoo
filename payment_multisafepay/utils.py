@@ -5,6 +5,7 @@
 
 import base64
 import logging
+from decimal import Decimal
 from functools import lru_cache
 
 import requests
@@ -38,3 +39,26 @@ def _get_requests_session():
 
     session.request = request_with_default_timeout
     return session
+
+
+def get_currency_precision_digits(currency):
+    """Return decimal precision for currency from Odoo configuration."""
+    if not currency:
+        raise ValueError("Currency is required to determine decimal precision.")
+
+    decimal_places = getattr(currency, "decimal_places", None)
+    if decimal_places is None:
+        raise ValueError(
+            "Currency decimal_places is not defined on Odoo currency "
+            f"'{getattr(currency, 'name', 'unknown')}'."
+        )
+
+    return int(decimal_places)
+
+
+def money_to_minor_units(money, currency):
+    """Convert an amount in currency units to gateway units (integer)."""
+    decimal_places = get_currency_precision_digits(currency)
+    rounded_amount = currency.round(money or 0)
+    amount_decimal = Decimal(str(rounded_amount))
+    return int(amount_decimal.scaleb(decimal_places))
