@@ -9,6 +9,13 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [19.0.2.2.0] - 2026-04-21
+### Added
+- ODOO-145: Add Apple Pay visibility handling (#31)
+
+### Fixed
+- ODOO-185: Support partial payment links and minor units (#37)
+
 ## [19.0.2.1.1] - 2026-03-12
 ### Fixed
 - ODOO-200: Fix shopping cart unit prices when taxes are configured as "Price Included"
