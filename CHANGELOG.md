@@ -9,6 +9,13 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [18.0.2.2.0] - 2026-04-21
+### Added
+- ODOO-146: Add Apple Pay visibility script and register asset
+
+### Fixed
+- ODOO-190: Support partial payment links and minor units
+
 ## [18.0.2.1.2] - 2026-03-18
 ### Fixed
 - ODOO-204: Use state_message kwarg for state setters
