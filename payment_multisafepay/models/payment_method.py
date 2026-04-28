@@ -220,9 +220,9 @@ class PaymentMethod(models.Model):
         # Apply amount filtering only to MultiSafepay methods
         allowed_multisafepay_methods = multisafepay_methods.filtered(
             lambda method: (
-                not method.minimum_amount or amount >= method.minimum_amount
+                (not method.minimum_amount or amount >= method.minimum_amount)
+                and (not method.maximum_amount or amount <= method.maximum_amount)
             )
-            and (not method.maximum_amount or amount <= method.maximum_amount)
         )
 
         return allowed_multisafepay_methods | other_methods

@@ -20,7 +20,6 @@ class PaymentRefundWizard(models.TransientModel):
         help="Optional reason for the refund (specific to MultiSafepay)",
     )
     provider_code = fields.Char(
-        string="Provider Code",
         compute="_compute_provider_code",
         store=False,
     )
