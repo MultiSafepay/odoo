@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - "18.0"
+      - "19.0"
   pull_request:
     branches:
       - "18.0"
+      - "19.0"
 
 jobs:
   pre-commit:
