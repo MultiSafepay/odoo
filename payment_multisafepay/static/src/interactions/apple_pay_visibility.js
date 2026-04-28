@@ -1,10 +1,10 @@
 /** @odoo-module **/
 
 function isApplePaySupported() {
-    if (typeof window.ApplePaySession === 'undefined') {
+    if (typeof window.ApplePaySession === "undefined") {
         return false;
     }
-    if (typeof window.ApplePaySession.canMakePayments !== 'function') {
+    if (typeof window.ApplePaySession.canMakePayments !== "function") {
         return false;
     }
     try {
@@ -19,9 +19,9 @@ function getApplePayRadios(rootElement) {
         'input[name="o_payment_radio"][data-payment-option-type="payment_method"]'
     );
     return Array.from(radios).filter((radio) => {
-        const code = (radio.dataset.paymentMethodCode || '').toLowerCase();
-        const normalizedCode = code.replace(/[^a-z0-9]/g, '');
-        return normalizedCode.includes('applepay');
+        const code = (radio.dataset.paymentMethodCode || "").toLowerCase();
+        const normalizedCode = code.replace(/[^a-z0-9]/g, "");
+        return normalizedCode.includes("applepay");
     });
 }
 
@@ -46,22 +46,26 @@ function getFallbackRadio(rootElement, excludedRadios = []) {
 }
 
 function revealPaymentForm() {
-    const loadingIndicators = document.querySelectorAll('[data-msp-applepay-loading="1"]');
+    const loadingIndicators = document.querySelectorAll(
+        '[data-msp-applepay-loading="1"]'
+    );
     loadingIndicators.forEach((indicator) => indicator.remove());
 
-    const paymentForm = document.querySelector('#o_payment_form[data-msp-applepay-pending="1"]');
+    const paymentForm = document.querySelector(
+        '#o_payment_form[data-msp-applepay-pending="1"]'
+    );
     if (paymentForm) {
-        paymentForm.style.visibility = '';
-        paymentForm.removeAttribute('data-msp-applepay-pending');
-        paymentForm.removeAttribute('aria-busy');
-        if (!paymentForm.getAttribute('style')) {
-            paymentForm.removeAttribute('style');
+        paymentForm.style.visibility = "";
+        paymentForm.removeAttribute("data-msp-applepay-pending");
+        paymentForm.removeAttribute("aria-busy");
+        if (!paymentForm.getAttribute("style")) {
+            paymentForm.removeAttribute("style");
         }
     }
 }
 
 function hideApplePayIfUnsupported() {
-    const paymentForm = document.querySelector('#o_payment_form');
+    const paymentForm = document.querySelector("#o_payment_form");
     if (!paymentForm) {
         return false;
     }
@@ -83,7 +87,7 @@ function hideApplePayIfUnsupported() {
     applePayRadios.forEach((radio) => {
         radio.checked = false;
         radio.defaultChecked = false;
-        radio.removeAttribute('checked');
+        radio.removeAttribute("checked");
         const option = getPaymentOptionNode(radio);
         if (option) {
             option.remove();
@@ -94,14 +98,14 @@ function hideApplePayIfUnsupported() {
 
     if (hadCheckedApplePay && fallbackRadio) {
         fallbackRadio.checked = true;
-        fallbackRadio.dispatchEvent(new Event('change', { bubbles: true }));
+        fallbackRadio.dispatchEvent(new Event("change", {bubbles: true}));
     }
 
     revealPaymentForm();
     return true;
 }
 
-if (document.readyState === 'loading') {
+if (document.readyState === "loading") {
     hideApplePayIfUnsupported();
 
     const observer = new MutationObserver(() => {
@@ -109,9 +113,9 @@ if (document.readyState === 'loading') {
             observer.disconnect();
         }
     });
-    observer.observe(document.documentElement, { childList: true, subtree: true });
+    observer.observe(document.documentElement, {childList: true, subtree: true});
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener("DOMContentLoaded", () => {
         hideApplePayIfUnsupported();
         observer.disconnect();
     });

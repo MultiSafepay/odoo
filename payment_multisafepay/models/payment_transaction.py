@@ -219,18 +219,22 @@ class PaymentTransaction(models.Model):
             )
             raise UserError(
                 _(
-                    "Could not connect to MultiSafepay API for transaction %s.\n\nError: %s"
+                    "Could not connect to MultiSafepay API for transaction %(transaction)s.\n\nError: %(error)s"
                 )
-                % (self.reference, str(api_error))
+                % {"transaction": self.reference, "error": str(api_error)}
             )
 
         if not order_data:
             _logger.error("Could not retrieve order data for %s", self.reference)
             raise UserError(
                 _(
-                    "Could not retrieve order information from MultiSafepay for transaction %s.\n\nReference: %s\nProvider: %s\n\nPlease check your internet connection and try again later."
+                    "Could not retrieve order information from MultiSafepay for transaction %(transaction)s.\n\nReference: %(reference)s\nProvider: %(provider)s\n\nPlease check your internet connection and try again later."
                 )
-                % (self.reference, self.reference, self.provider_id.name)
+                % {
+                    "transaction": self.reference,
+                    "reference": self.reference,
+                    "provider": self.provider_id.name,
+                }
             )
 
         original_amount = abs(self.amount)
@@ -245,14 +249,14 @@ class PaymentTransaction(models.Model):
             _logger.error("Order %s is already refunded", self.reference)
             raise UserError(
                 _(
-                    "This order has already been fully refunded.\n\nTransaction: %s\nOrder Status: %s\nOriginal Amount: %.2f %s\n\nNo additional refunds can be processed."
+                    "This order has already been fully refunded.\n\nTransaction: %(transaction)s\nOrder Status: %(status)s\nOriginal Amount: %(amount).2f %(currency)s\n\nNo additional refunds can be processed."
                 )
-                % (
-                    self.reference,
-                    order_status,
-                    abs(amount_to_refund),
-                    self.currency_id.name,
-                )
+                % {
+                    "transaction": self.reference,
+                    "status": order_status,
+                    "amount": original_amount,
+                    "currency": self.currency_id.name,
+                }
             )
 
         remaining_amount = 0
@@ -276,17 +280,15 @@ class PaymentTransaction(models.Model):
             )
             raise UserError(
                 _(
-                    "Refund amount exceeds available amount.\n\nTransaction: %s\nRequested Refund: %.2f %s\nMaximum Available: %.2f %s\nAlready Refunded: %.2f %s\n\nPlease adjust the refund amount."
+                    "Refund amount exceeds available amount.\n\nTransaction: %(transaction)s\nRequested Refund: %(requested).2f %(currency)s\nMaximum Available: %(available).2f %(currency)s\nAlready Refunded: %(refunded).2f %(currency)s\n\nPlease adjust the refund amount."
                 )
-                % (
-                    self.reference,
-                    abs(amount_to_refund),
-                    self.currency_id.name,
-                    remaining_amount,
-                    self.currency_id.name,
-                    refunded_amount,
-                    self.currency_id.name,
-                )
+                % {
+                    "transaction": self.reference,
+                    "requested": abs(amount_to_refund),
+                    "available": remaining_amount,
+                    "refunded": refunded_amount,
+                    "currency": self.currency_id.name,
+                }
             )
 
         try:

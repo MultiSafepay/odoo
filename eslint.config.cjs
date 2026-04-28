@@ -194,6 +194,19 @@ const config = [{
     },
 
 }, {
+    files: ["**/static/src/**/*.js", "**/static/tests/**/*.js"],
+
+    languageOptions: {
+        ecmaVersion: 2024,
+        sourceType: "module",
+    },
+
+    rules: {
+        strict: "off",
+        "jsdoc/check-tag-names": "off",
+    },
+
+}, {
     files: ["**/*.esm.js", "**/*test.js"],
 
     languageOptions: {
