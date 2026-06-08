@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <delete
+        model="ir.ui.menu"
+        search="[('name', '=', 'MultiSafepay Cloud Payments'), ('parent_id', '=', ref('point_of_sale.menu_point_config_product'))]"
+    />
+
+    <delete
+        model="ir.actions.act_window"
+        search="[('name', '=', 'Cloud POS Payments'), ('res_model', '=', 'pos.multisafepay.cloud.payment')]"
+    />
+
+    <delete
+        model="ir.ui.view"
+        search="[('model', '=', 'pos.multisafepay.cloud.payment'), ('name', 'in', ['pos.multisafepay.cloud.payment.search', 'pos.multisafepay.cloud.payment.tree', 'pos.multisafepay.cloud.payment.form'])]"
+    />
+
+</odoo>
