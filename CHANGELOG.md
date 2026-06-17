@@ -9,12 +9,16 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [19.0.2.2.1] - 2026-04-21
+### Fixed
+- ODOO-228: Fix multi-website: payment options URLs always use global web.base.url instead of per-website domain
+
 ## [19.0.2.2.0] - 2026-04-21
 ### Added
-- ODOO-145: Add Apple Pay visibility handling (#31)
+- ODOO-145: Add Apple Pay visibility handling
 
 ### Fixed
-- ODOO-185: Support partial payment links and minor units (#37)
+- ODOO-185: Support partial payment links and minor units
 
 ## [19.0.2.1.1] - 2026-03-12
 ### Fixed
@@ -34,13 +38,13 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [19.0.1.2.0] - 2025-12-01
 ### Added
-- ODOO-122: Add pricelist filter to payment method list (#1)
+- ODOO-122: Add pricelist filter to payment method list
 
 ### Changed
-- ODOO-155: Refactor cleanup logic preserving user configuration (#3)
+- ODOO-155: Refactor cleanup logic preserving user configuration
 
 ### Fixed
-- ODOO-162: Fix installation instructions in README.md file (#6)
+- ODOO-162: Fix installation instructions in README.md file
 
 ## [19.0.1.1.0] - 2025-10-31
 ### Added
