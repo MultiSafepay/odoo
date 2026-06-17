@@ -12,7 +12,7 @@ import copy
 import json
 import logging
 from typing import cast
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urlparse
 
 from multisafepay.api.paths.orders.request.components.checkout_options import (
     CheckoutOptions,
@@ -99,7 +99,7 @@ class MultiSafepayController(http.Controller):
                 )
 
             try:
-                base_url = self._get_correct_base_url()
+                base_url = self._get_base_url_for_transaction(payment_transaction)
                 order = self._get_order(base_url, payment_transaction)
 
                 if not order or not order.payment_url:
@@ -1194,16 +1194,88 @@ class MultiSafepayController(http.Controller):
         _logger.info("Order created successfully with ID: %s", _order_id)
         return order
 
-    def _get_correct_base_url(self):
-        """Get the correct base URL, prioritizing configured domain over localhost"""
+    def _get_base_url_for_transaction(self, payment_transaction):
+        """Resolve callback base URL for a transaction in multi-website environments.
 
-        # Priority 1: System parameter (configured domain)
-        base_url = (
-            request.env["ir.config_parameter"].sudo().get_param("web.base.url", "")
-        )
-        if base_url and not ("localhost" in base_url or "127.0.0.1" in base_url):
-            _logger.debug("Using configured base URL: %s", base_url)
-            return base_url
+        Priority:
+        1. Explicit ``website.domain`` from the sale order's website (most reliable)
+        2. HTTP request headers (``X-Forwarded-Host`` / ``Host``) — reflect the
+           actual domain the customer is browsing, handled by ``_get_correct_base_url``
+        3. ``web.base.url`` system parameter (global fallback, last resort)
+
+        We intentionally avoid ``sale_order.get_base_url()`` because Odoo's
+        website override falls back to the global ``web.base.url`` ICP when
+        ``website.domain`` is empty — and that global value may point to a
+        *different* website in a multi-website setup, producing wrong callback
+        URLs for the website that has no explicit domain configured.
+
+        By reading ``website.domain`` directly and skipping to request headers
+        when it is empty, we let the browser's actual Host determine the URL
+        instead of a potentially mismatched global parameter.
+        """
+        base_url = ""
+
+        sale_orders = getattr(payment_transaction, "sale_order_ids", None)
+        if sale_orders:
+            sale_order = sale_orders[0]
+            website = getattr(sale_order, "website_id", None)
+            if website:
+                # Read the domain field directly — do NOT use get_base_url()
+                # which falls back to web.base.url when domain is empty.
+                website_domain = getattr(website, "domain", None)
+                if website_domain:
+                    base_url = self._normalize_base_url(website_domain)
+                    _logger.debug(
+                        "Using explicit website domain for website '%s': %s",
+                        getattr(website, "name", "?"),
+                        base_url,
+                    )
+                else:
+                    _logger.debug(
+                        "Website '%s' has no domain configured, "
+                        "falling back to request headers",
+                        getattr(website, "name", "?"),
+                    )
+
+        if not base_url:
+            _logger.debug(
+                "No explicit website domain available, "
+                "delegating to request-header resolution"
+            )
+
+        return self._get_correct_base_url(base_url)
+
+    def _normalize_base_url(self, base_url):
+        """Normalize a base URL and ensure it includes a scheme."""
+        if not base_url:
+            return ""
+
+        normalized = str(base_url).strip().rstrip("/")
+        if not normalized:
+            return ""
+
+        if "://" not in normalized:
+            normalized = f"https://{normalized}"
+
+        return normalized
+
+    def _is_localhost_url(self, value):
+        """Return True when URL/host points to localhost or loopback."""
+        if not value:
+            return False
+
+        parsed = urlparse(value if "://" in str(value) else f"//{value}")
+        host = (parsed.hostname or str(value)).lower()
+        return host in {"localhost", "127.0.0.1"}
+
+    def _get_correct_base_url(self, preferred_base_url=""):
+        """Get the best base URL, honoring transaction-specific domains first."""
+
+        # Priority 1: Transaction-specific/website-aware URL
+        normalized_preferred = self._normalize_base_url(preferred_base_url)
+        if normalized_preferred and not self._is_localhost_url(normalized_preferred):
+            _logger.debug("Using preferred transaction base URL: %s", normalized_preferred)
+            return normalized_preferred
 
         # Priority 2: X-Forwarded-Host header (from proxy)
         x_forwarded_host = request.httprequest.headers.get("X-Forwarded-Host")
@@ -1211,36 +1283,38 @@ class MultiSafepayController(http.Controller):
             "X-Forwarded-Proto", "https"
         )
 
-        if x_forwarded_host:
-            base_url = f"{x_forwarded_proto}://{x_forwarded_host}"
+        if x_forwarded_host and not self._is_localhost_url(x_forwarded_host):
+            base_url = self._normalize_base_url(
+                f"{x_forwarded_proto}://{x_forwarded_host}"
+            )
             _logger.debug("Using X-Forwarded-Host: %s", base_url)
             return base_url
 
         # Priority 3: Host header
         host = request.httprequest.headers.get("Host")
-        if host and not ("localhost" in host or "127.0.0.1" in host):
+        if host and not self._is_localhost_url(host):
             is_secure = request.httprequest.is_secure or x_forwarded_proto == "https"
             scheme = "https" if is_secure else "http"
-            base_url = f"{scheme}://{host}"
+            base_url = self._normalize_base_url(f"{scheme}://{host}")
             _logger.debug("Using Host header: %s", base_url)
             return base_url
 
-        # Priority 4: Website domain (if configured)
-        if hasattr(request, "website") and request.website:
-            website_domain = request.website.domain
-            if website_domain and not (
-                "localhost" in website_domain or "127.0.0.1" in website_domain
-            ):
-                base_url = f"https://{website_domain}"
-                _logger.debug("Using website domain: %s", base_url)
-                return base_url
-
-        # Fallback: Use original method but log warning
-        base_url = request.httprequest.url_root.rstrip("/")
-        _logger.warning(
-            "Falling back to request URL root (may be localhost): %s", base_url
+        # Priority 4: System parameter fallback (global domain)
+        base_url = (
+            request.env["ir.config_parameter"].sudo().get_param("web.base.url", "")
         )
-        return base_url
+        normalized_base_url = self._normalize_base_url(base_url)
+        if normalized_base_url and not self._is_localhost_url(normalized_base_url):
+            _logger.debug("Using configured base URL fallback: %s", normalized_base_url)
+            return normalized_base_url
+
+        # Fallback: request URL root (may still be localhost)
+        fallback_base_url = self._normalize_base_url(request.httprequest.url_root)
+        _logger.warning(
+            "Falling back to request URL root (may be localhost): %s",
+            fallback_base_url,
+        )
+        return fallback_base_url
 
     def _mask_sensitive_value(self, value) -> str:
         """
