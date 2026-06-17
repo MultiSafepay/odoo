@@ -1197,12 +1197,11 @@ class MultiSafepayController(http.Controller):
     def _get_base_url_for_transaction(self, payment_transaction):
         """Resolve callback base URL for a transaction.
 
-        Priority 1 (new, multi-website fix):
-            If the transaction is linked to a sale order whose website has an
-            explicit ``domain`` configured, use that domain. This ensures
-            multi-website setups send customers back to the right website.
+        If the transaction is linked to a sale order whose website has an
+        explicit ``domain`` configured, use that domain. This ensures
+        multi-website setups send customers back to the right website.
 
-        Otherwise: fall back to the original behaviour implemented in
+        Otherwise: fall back to the behaviour implemented in
         ``_get_correct_base_url`` (web.base.url → proxy headers → website →
         request URL root).
         """
