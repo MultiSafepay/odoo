@@ -9,6 +9,10 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [19.0.2.2.3] - 2026-06-17
+### Fixed
+- ODOO-235: Fix plugin version within the MultiSafepay order request and release of 19.0.2.2.3
+
 ## [19.0.2.2.2] - 2026-06-17
 ### Fixed
 - ODOO-231: Fix t-if clause avoiding incorrect nested if statements
