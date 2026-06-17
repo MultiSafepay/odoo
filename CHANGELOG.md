@@ -9,6 +9,11 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [18.0.2.2.1] - 2026-06-17
+### Fixed
+- ODOO-232: Fix t-if clause avoiding incorrect nested if statements
+- ODOO-229: Multi-website: payment options URLs always use global web.base.url instead of per-website domain
+
 ## [18.0.2.2.0] - 2026-04-21
 ### Added
 - ODOO-146: Add Apple Pay visibility script and register asset
