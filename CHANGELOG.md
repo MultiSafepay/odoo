@@ -9,7 +9,11 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-## [19.0.2.2.1] - 2026-04-21
+## [19.0.2.2.2] - 2026-06-17
+### Fixed
+- ODOO-231: Fix t-if clause avoiding incorrect nested if statements
+
+## [19.0.2.2.1] - 2026-06-17
 ### Fixed
 - ODOO-228: Fix multi-website: payment options URLs always use global web.base.url instead of per-website domain
 
