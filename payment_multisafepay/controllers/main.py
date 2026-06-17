@@ -1274,7 +1274,9 @@ class MultiSafepayController(http.Controller):
         # Priority 1: Transaction-specific/website-aware URL
         normalized_preferred = self._normalize_base_url(preferred_base_url)
         if normalized_preferred and not self._is_localhost_url(normalized_preferred):
-            _logger.debug("Using preferred transaction base URL: %s", normalized_preferred)
+            _logger.debug(
+                "Using preferred transaction base URL: %s", normalized_preferred
+            )
             return normalized_preferred
 
         # Priority 2: X-Forwarded-Host header (from proxy)
