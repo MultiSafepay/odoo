@@ -41,7 +41,9 @@
     >
         <xpath expr="//div[@t-if='payment_not_found']" position="attributes">
             <!-- Hide the confusing "payment is on its way" message if there is an explicit error -->
-            <attribute name="t-att-style">'display: none !important;' if request.params.get('error') else None</attribute>
+            <attribute
+                name="t-att-style"
+            >'display: none !important;' if request.params.get('error') else None</attribute>
         </xpath>
         <xpath expr="//div[@name='o_payment_status']" position="after">
             <!-- Show error message if exists in URL parameters -->
