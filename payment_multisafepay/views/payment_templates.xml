@@ -39,11 +39,17 @@
         inherit_id="payment.payment_status"
         name="MultiSafepay Payment Status Error Messages"
     >
-        <xpath expr="//div[@name='o_payment_status']" position="before">
+        <xpath expr="//div[@t-if='payment_not_found']" position="attributes">
+            <!-- Hide the confusing "payment is on its way" message if there is an explicit error -->
+            <attribute
+                name="t-att-style"
+            >'display: none !important;' if request.params.get('error') else None</attribute>
+        </xpath>
+        <xpath expr="//div[@name='o_payment_status']" position="after">
             <!-- Show error message if exists in URL parameters -->
             <div
                 t-if="request.params.get('error')"
-                class="alert alert-danger alert-dismissible"
+                class="alert alert-danger alert-dismissible mt-3"
                 role="alert"
             >
                 <button
@@ -58,8 +64,6 @@
                     t-esc="request.params.get('message', 'An error occurred. Please try again.')"
                 />
             </div>
-        </xpath>
-        <xpath expr="//div[@name='o_payment_status']" position="after">
             <!-- Only show for MultiSafepay payment methods -->
             <div
                 t-if="request.params.get('payment_method', '').startswith('multisafepay')"
