@@ -1265,8 +1265,19 @@ class MultiSafepayController(http.Controller):
             return False
 
         parsed = urlparse(value if "://" in str(value) else f"//{value}")
-        host = (parsed.hostname or str(value)).lower()
-        return host in {"localhost", "127.0.0.1"}
+        host = (parsed.hostname or str(value)).strip().lower()
+
+        # Common localhost hostnames
+        if host == "localhost" or host.startswith("localhost."):
+            return True
+
+        # Loopback IPs (IPv4 127/8, IPv6 ::1)
+        try:
+            import ipaddress
+
+            return ipaddress.ip_address(host).is_loopback
+        except ValueError:
+            return False
 
     def _get_correct_base_url(self, preferred_base_url=""):
         """Get the best base URL, honoring transaction-specific domains first."""
