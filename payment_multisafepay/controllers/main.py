@@ -99,7 +99,7 @@ class MultiSafepayController(http.Controller):
                 )
 
             try:
-                base_url = self._get_correct_base_url()
+                base_url = self._get_base_url_for_transaction(payment_transaction)
                 order = self._get_order(base_url, payment_transaction)
 
                 if not order or not order.payment_url:
@@ -1243,6 +1243,37 @@ class MultiSafepayController(http.Controller):
 
         _logger.info("Order created successfully with ID: %s", _order_id)
         return order
+
+    def _get_base_url_for_transaction(self, payment_transaction):
+        """Resolve callback base URL for a transaction.
+
+        If the transaction is linked to a sale order whose website has an
+        explicit ``domain`` configured, use that domain. This ensures
+        multi-website setups send customers back to the right website.
+
+        Otherwise: fall back to the behaviour implemented in
+        ``_get_correct_base_url`` (web.base.url → proxy headers → website →
+        request URL root).
+        """
+        sale_orders = getattr(payment_transaction, "sale_order_ids", None)
+        if sale_orders:
+            sale_order = sale_orders[0]
+            website = getattr(sale_order, "website_id", None)
+            if website:
+                website_domain = getattr(website, "domain", None)
+                if website_domain:
+                    base_url = str(website_domain).strip().rstrip("/")
+                    if base_url and "://" not in base_url:
+                        base_url = f"https://{base_url}"
+                    if base_url:
+                        _logger.debug(
+                            "Using explicit website domain for website '%s': %s",
+                            getattr(website, "name", "?"),
+                            base_url,
+                        )
+                        return base_url
+
+        return self._get_correct_base_url()
 
     def _get_correct_base_url(self):
         """Get the correct base URL, prioritizing configured domain over localhost"""
