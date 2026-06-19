@@ -18,8 +18,7 @@
     ],
     "assets": {
         "point_of_sale._assets_pos": [
-            "pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js",
-            "pos_multisafepay_cloud/static/src/overrides/**/*",
+            "pos_multisafepay_cloud/static/src/app/**/*",
         ],
     },
     "installable": True,

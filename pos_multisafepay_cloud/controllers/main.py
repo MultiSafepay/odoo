@@ -1,22 +1,19 @@
+# Copyright (c) MultiSafepay, Inc. All rights reserved.
+# This file is licensed under the GNU Affero General Public License (AGPL) version 3.0.
+# See the LICENSE.md file for more information.
+# See the DISCLAIMER.md file for disclaimer details
+
 import json
 import logging
 
 from odoo import http
 from odoo.http import request
 
-_logger = logging.getLogger(__name__)
-
-SENSITIVE_LOG_KEYS = (
-    "token",
-    "auth",
-    "key",
-    "secret",
-    "signature",
-    "hmac",
-    "hash",
-    "checksum",
-    "password",
+from odoo.addons.pos_multisafepay_cloud.helpers.notification_payload import (
+    _NotificationPayload,
 )
+
+_logger = logging.getLogger(__name__)
 
 
 class PosMultiSafepayCloudController(http.Controller):
@@ -30,11 +27,29 @@ class PosMultiSafepayCloudController(http.Controller):
         csrf=False,
     )
     def notification(self, **kwargs):
+        """Handle MultiSafepay Cloud POS notifications.
+
+        Accepts both GET status callbacks and POST webhook payloads, delegates the
+        functional validation to the tracking model and returns an HTTP response for
+        MultiSafepay.
+
+        :param kwargs: Query-string or form parameters received by the route.
+        :return: HTTP response consumed by MultiSafepay.
+        """
         raw_body = request.httprequest.get_data(as_text=True)
         method = request.httprequest.method
-        payload = self._get_notification_payload(raw_body, kwargs, method=method)
-        log_payload = self._sanitize_notification_log_payload(payload)
-        log_query = self._sanitize_notification_log_payload(kwargs)
+        _logger.info("=== MSP_DEBUG: WEBHOOK RECEIVED ===")
+        _logger.info("MSP_DEBUG Method: %s", method)
+        _logger.info("MSP_DEBUG Kwargs: %s", kwargs)
+        _logger.info("MSP_DEBUG Raw Body: %s", raw_body)
+        payload = _NotificationPayload.get_from_request(
+            raw_body,
+            kwargs,
+            method=method,
+            json_payload=request.httprequest.get_json(silent=True),
+        )
+        log_payload = _NotificationPayload.sanitize_log_payload(payload)
+        log_query = _NotificationPayload.sanitize_log_payload(kwargs)
         notification = (
             request.env["pos.multisafepay.cloud.payment"]
             .sudo()
@@ -74,59 +89,3 @@ class PosMultiSafepayCloudController(http.Controller):
         )
         return request.make_response("OK", status=200)
 
-    def _get_notification_payload(self, raw_body, kwargs, method=None):
-        if (method or "").upper() == "GET":
-            order_id = kwargs.get("order_id")
-            return {"order_id": order_id} if order_id else {}
-
-        payload = request.httprequest.get_json(silent=True) or {}
-        if not payload and raw_body:
-            try:
-                payload = json.loads(raw_body)
-            except ValueError:
-                payload = {}
-        if not isinstance(payload, dict):
-            payload = {}
-        return self._normalize_notification_payload(payload)
-
-    def _normalize_notification_payload(self, payload):
-        normalized_payload = dict(payload or {})
-
-        nested_payload = normalized_payload.get("data")
-        if isinstance(nested_payload, dict):
-            normalized_payload = {
-                **nested_payload,
-                **{key: value for key, value in normalized_payload.items() if key != "data"},
-            }
-
-        for nested_key in ("order", "payment", "transaction"):
-            nested_value = normalized_payload.get(nested_key)
-            if isinstance(nested_value, dict):
-                normalized_payload = {
-                    **nested_value,
-                    **{
-                        key: value
-                        for key, value in normalized_payload.items()
-                        if key != nested_key
-                    },
-                }
-
-        return normalized_payload
-
-    def _sanitize_notification_log_payload(self, payload):
-        if not isinstance(payload, dict):
-            return {}
-
-        sanitized_payload = {}
-        for key, value in payload.items():
-            normalized_key = str(key).lower()
-            if any(
-                secret_key in normalized_key
-                for secret_key in SENSITIVE_LOG_KEYS
-            ):
-                sanitized_payload[key] = "***"
-            elif isinstance(value, dict):
-                sanitized_payload[key] = self._sanitize_notification_log_payload(value)
-            else:
-                sanitized_payload[key] = value
-        return sanitized_payload
