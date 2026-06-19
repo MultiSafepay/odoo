@@ -38,10 +38,6 @@ class PosMultiSafepayCloudController(http.Controller):
         """
         raw_body = request.httprequest.get_data(as_text=True)
         method = request.httprequest.method
-        _logger.info("=== MSP_DEBUG: WEBHOOK RECEIVED ===")
-        _logger.info("MSP_DEBUG Method: %s", method)
-        _logger.info("MSP_DEBUG Kwargs: %s", kwargs)
-        _logger.info("MSP_DEBUG Raw Body: %s", raw_body)
         payload = _NotificationPayload.get_from_request(
             raw_body,
             kwargs,

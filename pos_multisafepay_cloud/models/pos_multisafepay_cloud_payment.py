@@ -233,10 +233,8 @@ class PosMultiSafepayCloudPayment(models.Model):
         :rtype: dict
         """
         method_name = (method or "").upper()
-        _logger.info("MSP_DEBUG: process_notification called. Payload: %s, Method: %s", payload, method_name)
         notification_payload = payload if isinstance(payload, dict) else {}
         reference = _NotificationPayload.get_reference(notification_payload)
-        _logger.info("MSP_DEBUG: Computed reference: %s", reference)
         if not reference:
             return _FrontendResponseBuilder.error(
                 _("The MultiSafepay Cloud POS notification has no order reference."),
@@ -249,7 +247,6 @@ class PosMultiSafepayCloudPayment(models.Model):
             msp_cloud_uid=reference,
             include_remote=True,
         )
-        _logger.info("MSP_DEBUG: Payment found: %s", payment.id if payment else None)
         if not payment:
             return _FrontendResponseBuilder.error(
                 _("No MultiSafepay Cloud POS payment was found for this notification."),

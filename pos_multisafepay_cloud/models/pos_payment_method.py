@@ -13,6 +13,7 @@ from multisafepay.api.paths.orders.order_id.refund.request.refund_request import
     RefundOrderRequest,
 )
 from multisafepay.api.paths.orders.request import OrderRequest
+from multisafepay.api.paths.orders.request.components.plugin import Plugin
 
 from multisafepay.api.paths.orders.request.components.payment_options import (
     PaymentOptions,
@@ -373,6 +374,13 @@ class PosPaymentMethod(models.Model):
         )
 
         try:
+            plugin = (
+                Plugin()
+                .add_plugin_version("2.1.2")
+                .add_shop("Odoo")
+                .add_shop_version("18.0")
+                .add_shop_root_url(self.get_base_url())
+            )
             order_request = (
                 OrderRequest()
                 .add_type("redirect")
@@ -381,6 +389,7 @@ class PosPaymentMethod(models.Model):
                 .add_amount(amount_in_cents)
                 .add_currency(currency)
                 .add_gateway_info({"terminal_id": self.msp_cloud_terminal_id.strip()})
+                .add_plugin(plugin)
             )
             if payment_options:
                 order_request.add_payment_options(payment_options)
