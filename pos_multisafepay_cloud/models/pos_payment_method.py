@@ -340,7 +340,7 @@ class PosPaymentMethod(models.Model):
             }
         )
 
-        amount_in_cents = int(round(abs(data.get("amount") or 0.0) * 100))
+        amount_in_cents = _Utils.amount_to_minor_units(data.get("amount"))
         currency = data.get("currency") or "EUR"
         shopping_cart_data = data.get("shopping_cart")
         shopping_cart = _OrderPayloadBuilder.shopping_cart(
