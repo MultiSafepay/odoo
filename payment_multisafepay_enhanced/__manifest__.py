@@ -1,7 +1,7 @@
 {
     "name": "MultiSafepay Enhanced",
     "summary": """Advanced MultiSafepay business logic integration""",
-    "author": "MultiSafepay",
+    "author": "MultiSafepay, Odoo Community Association (OCA)",
     "website": "https://github.com//multisafepay",
     "license": "AGPL-3",
     "category": "Sales",

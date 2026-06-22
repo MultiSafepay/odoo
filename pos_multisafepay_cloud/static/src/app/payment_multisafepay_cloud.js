@@ -44,17 +44,15 @@ export function buildCustomer(order) {
     );
 }
 
-export function getRefundSourcePaymentLine(order, refundPaymentLine) {
-    const refundablePaymentLines = getRefundableMspCloudPaymentLines(order);
-    const refundedPaymentId = refundPaymentLine.refundedPaymentId;
-    if (refundedPaymentId) {
-        return refundablePaymentLines.find(
-            (line) =>
-                String(line.id) === String(refundedPaymentId) ||
-                String(line.uuid) === String(refundedPaymentId)
-        );
-    }
-    return refundablePaymentLines.length === 1 ? refundablePaymentLines[0] : null;
+export function isRefundableMspCloudPaymentLine(paymentLine) {
+    return Boolean(
+        paymentLine &&
+            paymentLine.amount > 0 &&
+            !paymentLine.is_change &&
+            paymentLine.payment_method_id?.use_payment_terminal ===
+                "multisafepay_cloud" &&
+            (paymentLine.transaction_id || paymentLine.id)
+    );
 }
 
 export function getRefundableMspCloudPaymentLines(order) {
@@ -73,15 +71,17 @@ export function getRefundableMspCloudPaymentLines(order) {
     return [...paymentLinesByKey.values()];
 }
 
-export function isRefundableMspCloudPaymentLine(paymentLine) {
-    return Boolean(
-        paymentLine &&
-            paymentLine.amount > 0 &&
-            !paymentLine.is_change &&
-            paymentLine.payment_method_id?.use_payment_terminal ===
-                "multisafepay_cloud" &&
-            (paymentLine.transaction_id || paymentLine.id)
-    );
+export function getRefundSourcePaymentLine(order, refundPaymentLine) {
+    const refundablePaymentLines = getRefundableMspCloudPaymentLines(order);
+    const refundedPaymentId = refundPaymentLine.refundedPaymentId;
+    if (refundedPaymentId) {
+        return refundablePaymentLines.find(
+            (line) =>
+                String(line.id) === String(refundedPaymentId) ||
+                String(line.uuid) === String(refundedPaymentId)
+        );
+    }
+    return refundablePaymentLines.length === 1 ? refundablePaymentLines[0] : null;
 }
 
 /**
@@ -166,7 +166,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
                 msp_cloud_attempt_number: mspCloudAttemptNumber + 1,
                 msp_cloud_uid: mspCloudUid,
             });
-        } catch (_e) {
+        } catch {
             // Field may not be in DB schema yet; direct assignment above is the fallback.
         }
 
@@ -195,7 +195,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             .then((response) =>
                 this._handle_initial_response(line, response, mspCloudUid)
             )
-            .catch((error) => {
+            .catch(() => {
                 this._handle_odoo_connection_failure(uuid, mspCloudUid);
             });
         return paymentConfirmation;

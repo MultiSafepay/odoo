@@ -5,7 +5,7 @@
 
 from decimal import Decimal
 
-from odoo.addons.pos_multisafepay_cloud.helpers.utils import (
+from ..helpers.utils import (
     _Utils,
 )
 

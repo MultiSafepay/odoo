@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 from multisafepay import Sdk
 from multisafepay.client import ScopedCredentialResolver
 
-from odoo.addons.pos_multisafepay_cloud.helpers.transport import (
+from ..helpers.transport import (
     _get_cloud_pos_transport,
 )
 

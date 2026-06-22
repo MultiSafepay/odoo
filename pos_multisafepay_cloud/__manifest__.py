@@ -1,7 +1,7 @@
 {
     "name": "PoS MultiSafepay Cloud",
     "summary": "PoC for MultiSafepay Cloud POS payments in Odoo POS",
-    "author": "MultiSafepay",
+    "author": "MultiSafepay, Odoo Community Association (OCA)",
     "website": "https://github.com//multisafepay",
     "license": "AGPL-3",
     "category": "Point of Sale",

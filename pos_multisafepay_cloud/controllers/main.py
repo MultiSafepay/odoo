@@ -8,7 +8,7 @@ import logging
 from odoo import http
 from odoo.http import request
 
-from odoo.addons.pos_multisafepay_cloud.helpers.notification_payload import (
+from ..helpers.notification_payload import (
     _NotificationPayload,
 )
 

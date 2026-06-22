@@ -3,8 +3,11 @@
 # See the LICENSE.md file for more information.
 # See the DISCLAIMER.md file for disclaimer details
 
+import logging
 from datetime import date, datetime
 from decimal import Decimal
+
+_logger = logging.getLogger(__name__)
 
 
 class _Serializer:
@@ -50,8 +53,8 @@ class _Serializer:
         if hasattr(sdk_model, "dict") and callable(sdk_model.dict):
             try:
                 return cls.json_safe_payload(sdk_model.dict())
-            except TypeError:
-                pass
+            except TypeError as err:
+                _logger.debug("Failed to call dict() on SDK model: %s", err)
         if isinstance(sdk_model, dict):
             return cls.json_safe_payload(dict(sdk_model))
         return {}
@@ -67,15 +70,15 @@ class _Serializer:
             return {
                 str(key): cls.json_safe_payload(value) for key, value in payload.items()
             }
-        if isinstance(payload, (list, tuple, set)):
+        if isinstance(payload, list | tuple | set):
             return [cls.json_safe_payload(value) for value in payload]
         if isinstance(payload, Decimal):
             if payload == payload.to_integral_value():
                 return int(payload)
             return float(payload)
-        if isinstance(payload, (date, datetime)):
+        if isinstance(payload, date | datetime):
             return payload.isoformat()
-        if isinstance(payload, (str, int, float, bool)) or payload is None:
+        if isinstance(payload, str | int | float | bool) or payload is None:
             return payload
         value = getattr(payload, "value", None)
         if value is not None:

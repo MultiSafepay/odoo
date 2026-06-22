@@ -9,19 +9,19 @@ import logging
 
 from odoo import _, api, fields, models
 
-from odoo.addons.pos_multisafepay_cloud.helpers.frontend_response_builder import (
+from ..helpers.frontend_response_builder import (
     _FrontendResponseBuilder,
 )
-from odoo.addons.pos_multisafepay_cloud.helpers.notification_payload import (
+from ..helpers.notification_payload import (
     _NotificationPayload,
 )
-from odoo.addons.pos_multisafepay_cloud.helpers.notification_validator import (
+from ..helpers.notification_validator import (
     _NotificationValidator,
 )
-from odoo.addons.pos_multisafepay_cloud.helpers.odoo_payload_builder import (
+from ..helpers.odoo_payload_builder import (
     _OdooPayloadBuilder,
 )
-from odoo.addons.pos_multisafepay_cloud.helpers.status import _Status
+from ..helpers.status import _Status
 
 _logger = logging.getLogger(__name__)
 
@@ -48,7 +48,7 @@ class PosMultiSafepayCloudPayment(models.Model):
     terminal_id = fields.Char("Terminal ID")
     remote_transaction_id = fields.Char("Remote Transaction ID")
     msp_latest_response = fields.Json("Response", default={})
-    receipt_data = fields.Json("Receipt Data", default={})
+    receipt_data = fields.Json(default={})
     status = fields.Selection(
         [
             ("initialized", "Initialized"),
@@ -68,9 +68,9 @@ class PosMultiSafepayCloudPayment(models.Model):
         default="initialized",
     )
     refund_transaction_id = fields.Char("Refund Transaction ID", copy=False)
-    reversal_response = fields.Json("Reversal Response", default={})
-    reversed_at = fields.Datetime("Reversed At", copy=False)
-    events_token = fields.Char("Events Token", copy=False)
+    reversal_response = fields.Json(default={})
+    reversed_at = fields.Datetime(copy=False)
+    events_token = fields.Char(copy=False)
     events_stream_url = fields.Char("Events Stream URL", copy=False)
     last_event_id = fields.Char("Last Event ID", copy=False)
     stream_state = fields.Selection(
@@ -83,7 +83,7 @@ class PosMultiSafepayCloudPayment(models.Model):
         default="idle",
         copy=False,
     )
-    stream_lock_until = fields.Datetime("Stream Lock Until", copy=False)
+    stream_lock_until = fields.Datetime(copy=False)
 
     @api.model
     def create_payment_request(self, response, data):
