@@ -8,31 +8,33 @@
 import logging
 
 from odoo import _, api, fields, models
-from odoo.addons.pos_multisafepay_cloud.helpers.status import _Status
+
 from odoo.addons.pos_multisafepay_cloud.helpers.frontend_response_builder import (
     _FrontendResponseBuilder,
-)
-from odoo.addons.pos_multisafepay_cloud.helpers.odoo_payload_builder import (
-    _OdooPayloadBuilder,
-)
-from odoo.addons.pos_multisafepay_cloud.helpers.notification_validator import (
-    _NotificationValidator,
 )
 from odoo.addons.pos_multisafepay_cloud.helpers.notification_payload import (
     _NotificationPayload,
 )
+from odoo.addons.pos_multisafepay_cloud.helpers.notification_validator import (
+    _NotificationValidator,
+)
+from odoo.addons.pos_multisafepay_cloud.helpers.odoo_payload_builder import (
+    _OdooPayloadBuilder,
+)
+from odoo.addons.pos_multisafepay_cloud.helpers.status import _Status
 
 _logger = logging.getLogger(__name__)
 
 
 class PosMultiSafepayCloudPayment(models.Model):
     """Track ongoing and completed Cloud POS terminal transactions.
-    
-    This model acts as a bridge and state machine between Odoo POS 
-    and the MultiSafepay Cloud POS API, tracking payment attempts, 
-    reversals, and webhook notifications independently of the core 
+
+    This model acts as a bridge and state machine between Odoo POS
+    and the MultiSafepay Cloud POS API, tracking payment attempts,
+    reversals, and webhook notifications independently of the core
     Odoo POS orders.
     """
+
     _name = "pos.multisafepay.cloud.payment"
     _description = "PoS MultiSafepay Cloud Payment"
     _order = "id desc"
@@ -335,10 +337,8 @@ class PosMultiSafepayCloudPayment(models.Model):
         """
         self.ensure_one()
         now_string = fields.Datetime.to_string(fields.Datetime.now())
-        write_vals, latest_response = (
-            _OdooPayloadBuilder.write_for_notification(
-                self, payload, method, now_string
-            )
+        write_vals, latest_response = _OdooPayloadBuilder.write_for_notification(
+            self, payload, method, now_string
         )
         _NotificationPayload.add_terminal_tip_warning(latest_response, payload)
         write_vals["msp_latest_response"] = latest_response
@@ -349,8 +349,6 @@ class PosMultiSafepayCloudPayment(models.Model):
                 write_vals["receipt_data"] = receipt_data
 
         self.sudo().write(write_vals)
-
-
 
     def _cancel_missing_payment_request(
         self, msp_cloud_uid=None, payment_method_id=None
@@ -432,9 +430,7 @@ class PosMultiSafepayCloudPayment(models.Model):
             sdk=sdk,
         )
         if event_payload and event_payload.get("status"):
-            status = _Status.normalize(
-                event_payload.get("status") or self.status
-            )
+            status = _Status.normalize(event_payload.get("status") or self.status)
             values = {
                 "msp_latest_response": {
                     **(self.msp_latest_response or {}),
@@ -522,10 +518,8 @@ class PosMultiSafepayCloudPayment(models.Model):
 
         cancellation = self.payment_method_id._api_cancel_cloud_pos_order(self.name)
         if cancellation.get("status") == "error":
-            write_vals, payload = (
-                _OdooPayloadBuilder.write_for_cancel_error(
-                    self, cancellation
-                )
+            write_vals, payload = _OdooPayloadBuilder.write_for_cancel_error(
+                self, cancellation
             )
             self.sudo().write(write_vals)
             return payload
@@ -577,9 +571,7 @@ class PosMultiSafepayCloudPayment(models.Model):
             description=_("POS reversal for #%(order_id)s") % {"order_id": self.name},
         )
         if refund.get("status") == "error":
-            self.sudo().write(
-                _OdooPayloadBuilder.write_for_reversal_error(refund)
-            )
+            self.sudo().write(_OdooPayloadBuilder.write_for_reversal_error(refund))
             return refund
 
         return self._mark_as_refunded(refund)
@@ -627,9 +619,7 @@ class PosMultiSafepayCloudPayment(models.Model):
             description=_("POS refund for #%(order_id)s") % {"order_id": self.name},
         )
         if refund.get("status") == "error":
-            self.sudo().write(
-                _OdooPayloadBuilder.write_for_reversal_error(refund)
-            )
+            self.sudo().write(_OdooPayloadBuilder.write_for_reversal_error(refund))
             return refund
 
         return self._mark_as_refunded(
@@ -646,9 +636,7 @@ class PosMultiSafepayCloudPayment(models.Model):
         :rtype: dict
         """
         self.ensure_one()
-        write_vals = _OdooPayloadBuilder.write_for_cancel(
-            self, cancellation
-        )
+        write_vals = _OdooPayloadBuilder.write_for_cancel(self, cancellation)
         self.sudo().write(write_vals)
         return self._build_status_payload()
 

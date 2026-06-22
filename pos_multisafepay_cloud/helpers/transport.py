@@ -4,6 +4,7 @@
 # See the DISCLAIMER.md file for disclaimer details
 
 from functools import lru_cache
+
 from multisafepay.transport import RequestsTransport
 
 DEFAULT_CLOUD_POS_TIMEOUT_SECONDS = 60

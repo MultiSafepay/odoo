@@ -20,6 +20,7 @@ from multisafepay.api.shared.checkout.tax_rule import TaxRule
 from multisafepay.api.shared.customer import Customer
 
 from odoo import _
+
 from odoo.addons.pos_multisafepay_cloud.helpers.utils import (
     _Utils,
 )
@@ -158,9 +159,7 @@ class _OrderPayloadBuilder:
         """
         tax_rate_percentage = item_data.get("tax_rate_percentage")
         if tax_rate_percentage is not None:
-            cart_item.add_tax_rate(
-                _Utils.tax_rate_from_percentage(tax_rate_percentage)
-            )
+            cart_item.add_tax_rate(_Utils.tax_rate_from_percentage(tax_rate_percentage))
         elif item_data.get("tax_table_selector") is not None:
             cart_item.add_tax_table_selector(str(item_data.get("tax_table_selector")))
         else:
@@ -191,9 +190,7 @@ class _OrderPayloadBuilder:
             "zip_code": truncate_text(customer_data.get("zip_code"), 64),
             "city": truncate_text(customer_data.get("city"), 255),
             "state": truncate_text(customer_data.get("state"), 255),
-            "country": _Utils.format_country_code(
-                customer_data.get("country")
-            ),
+            "country": _Utils.format_country_code(customer_data.get("country")),
             "phone": truncate_text(customer_data.get("phone"), 64),
             "email": _Utils.format_email(customer_data.get("email")),
         }

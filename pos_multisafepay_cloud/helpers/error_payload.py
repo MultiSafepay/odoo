@@ -50,7 +50,9 @@ class _ErrorPayload:
         return f"{error_type}: {error_message}" if error_message else error_type
 
     @classmethod
-    def build(cls, payment_method_or_detail, default_detail=None, error=None, operation=None):
+    def build(
+        cls, payment_method_or_detail, default_detail=None, error=None, operation=None
+    ):
         """Build a POS-friendly error payload for Cloud POS API failures.
 
         Can be called with a simple text message:
@@ -69,12 +71,15 @@ class _ErrorPayload:
         if default_detail is None and isinstance(payment_method_or_detail, str):
             final_detail = payment_method_or_detail
         else:
-            final_detail = cls.humanize(
-                payment_method_or_detail,
-                cls.format_exception(error),
-                default_detail,
-                operation=operation,
-            ) or default_detail
+            final_detail = (
+                cls.humanize(
+                    payment_method_or_detail,
+                    cls.format_exception(error),
+                    default_detail,
+                    operation=operation,
+                )
+                or default_detail
+            )
 
         return {
             "status": "error",

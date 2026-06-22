@@ -5,18 +5,18 @@
 // See the LICENSE.md file for more information.
 // See the DISCLAIMER.md file for disclaimer details
 
-import { _t } from "@web/core/l10n/translation";
-import { PaymentInterface } from "@point_of_sale/app/payment/payment_interface";
-import { register_payment_method } from "@point_of_sale/app/store/pos_store";
+import {_t} from "@web/core/l10n/translation";
+import {PaymentInterface} from "@point_of_sale/app/payment/payment_interface";
+import {register_payment_method} from "@point_of_sale/app/store/pos_store";
 import {
     AlertDialog,
     ConfirmationDialog,
 } from "@web/core/confirmation_dialog/confirmation_dialog";
-import { Utils } from "@pos_multisafepay_cloud/app/utils";
-
+import {Utils} from "@pos_multisafepay_cloud/app/utils";
 
 export function buildCustomer(order) {
-    const partner = order?.partner_id || order?.getPartner?.() || order?.partner || null;
+    const partner =
+        order?.partner_id || order?.getPartner?.() || order?.partner || null;
     if (!partner) {
         return null;
     }
@@ -38,7 +38,9 @@ export function buildCustomer(order) {
         email: partner.email || "",
     };
     return Object.fromEntries(
-        Object.entries(customer).filter(([, value]) => value !== null && value !== undefined && value !== "")
+        Object.entries(customer).filter(
+            ([, value]) => value !== null && value !== undefined && value !== ""
+        )
     );
 }
 
@@ -47,7 +49,9 @@ export function getRefundSourcePaymentLine(order, refundPaymentLine) {
     const refundedPaymentId = refundPaymentLine.refundedPaymentId;
     if (refundedPaymentId) {
         return refundablePaymentLines.find(
-            (line) => String(line.id) === String(refundedPaymentId) || String(line.uuid) === String(refundedPaymentId)
+            (line) =>
+                String(line.id) === String(refundedPaymentId) ||
+                String(line.uuid) === String(refundedPaymentId)
         );
     }
     return refundablePaymentLines.length === 1 ? refundablePaymentLines[0] : null;
@@ -72,10 +76,11 @@ export function getRefundableMspCloudPaymentLines(order) {
 export function isRefundableMspCloudPaymentLine(paymentLine) {
     return Boolean(
         paymentLine &&
-        paymentLine.amount > 0 &&
-        !paymentLine.is_change &&
-        paymentLine.payment_method_id?.use_payment_terminal === "multisafepay_cloud" &&
-        (paymentLine.transaction_id || paymentLine.id)
+            paymentLine.amount > 0 &&
+            !paymentLine.is_change &&
+            paymentLine.payment_method_id?.use_payment_terminal ===
+                "multisafepay_cloud" &&
+            (paymentLine.transaction_id || paymentLine.id)
     );
 }
 
@@ -98,7 +103,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
     /**
      * Define whether this terminal supports fast/offline payments.
      *
-     * @returns {boolean} Always false.
+     * @returns {Boolean} Always false.
      */
     get fast_payments() {
         return false;
@@ -125,7 +130,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
     /**
      * Initiate a payment or refund request for the given payment line UUID.
      *
-     * @param {string} uuid - Unique payment line identifier.
+     * @param {String} uuid - Unique payment line identifier.
      * @returns {Promise<boolean>} Resolves to true if payment succeeded.
      */
     async send_payment_request(uuid) {
@@ -179,12 +184,17 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             amount: line.amount,
             customer,
             shopping_cart: shoppingCart,
-            session_id: this.pos.pos_session?.id || window.odoo?.pos_session_id || this.pos.session?.id,
+            session_id:
+                this.pos.pos_session?.id ||
+                window.odoo?.pos_session_id ||
+                this.pos.session?.id,
             payment_method_id: this.payment_method_id.id,
         };
 
         this._submit_payment(data, uuid, mspCloudUid)
-            .then((response) => this._handle_initial_response(line, response, mspCloudUid))
+            .then((response) =>
+                this._handle_initial_response(line, response, mspCloudUid)
+            )
             .catch((error) => {
                 this._handle_odoo_connection_failure(uuid, mspCloudUid);
             });
@@ -195,7 +205,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
      * Cancel a pending payment transaction on the terminal screen.
      *
      * @param {Object} order - The active POS order.
-     * @param {string} uuid - Unique payment line identifier.
+     * @param {String} uuid - Unique payment line identifier.
      * @returns {Promise<boolean>} Resolves to true if cancel request succeeded.
      */
     async send_payment_cancel(order, uuid) {
@@ -210,11 +220,16 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
                     const line = order?.get_paymentline_by_uuid(uuid);
 
                     const response = await this.orm.silent
-                        .call("pos.multisafepay.cloud.payment", "cancel_payment_request", [], {
-                            order_id: line?.transaction_id,
-                            msp_cloud_uid: line?.msp_cloud_uid,
-                            payment_method_id: this.payment_method_id.id,
-                        })
+                        .call(
+                            "pos.multisafepay.cloud.payment",
+                            "cancel_payment_request",
+                            [],
+                            {
+                                order_id: line?.transaction_id,
+                                msp_cloud_uid: line?.msp_cloud_uid,
+                                payment_method_id: this.payment_method_id.id,
+                            }
+                        )
                         .catch(() => null);
 
                     if (!response) {
@@ -228,9 +243,15 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
 
                     const state = (response.state || "").toLowerCase();
                     const status = (response.status || "").toLowerCase();
-                    if (state !== "success" && !["canceled", "expired", "failed", "declined", "void"].includes(status)) {
+                    if (
+                        state !== "success" &&
+                        !["canceled", "expired", "failed", "declined", "void"].includes(
+                            status
+                        )
+                    ) {
                         this._show_error(
-                            response.detail || _t("MultiSafepay Cloud POS cancellation failed."),
+                            response.detail ||
+                                _t("MultiSafepay Cloud POS cancellation failed."),
                             _t("MultiSafepay Cloud")
                         );
                         resolve(false);
@@ -258,7 +279,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
     /**
      * Trigger a transaction reversal (void/cancellation) on the terminal.
      *
-     * @param {string} uuid - Unique payment line identifier.
+     * @param {String} uuid - Unique payment line identifier.
      * @returns {Promise<boolean>} Resolves to true if reversal succeeded.
      */
     async send_payment_reversal(uuid) {
@@ -297,7 +318,8 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             )
         ) {
             line.update({
-                transaction_id: response.order_id || response.transaction_id || line.transaction_id,
+                transaction_id:
+                    response.order_id || response.transaction_id || line.transaction_id,
             });
             return true;
         }
@@ -317,10 +339,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
      * @returns {Promise<boolean>} True if refund was successfully initiated.
      */
     async _send_refund_request(order, line) {
-        const sourcePaymentLine = getRefundSourcePaymentLine(
-            order,
-            line
-        );
+        const sourcePaymentLine = getRefundSourcePaymentLine(order, line);
         if (!sourcePaymentLine) {
             this._show_error(
                 _t("Select the original MultiSafepay Cloud POS payment to refund."),
@@ -356,9 +375,13 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
         const status = (response.status || "").toLowerCase();
         if (state === "success" || ["refunded", "partial_refunded"].includes(status)) {
             line.update({
-                transaction_id: response.refund_id || response.transaction_id || line.transaction_id,
+                transaction_id:
+                    response.refund_id ||
+                    response.transaction_id ||
+                    line.transaction_id,
                 payment_ref_no: response.order_id || sourcePaymentLine.transaction_id,
-                msp_cloud_refund_source_order_id: response.order_id || sourcePaymentLine.transaction_id,
+                msp_cloud_refund_source_order_id:
+                    response.order_id || sourcePaymentLine.transaction_id,
             });
             return true;
         }
@@ -419,8 +442,8 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
      *
      * @param {Object} line - The active payment line record.
      * @param {Object} response - The response payload.
-     * @param {string} mspCloudUid - Unique payment execution identifier.
-     * @returns {boolean} True if payment completed immediately.
+     * @param {String} mspCloudUid - Unique payment execution identifier.
+     * @returns {Boolean} True if payment completed immediately.
      */
     _handle_initial_response(line, response, mspCloudUid) {
         if (!this._is_current_pending_payment(line, mspCloudUid)) {
@@ -481,22 +504,22 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
     /**
      * Map a unique identifier to a promise resolver representing the pending checkout.
      *
-     * @param {string} uuid - Unique payment line identifier.
-     * @param {string} mspCloudUid - Unique payment execution identifier.
+     * @param {String} uuid - Unique payment line identifier.
+     * @param {String} mspCloudUid - Unique payment execution identifier.
      * @returns {Promise} The transaction outcome promise.
      */
     _register_pending_payment(uuid, mspCloudUid) {
         this._clear_poll_timeout(uuid);
         return new Promise((resolve) => {
-            this.paymentLineResolvers[uuid] = { mspCloudUid, resolve };
+            this.paymentLineResolvers[uuid] = {mspCloudUid, resolve};
         });
     }
 
     /**
      * Schedule a polling task to check transaction status at short intervals.
      *
-     * @param {string} uuid - Unique payment line identifier.
-     * @param {string} mspCloudUid - Unique payment execution identifier.
+     * @param {String} uuid - Unique payment line identifier.
+     * @param {String} mspCloudUid - Unique payment execution identifier.
      */
     _schedule_status_poll(uuid, mspCloudUid) {
         this._clear_poll_timeout(uuid);
@@ -528,7 +551,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
     /**
      * Clear the polling timeout registered for a specific payment line.
      *
-     * @param {string} uuid - Unique payment line identifier.
+     * @param {String} uuid - Unique payment line identifier.
      */
     _clear_poll_timeout(uuid) {
         if (this.paymentPollTimeouts[uuid]) {
@@ -549,18 +572,25 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             return;
         }
 
-        const paymentStatus = await this.orm
-            .call("pos.multisafepay.cloud.payment", "poll_payment_status", [], {
+        const paymentStatus = await this.orm.call(
+            "pos.multisafepay.cloud.payment",
+            "poll_payment_status",
+            [],
+            {
                 order_id: line.transaction_id,
                 msp_cloud_uid: line.msp_cloud_uid,
-            });
+            }
+        );
 
         if (!paymentStatus || !this._is_current_pending_payment(line, mspCloudUid)) {
             return;
         }
 
         line.update({
-            transaction_id: paymentStatus.order_id || paymentStatus.transaction_id || line.transaction_id,
+            transaction_id:
+                paymentStatus.order_id ||
+                paymentStatus.transaction_id ||
+                line.transaction_id,
         });
 
         const state = (paymentStatus.state || "").toLowerCase();
@@ -581,8 +611,8 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
     /**
      * Resolve the status of a payment line and update Odoo's payment state.
      *
-     * @param {string} uuid - Unique payment line identifier.
-     * @param {boolean} success - True if the payment was completed successfully.
+     * @param {String} uuid - Unique payment line identifier.
+     * @param {Boolean} success - True if the payment was completed successfully.
      * @param {string|null} mspCloudUid - Optional unique payment execution identifier.
      */
     _resolve_payment_status(uuid, success, mspCloudUid = null) {
@@ -606,10 +636,10 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
     /**
      * Resolve the checkout promise mapper for a pending payment attempt.
      *
-     * @param {string} uuid - Unique payment line identifier.
-     * @param {boolean} success - True if transaction completed successfully.
+     * @param {String} uuid - Unique payment line identifier.
+     * @param {Boolean} success - True if transaction completed successfully.
      * @param {string|null} mspCloudUid - Optional unique payment execution identifier.
-     * @returns {boolean} True if a pending registry was found and resolved.
+     * @returns {Boolean} True if a pending registry was found and resolved.
      */
     _resolve_pending_payment(uuid, success, mspCloudUid = null) {
         const pendingPayment = this.paymentLineResolvers[uuid];
@@ -633,9 +663,9 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
     /**
      * Update the tracked transaction reference code of a pending payment resolver.
      *
-     * @param {string} uuid - Unique payment line identifier.
-     * @param {string} currentMspCloudUid - Existing identifier key.
-     * @param {string} nextMspCloudUid - New identifier key to assign.
+     * @param {String} uuid - Unique payment line identifier.
+     * @param {String} currentMspCloudUid - Existing identifier key.
+     * @param {String} nextMspCloudUid - New identifier key to assign.
      */
     _update_pending_payment_attempt_id(uuid, currentMspCloudUid, nextMspCloudUid) {
         const pendingPayment = this.paymentLineResolvers[uuid];
@@ -649,7 +679,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
      *
      * @param {Object} line - The active payment line record.
      * @param {string|null} mspCloudUid - Unique execution identifier to check.
-     * @returns {boolean} True if matched.
+     * @returns {Boolean} True if matched.
      */
     _is_current_pending_payment(line, mspCloudUid = null) {
         if (!line) {
@@ -658,16 +688,16 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
         const pendingPayment = this.paymentLineResolvers[line.uuid];
         return Boolean(
             pendingPayment &&
-            (!mspCloudUid || pendingPayment.mspCloudUid === mspCloudUid) &&
-            line.msp_cloud_uid === pendingPayment.mspCloudUid
+                (!mspCloudUid || pendingPayment.mspCloudUid === mspCloudUid) &&
+                line.msp_cloud_uid === pendingPayment.mspCloudUid
         );
     }
 
     /**
      * Display an alert popup dialog to the user with a localized message.
      *
-     * @param {string} message - The message content.
-     * @param {string} title - The dialog header title.
+     * @param {String} message - The message content.
+     * @param {String} title - The dialog header title.
      */
     _show_error(message, title = _t("MultiSafepay Cloud Error")) {
         this.dialog.add(AlertDialog, {
@@ -686,7 +716,6 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             this._show_error(response.warning, _t("MultiSafepay Cloud"));
         }
     }
-
 }
 
 register_payment_method("multisafepay_cloud", PaymentMultiSafepayCloud);

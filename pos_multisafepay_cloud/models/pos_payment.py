@@ -43,5 +43,3 @@ class PosPayment(models.Model):
                 continue
             missing_fields.append(field_name)
         return base_fields + missing_fields
-
-

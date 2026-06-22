@@ -8,6 +8,7 @@ import logging
 from decimal import Decimal
 
 from odoo import _
+
 from odoo.addons.pos_multisafepay_cloud.helpers.utils import (
     _Utils,
 )

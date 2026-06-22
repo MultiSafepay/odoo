@@ -13,12 +13,10 @@ from multisafepay.api.paths.orders.order_id.refund.request.refund_request import
     RefundOrderRequest,
 )
 from multisafepay.api.paths.orders.request import OrderRequest
-from multisafepay.api.paths.orders.request.components.plugin import Plugin
-
 from multisafepay.api.paths.orders.request.components.payment_options import (
     PaymentOptions,
 )
-
+from multisafepay.api.paths.orders.request.components.plugin import Plugin
 from multisafepay.client import ScopedCredentialResolver
 from multisafepay.client.credential_resolver import AuthScope
 from multisafepay.util.json_encoder import DecimalEncoder
@@ -28,21 +26,21 @@ from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
 
-from odoo.addons.pos_multisafepay_cloud.helpers.status import _Status
-from odoo.addons.pos_multisafepay_cloud.helpers.utils import (
-    _Utils,
-)
-from odoo.addons.pos_multisafepay_cloud.helpers.serializer import (
-    _Serializer,
-)
-from odoo.addons.pos_multisafepay_cloud.helpers.sdk_factory import (
-    _SDKFactory,
+from odoo.addons.pos_multisafepay_cloud.helpers.error_payload import (
+    _ErrorPayload,
 )
 from odoo.addons.pos_multisafepay_cloud.helpers.order_payload_builder import (
     _OrderPayloadBuilder,
 )
-from odoo.addons.pos_multisafepay_cloud.helpers.error_payload import (
-    _ErrorPayload,
+from odoo.addons.pos_multisafepay_cloud.helpers.sdk_factory import (
+    _SDKFactory,
+)
+from odoo.addons.pos_multisafepay_cloud.helpers.serializer import (
+    _Serializer,
+)
+from odoo.addons.pos_multisafepay_cloud.helpers.status import _Status
+from odoo.addons.pos_multisafepay_cloud.helpers.utils import (
+    _Utils,
 )
 
 MSP_CLOUD_PAYMENT_TERMINAL_CODE = "multisafepay_cloud"
@@ -353,12 +351,10 @@ class PosPaymentMethod(models.Model):
             self,
             shopping_cart,
         )
-        shopping_cart_summary = (
-            _OrderPayloadBuilder.shopping_cart_summary(shopping_cart_data)
-        )
-        amount_details = _OrderPayloadBuilder.amount_details(
+        shopping_cart_summary = _OrderPayloadBuilder.shopping_cart_summary(
             shopping_cart_data
         )
+        amount_details = _OrderPayloadBuilder.amount_details(shopping_cart_data)
         customer = _OrderPayloadBuilder.customer(data.get("customer"))
         order_description = _OrderPayloadBuilder.order_description(
             data,

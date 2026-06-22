@@ -3,7 +3,6 @@
 # See the LICENSE.md file for more information.
 # See the DISCLAIMER.md file for disclaimer details
 
-import json
 import logging
 
 from odoo import http
@@ -84,4 +83,3 @@ class PosMultiSafepayCloudController(http.Controller):
             notification.get("transaction_id"),
         )
         return request.make_response("OK", status=200)
-

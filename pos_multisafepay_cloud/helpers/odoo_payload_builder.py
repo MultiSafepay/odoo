@@ -3,10 +3,10 @@
 # See the LICENSE.md file for more information.
 # See the DISCLAIMER.md file for disclaimer details
 
-from odoo.addons.pos_multisafepay_cloud.helpers.status import _Status
 from odoo.addons.pos_multisafepay_cloud.helpers.order_context_builder import (
     _OrderContextBuilder,
 )
+from odoo.addons.pos_multisafepay_cloud.helpers.status import _Status
 
 
 class _OdooPayloadBuilder:
@@ -42,8 +42,10 @@ class _OdooPayloadBuilder:
             "session_id": data.get("session_id"),
             "terminal_id": terminal_id,
             "events_token": response.get("events_token") or response.get("event_token"),
-            "remote_transaction_id": response.get("transaction_id") or response.get("order_id"),
-            "events_stream_url": response.get("events_stream_url") or response.get("event_stream_url"),
+            "remote_transaction_id": response.get("transaction_id")
+            or response.get("order_id"),
+            "events_stream_url": response.get("events_stream_url")
+            or response.get("event_stream_url"),
             "last_event_id": response.get("last_event_id"),
             "msp_latest_response": payload,
             "status": status,
@@ -62,12 +64,18 @@ class _OdooPayloadBuilder:
         :rtype: dict
         """
         status = _Status.normalize(cancellation.get("status") or "canceled")
-        payload = (payment.msp_latest_response or {}) | cancellation | {
-            "status": status,
-            "state": _Status.state(status),
-            "order_id": payment.name,
-            "transaction_id": cancellation.get("transaction_id") or payment.remote_transaction_id or payment.name,
-        }
+        payload = (
+            (payment.msp_latest_response or {})
+            | cancellation
+            | {
+                "status": status,
+                "state": _Status.state(status),
+                "order_id": payment.name,
+                "transaction_id": cancellation.get("transaction_id")
+                or payment.remote_transaction_id
+                or payment.name,
+            }
+        )
         return {
             "msp_latest_response": payload,
             "status": status,
@@ -136,14 +144,20 @@ class _OdooPayloadBuilder:
             "notification_method": method,
             "notification_received_at": now_string,
         }
-        for key in ("last_status_refresh_error", "last_status_refresh_error_at", "last_status_refresh_error_source"):
+        for key in (
+            "last_status_refresh_error",
+            "last_status_refresh_error_at",
+            "last_status_refresh_error_source",
+        ):
             latest_response.pop(key, None)
 
         write_vals = {
             "status": status,
             "remote_transaction_id": transaction_id,
             "stream_state": "done" if state != "pending" else payment.stream_state,
-            "stream_lock_until": False if state != "pending" else payment.stream_lock_until,
+            "stream_lock_until": False
+            if state != "pending"
+            else payment.stream_lock_until,
         }
 
         cls._append_events(payload, write_vals, latest_response)
@@ -185,7 +199,9 @@ class _OdooPayloadBuilder:
 
         stream_url = payload.get("events_stream_url") or payload.get("event_stream_url")
         if stream_url:
-            write_vals["events_stream_url"] = latest_response["events_stream_url"] = stream_url
+            write_vals["events_stream_url"] = latest_response["events_stream_url"] = (
+                stream_url
+            )
 
     @staticmethod
     def write_for_refresh_error(payment, remote_status, source, now_string):
@@ -238,10 +254,14 @@ class _OdooPayloadBuilder:
         :return: A tuple of write values dictionary and error payload dictionary.
         :rtype: tuple[dict, dict]
         """
-        payload = (payment.msp_latest_response or {}) | cancellation | {
-            "order_id": payment.name,
-            "transaction_id": payment.remote_transaction_id or payment.name,
-        }
+        payload = (
+            (payment.msp_latest_response or {})
+            | cancellation
+            | {
+                "order_id": payment.name,
+                "transaction_id": payment.remote_transaction_id or payment.name,
+            }
+        )
         write_vals = {
             "msp_latest_response": payload,
             "status": "error",

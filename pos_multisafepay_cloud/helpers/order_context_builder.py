@@ -34,7 +34,9 @@ class _OrderContextBuilder:
             "odoo_order_amount": data.get("amount") if isinstance(data, dict) else None,
             "odoo_shopping_cart_item_count": len(items),
             "odoo_shopping_cart_amount": float(cart_amount),
-            "odoo_shopping_cart_amount_cents": _Utils.amount_to_minor_units(cart_amount),
+            "odoo_shopping_cart_amount_cents": _Utils.amount_to_minor_units(
+                cart_amount
+            ),
             "odoo_tip_amount": float(tip_amount),
             "odoo_tip_amount_cents": _Utils.amount_to_minor_units(tip_amount),
             "odoo_tip_line_count": tip_line_count,

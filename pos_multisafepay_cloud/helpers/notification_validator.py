@@ -41,7 +41,9 @@ class _NotificationValidator:
             )
             return False
 
-        return cls._validate_with_api_keys(payment_name, raw_body, auth_header, api_keys)
+        return cls._validate_with_api_keys(
+            payment_name, raw_body, auth_header, api_keys
+        )
 
     @staticmethod
     def _get_api_keys(payment_method):
