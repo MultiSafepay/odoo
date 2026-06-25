@@ -5,14 +5,14 @@
 // See the LICENSE.md file for more information.
 // See the DISCLAIMER.md file for disclaimer details
 
-import {_t} from "@web/core/l10n/translation";
-import {PaymentInterface} from "@point_of_sale/app/payment/payment_interface";
-import {register_payment_method} from "@point_of_sale/app/store/pos_store";
+import { _t } from "@web/core/l10n/translation";
+import { PaymentInterface } from "@point_of_sale/app/payment/payment_interface";
+import { register_payment_method } from "@point_of_sale/app/store/pos_store";
 import {
     AlertDialog,
     ConfirmationDialog,
 } from "@web/core/confirmation_dialog/confirmation_dialog";
-import {Utils} from "@pos_multisafepay_cloud/app/utils";
+import { Utils } from "@pos_multisafepay_cloud/app/utils";
 
 export function buildCustomer(order) {
     const partner =
@@ -44,14 +44,86 @@ export function buildCustomer(order) {
     );
 }
 
+export function buildShoppingCart(order, pos) {
+    const orderLines = order?.get_orderlines?.() || order?.lines || [];
+    if (!orderLines.length) {
+        return null;
+    }
+
+    const tipProductId =
+        pos?.config?.tip_product_id?.[0] ||
+        pos?.config?.tip_product_id?.id ||
+        pos?.config?.tip_product_id;
+
+    const items = orderLines.map((line) => {
+        let product = line.product_id || line.product || line.get_product?.();
+        let productId = null;
+        let productName = null;
+        let taxes = [];
+
+        if (Array.isArray(product)) {
+            productId = product[0];
+            productName = product[1];
+        } else if (product && typeof product === "object") {
+            productId = product.id;
+            productName =
+                product.display_name || product.name || product.full_product_name;
+            taxes = product.taxes_id || [];
+        }
+
+        const isTip = Boolean(
+            tipProductId && productId && String(productId) === String(tipProductId)
+        );
+        const taxRate = taxes.length ? taxes[0].amount || 0 : 0;
+
+        const possiblePrices =
+            [
+                line.price_unit,
+                line.price,
+                line.price_subtotal,
+                line.price_subtotal_incl,
+                typeof line.get_unit_price === "function"
+                    ? line.get_unit_price()
+                    : undefined,
+                typeof line.get_price_with_tax === "function"
+                    ? line.get_price_with_tax()
+                    : undefined,
+                typeof line.get_price_without_tax === "function"
+                    ? line.get_price_without_tax()
+                    : undefined,
+            ].find((p) => p !== undefined && p !== null && p !== 0) || 0;
+
+        const possibleQty =
+            [
+                line.qty,
+                line.quantity,
+                typeof line.get_quantity === "function"
+                    ? line.get_quantity()
+                    : undefined,
+            ].find((q) => q !== undefined && q !== null) || 1;
+
+        return {
+            name: line.full_product_name || productName || "POS Item",
+            description: "",
+            unit_price: possiblePrices,
+            quantity: possibleQty,
+            merchant_item_id: String(productId || "pos-item"),
+            tax_rate_percentage: taxRate,
+            msp_cloud_is_tip: isTip,
+        };
+    });
+
+    return { items };
+}
+
 export function isRefundableMspCloudPaymentLine(paymentLine) {
     return Boolean(
         paymentLine &&
-            paymentLine.amount > 0 &&
-            !paymentLine.is_change &&
-            paymentLine.payment_method_id?.use_payment_terminal ===
-                "multisafepay_cloud" &&
-            (paymentLine.transaction_id || paymentLine.id)
+        paymentLine.amount > 0 &&
+        !paymentLine.is_change &&
+        paymentLine.payment_method_id?.use_payment_terminal ===
+        "multisafepay_cloud" &&
+        (paymentLine.transaction_id || paymentLine.id)
     );
 }
 
@@ -172,7 +244,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
 
         const paymentConfirmation = this._register_pending_payment(uuid, mspCloudUid);
         const customer = buildCustomer(order);
-        const shoppingCart = null;
+        const shoppingCart = buildShoppingCart(order, this.pos);
         const data = {
             msp_cloud_uid: mspCloudUid,
             msp_cloud_attempt_base: mspCloudAttemptBase,
@@ -251,7 +323,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
                     ) {
                         this._show_error(
                             response.detail ||
-                                _t("MultiSafepay Cloud POS cancellation failed."),
+                            _t("MultiSafepay Cloud POS cancellation failed."),
                             _t("MultiSafepay Cloud")
                         );
                         resolve(false);
@@ -511,7 +583,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
     _register_pending_payment(uuid, mspCloudUid) {
         this._clear_poll_timeout(uuid);
         return new Promise((resolve) => {
-            this.paymentLineResolvers[uuid] = {mspCloudUid, resolve};
+            this.paymentLineResolvers[uuid] = { mspCloudUid, resolve };
         });
     }
 
@@ -688,8 +760,8 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
         const pendingPayment = this.paymentLineResolvers[line.uuid];
         return Boolean(
             pendingPayment &&
-                (!mspCloudUid || pendingPayment.mspCloudUid === mspCloudUid) &&
-                line.msp_cloud_uid === pendingPayment.mspCloudUid
+            (!mspCloudUid || pendingPayment.mspCloudUid === mspCloudUid) &&
+            line.msp_cloud_uid === pendingPayment.mspCloudUid
         );
     }
 

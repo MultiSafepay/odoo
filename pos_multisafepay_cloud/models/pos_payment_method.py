@@ -354,7 +354,10 @@ class PosPaymentMethod(models.Model):
         shopping_cart_summary = _OrderPayloadBuilder.shopping_cart_summary(
             shopping_cart_data
         )
-        amount_details = _OrderPayloadBuilder.amount_details(shopping_cart_data)
+        amount_details = _OrderPayloadBuilder.amount_details(
+            shopping_cart_data,
+            tip_amount_override=data.get("tip_amount"),
+        )
         customer = _OrderPayloadBuilder.customer(data.get("customer"))
         order_description = _OrderPayloadBuilder.order_description(
             data,
@@ -392,10 +395,6 @@ class PosPaymentMethod(models.Model):
             if customer:
                 order_request.add_customer(customer)
 
-            if shopping_cart:
-                order_request.add_shopping_cart(shopping_cart)
-            if checkout_options:
-                order_request.add_checkout_options(checkout_options)
             if amount_details:
                 order_request.add_amount_details(amount_details)
 

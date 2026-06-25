@@ -60,14 +60,19 @@ class _OrderPayloadBuilder:
         return ShoppingCart(items=cart_items) if cart_items else None
 
     @classmethod
-    def amount_details(cls, shopping_cart_data):
+    def amount_details(cls, shopping_cart_data, tip_amount_override=None):
         """Build amount details such as tips for the Cloud POS request.
 
         :param dict shopping_cart_data: Cart payload dictionary.
+        :param float|int tip_amount_override: Direct tip amount if provided by frontend.
         :return: AmountDetails structure or None.
         :rtype: multisafepay.api.paths.orders.request.components.AmountDetails or None
         """
-        tip_amount = cls.shopping_cart_tip_amount(shopping_cart_data)
+        if tip_amount_override is not None and float(tip_amount_override) > 0:
+            tip_amount = _Utils.parse_decimal(tip_amount_override)
+        else:
+            tip_amount = cls.shopping_cart_tip_amount(shopping_cart_data)
+
         tip_amount_in_cents = _Utils.amount_to_minor_units(tip_amount)
         if tip_amount_in_cents <= 0:
             return None
