@@ -400,10 +400,13 @@ class PosPaymentMethod(models.Model):
 
             sdk = self._get_multisafepay_cloud_sdk()
             order_manager = sdk.get_order_manager()
-            _logger.warning(
-                "MSP Cloud POS order request payload debug: %s",
-                json.dumps(order_request.to_dict(), cls=DecimalEncoder, sort_keys=True),
-            )
+            if _logger.isEnabledFor(logging.DEBUG):
+                _logger.debug(
+                    "MSP Cloud POS order request payload: %s",
+                    json.dumps(
+                        order_request.to_dict(), cls=DecimalEncoder, sort_keys=True
+                    ),
+                )
             create_response = order_manager.create(
                 order_request,
                 terminal_group_id=self.msp_cloud_terminal_group_id.strip(),
