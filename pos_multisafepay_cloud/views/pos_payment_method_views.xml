@@ -33,7 +33,6 @@
                     />
                     <field name="msp_cloud_account_api_key" password="True" />
                     <field name="msp_cloud_validate_cart" invisible="1" />
-
                 </group>
                 <group
                     invisible="use_payment_terminal != 'multisafepay_cloud'"

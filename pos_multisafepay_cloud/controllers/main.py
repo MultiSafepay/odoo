@@ -17,7 +17,6 @@ _logger = logging.getLogger(__name__)
 
 
 class PosMultiSafepayCloudController(http.Controller):
-
     def _find_payment(self, env, reference):
         """Find the corresponding payment record for a given reference."""
         PaymentModel = env["pos.multisafepay.cloud.payment"].sudo()
@@ -54,15 +53,21 @@ class PosMultiSafepayCloudController(http.Controller):
 
             # 2. Early Validation: Missing Parameter (422)
             if not reference:
-                _logger.warning("MSP Cloud POS notification rejected (No Reference): %s", log_data)
-                return request.make_response("Notification rejected: No order reference", status=422)
+                _logger.warning(
+                    "MSP Cloud POS notification rejected (No Reference): %s", log_data
+                )
+                return request.make_response(
+                    "Notification rejected: No order reference", status=422
+                )
 
             # 3. Database Lookup (404)
             payment = self._find_payment(request.env, reference)
             if not payment:
                 status_code = 404
                 status_payload = _FrontendResponseBuilder.error(
-                    _("No MultiSafepay Cloud POS payment was found for this notification."),
+                    _(
+                        "No MultiSafepay Cloud POS payment was found for this notification."
+                    ),
                     status_code=404,
                     extra={"order_id": reference, "notification": notification_payload},
                 )
@@ -72,14 +77,16 @@ class PosMultiSafepayCloudController(http.Controller):
                 status_payload = payment._force_remote_status_check(method="GET")
 
             # 5. Build Log Payload
-            log_data.update({
-                "status": status_payload.get("status"),
-                "state": status_payload.get("state"),
-                "order_id": status_payload.get("order_id"),
-                "transaction_id": status_payload.get("transaction_id"),
-                "detail": status_payload.get("detail"),
-                "status_code": status_code,
-            })
+            log_data.update(
+                {
+                    "status": status_payload.get("status"),
+                    "state": status_payload.get("state"),
+                    "order_id": status_payload.get("order_id"),
+                    "transaction_id": status_payload.get("transaction_id"),
+                    "detail": status_payload.get("detail"),
+                    "status_code": status_code,
+                }
+            )
 
             # 6. Final HTTP Response Mapping
             if status_code == 200:
@@ -99,7 +106,9 @@ class PosMultiSafepayCloudController(http.Controller):
                     status=status_code,
                 )
         except Exception as e:
-            _logger.exception("MSP Cloud POS GET notification failed with unhandled exception: %s", e)
+            _logger.exception(
+                "MSP Cloud POS GET notification failed with unhandled exception: %s", e
+            )
             return request.make_response("Internal Server Error", status=500)
 
     @http.route(
@@ -117,8 +126,12 @@ class PosMultiSafepayCloudController(http.Controller):
             try:
                 json_payload = json.loads(raw_body) if raw_body else {}
             except ValueError:
-                _logger.warning("MSP Cloud POS notification rejected (Malformed JSON): method=POST")
-                return request.make_response("Notification rejected: Malformed JSON", status=400)
+                _logger.warning(
+                    "MSP Cloud POS notification rejected (Malformed JSON): method=POST"
+                )
+                return request.make_response(
+                    "Notification rejected: Malformed JSON", status=400
+                )
 
             # 2. Payload Normalization
             payload = _NotificationPayload.get_from_request(
@@ -140,15 +153,21 @@ class PosMultiSafepayCloudController(http.Controller):
 
             # 3. Early Validation: Missing Parameter (422)
             if not reference:
-                _logger.warning("MSP Cloud POS notification rejected (No Reference): %s", log_data)
-                return request.make_response("Notification rejected: No order reference", status=422)
+                _logger.warning(
+                    "MSP Cloud POS notification rejected (No Reference): %s", log_data
+                )
+                return request.make_response(
+                    "Notification rejected: No order reference", status=422
+                )
 
             # 4. Database Lookup (404)
             payment = self._find_payment(request.env, reference)
             if not payment:
                 status_code = 404
                 notification = _FrontendResponseBuilder.error(
-                    _("No MultiSafepay Cloud POS payment was found for this notification."),
+                    _(
+                        "No MultiSafepay Cloud POS payment was found for this notification."
+                    ),
                     status_code=404,
                     extra={"order_id": reference, "notification": notification_payload},
                 )
@@ -170,7 +189,11 @@ class PosMultiSafepayCloudController(http.Controller):
                 # Reaching this branch means the payment exists and signature validation did not reject it.
                 status_payload = notification_payload
                 if not notification_payload.get("status"):
-                    remote_status = payment.payment_method_id._api_get_cloud_order_status(payment.name)
+                    remote_status = (
+                        payment.payment_method_id._api_get_cloud_order_status(
+                            payment.name
+                        )
+                    )
                     if remote_status and remote_status.get("state") != "failure":
                         status_payload = {**notification_payload, **remote_status}
 
@@ -179,14 +202,16 @@ class PosMultiSafepayCloudController(http.Controller):
                 notification = payment._build_status_payload()
 
             # 7. Build Log Payload
-            log_data.update({
-                "status": notification.get("status"),
-                "state": notification.get("state"),
-                "order_id": notification.get("order_id"),
-                "transaction_id": notification.get("transaction_id"),
-                "detail": notification.get("detail"),
-                "status_code": status_code,
-            })
+            log_data.update(
+                {
+                    "status": notification.get("status"),
+                    "state": notification.get("state"),
+                    "order_id": notification.get("order_id"),
+                    "transaction_id": notification.get("transaction_id"),
+                    "detail": notification.get("detail"),
+                    "status_code": status_code,
+                }
+            )
 
             # 8. Final HTTP Response Mapping
             if status_code == 200:
@@ -206,5 +231,7 @@ class PosMultiSafepayCloudController(http.Controller):
                     status=status_code,
                 )
         except Exception as e:
-            _logger.exception("MSP Cloud POS POST notification failed with unhandled exception: %s", e)
+            _logger.exception(
+                "MSP Cloud POS POST notification failed with unhandled exception: %s", e
+            )
             return request.make_response("Internal Server Error", status=500)

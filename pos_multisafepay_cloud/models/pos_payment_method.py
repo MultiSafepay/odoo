@@ -128,8 +128,6 @@ class PosPaymentMethod(models.Model):
                         vals["image"] = base64.b64encode(icon_file.read())
         return super().create(vals_list)
 
-
-
     @api.constrains(
         "use_payment_terminal",
         "active",
