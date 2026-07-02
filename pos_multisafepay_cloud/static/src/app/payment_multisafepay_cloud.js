@@ -5,14 +5,14 @@
 // See the LICENSE.md file for more information.
 // See the DISCLAIMER.md file for disclaimer details
 
-import { _t } from "@web/core/l10n/translation";
-import { PaymentInterface } from "@point_of_sale/app/payment/payment_interface";
-import { register_payment_method } from "@point_of_sale/app/store/pos_store";
+import {_t} from "@web/core/l10n/translation";
+import {PaymentInterface} from "@point_of_sale/app/payment/payment_interface";
+import {register_payment_method} from "@point_of_sale/app/store/pos_store";
 import {
     AlertDialog,
     ConfirmationDialog,
 } from "@web/core/confirmation_dialog/confirmation_dialog";
-import { Utils } from "@pos_multisafepay_cloud/app/utils";
+import {Utils} from "@pos_multisafepay_cloud/app/utils";
 
 export function buildCustomer(order) {
     const partner =
@@ -56,7 +56,7 @@ export function buildShoppingCart(order, pos) {
         pos?.config?.tip_product_id;
 
     const items = orderLines.map((line) => {
-        let product = line.product_id || line.product || line.get_product?.();
+        const product = line.product_id || line.product || line.get_product?.();
         let productId = null;
         let productName = null;
         let taxes = [];
@@ -113,17 +113,17 @@ export function buildShoppingCart(order, pos) {
         };
     });
 
-    return { items };
+    return {items};
 }
 
 export function isRefundableMspCloudPaymentLine(paymentLine) {
     return Boolean(
         paymentLine &&
-        paymentLine.amount > 0 &&
-        !paymentLine.is_change &&
-        paymentLine.payment_method_id?.use_payment_terminal ===
-        "multisafepay_cloud" &&
-        (paymentLine.transaction_id || paymentLine.id)
+            paymentLine.amount > 0 &&
+            !paymentLine.is_change &&
+            paymentLine.payment_method_id?.use_payment_terminal ===
+                "multisafepay_cloud" &&
+            (paymentLine.transaction_id || paymentLine.id)
     );
 }
 
@@ -323,7 +323,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
                     ) {
                         this._show_error(
                             response.detail ||
-                            _t("MultiSafepay Cloud POS cancellation failed."),
+                                _t("MultiSafepay Cloud POS cancellation failed."),
                             _t("MultiSafepay Cloud")
                         );
                         resolve(false);
@@ -545,6 +545,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
                 remoteOrderId
             );
             mspCloudUid = remoteOrderId;
+            line.msp_cloud_uid = remoteOrderId;
         }
         line.update({
             transaction_id: remoteOrderId || line.transaction_id,
@@ -583,7 +584,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
     _register_pending_payment(uuid, mspCloudUid) {
         this._clear_poll_timeout(uuid);
         return new Promise((resolve) => {
-            this.paymentLineResolvers[uuid] = { mspCloudUid, resolve };
+            this.paymentLineResolvers[uuid] = {mspCloudUid, resolve};
         });
     }
 
@@ -617,7 +618,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             ) {
                 this._schedule_status_poll(uuid, mspCloudUid);
             }
-        }, 3000);
+        }, 2000);
     }
 
     /**
@@ -760,8 +761,8 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
         const pendingPayment = this.paymentLineResolvers[line.uuid];
         return Boolean(
             pendingPayment &&
-            (!mspCloudUid || pendingPayment.mspCloudUid === mspCloudUid) &&
-            line.msp_cloud_uid === pendingPayment.mspCloudUid
+                (!mspCloudUid || pendingPayment.mspCloudUid === mspCloudUid) &&
+                line.msp_cloud_uid === pendingPayment.mspCloudUid
         );
     }
 

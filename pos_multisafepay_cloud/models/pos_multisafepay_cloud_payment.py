@@ -15,9 +15,6 @@ from ..helpers.frontend_response_builder import (
 from ..helpers.notification_payload import (
     _NotificationPayload,
 )
-from ..helpers.notification_validator import (
-    _NotificationValidator,
-)
 from ..helpers.odoo_payload_builder import (
     _OdooPayloadBuilder,
 )
@@ -107,6 +104,14 @@ class PosMultiSafepayCloudPayment(models.Model):
         values = _OdooPayloadBuilder.create_values(
             response, data, payment_method.msp_cloud_terminal_id, status
         )
+
+        _logger.info(
+            "Created MultiSafepay Cloud POS payment tracker for order %s (Remote ID: %s, Status: %s).",
+            values.get("name"),
+            values.get("remote_transaction_id"),
+            status,
+        )
+
         return self.sudo().create(values)
 
     @api.model
@@ -122,8 +127,9 @@ class PosMultiSafepayCloudPayment(models.Model):
         if not payment:
             return {}
 
-        if _Status.state(payment.status) == "pending":
-            payment._refresh_status()
+        # The frontend only polls Odoo's local state, expecting the webhook to update the database.
+        # if _Status.state(payment.status) == "pending":
+        #     payment._refresh_status()
 
         return payment._build_status_payload()
 
@@ -217,80 +223,6 @@ class PosMultiSafepayCloudPayment(models.Model):
             source_payment=source_payment,
         )
 
-    @api.model
-    def process_notification(
-        self,
-        payload,
-        raw_body=None,
-        auth_header=None,
-        method=None,
-    ):
-        """Handle incoming status webhooks from MultiSafepay.
-
-        :param dict payload: The webhook notification payload.
-        :param str raw_body: The raw HTTP request body.
-        :param str auth_header: The HTTP Auth validation header.
-        :param str method: The HTTP request method.
-        :return: A status response dictionary.
-        :rtype: dict
-        """
-        method_name = (method or "").upper()
-        notification_payload = payload if isinstance(payload, dict) else {}
-        reference = _NotificationPayload.get_reference(notification_payload)
-        if not reference:
-            return _FrontendResponseBuilder.error(
-                _("The MultiSafepay Cloud POS notification has no order reference."),
-                status_code=400,
-                extra={"notification": notification_payload},
-            )
-
-        payment = self._find_payment(
-            order_id=reference,
-            msp_cloud_uid=reference,
-            include_remote=True,
-        )
-        if not payment:
-            return _FrontendResponseBuilder.error(
-                _("No MultiSafepay Cloud POS payment was found for this notification."),
-                status_code=404,
-                extra={"order_id": reference, "notification": notification_payload},
-            )
-
-        if not payment.payment_method_id._msp_cloud_allows_webhook_confirmation(method):
-            _logger.info(
-                "MSP Cloud POS notification ignored for order %s because payment method %s uses confirmation channel %s.",
-                payment.name,
-                payment.payment_method_id.display_name,
-                payment.payment_method_id._msp_cloud_confirmation_channel_value(),
-            )
-            return payment._build_status_payload()
-
-        if not _NotificationValidator.validate(
-            payment.name,
-            payment.payment_method_id,
-            raw_body,
-            auth_header,
-        ):
-            return _FrontendResponseBuilder.error(
-                _("The MultiSafepay Cloud POS notification signature is invalid."),
-                status_code=403,
-                extra={"order_id": payment.name},
-            )
-
-        if method_name == "GET":
-            return payment._force_remote_status_check(method=method_name)
-
-        status_payload = notification_payload
-        if not notification_payload.get("status"):
-            remote_status = payment.payment_method_id._api_get_cloud_order_status(
-                payment.name
-            )
-            if remote_status and remote_status.get("state") != "failure":
-                status_payload = {**notification_payload, **remote_status}
-
-        payment._apply_notification_payload(status_payload, method=method)
-        return payment._build_status_payload()
-
     def _force_remote_status_check(self, method=None):
         """Fetch remote order status and apply it as a notification update.
 
@@ -347,6 +279,14 @@ class PosMultiSafepayCloudPayment(models.Model):
             receipt_data = self.payment_method_id._api_get_cloud_receipt(self.name)
             if receipt_data:
                 write_vals["receipt_data"] = receipt_data
+
+        _logger.info(
+            "MultiSafepay Cloud POS payment %s updated (Method: %s). New Status: %s (State: %s)",
+            self.name,
+            method or "unknown",
+            write_vals.get("status", self.status),
+            latest_response.get("state", "unknown"),
+        )
 
         self.sudo().write(write_vals)
 
@@ -522,8 +462,14 @@ class PosMultiSafepayCloudPayment(models.Model):
                 self, cancellation
             )
             self.sudo().write(write_vals)
+            _logger.warning(
+                "MultiSafepay Cloud POS payment cancellation failed for %s.", self.name
+            )
             return payload
 
+        _logger.info(
+            "MultiSafepay Cloud POS payment %s was successfully cancelled.", self.name
+        )
         return self._mark_as_canceled(cancellation)
 
     def _reverse_payment_request(self, amount=None, currency=None):

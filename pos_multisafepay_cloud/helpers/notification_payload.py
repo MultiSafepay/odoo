@@ -49,8 +49,9 @@ class _NotificationPayload:
         :rtype: dict
         """
         if (method or "").upper() == "GET":
-            order_id = kwargs.get("order_id")
-            return {"order_id": order_id} if order_id else {}
+            return {
+                k: kwargs.get(k) for k in ("transactionid", "timestamp") if k in kwargs
+            }
 
         payload = json_payload or {}
         if not payload and raw_body:
@@ -98,21 +99,11 @@ class _NotificationPayload:
     def get_reference(payload):
         """Extract the best order reference match from a notification.
 
-        :param dict payload: The notification webhook body.
+        :param dict payload: The notification webhook payload or query parameters.
         :return: A string reference or empty string.
         :rtype: str
         """
-        for key in (
-            "order_id",
-            "orderid",
-            "orderId",
-            "transactionid",
-            "transaction_id",
-            "transactionId",
-            "reference",
-            "id",
-            "msp_cloud_uid",
-        ):
+        for key in ("transactionid", "order_id"):
             reference = payload.get(key)
             if reference:
                 return str(reference)

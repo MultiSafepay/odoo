@@ -5,6 +5,7 @@
 
 """Cloud POS payment method configuration and SDK helpers."""
 
+import base64
 import json
 import logging
 import os
@@ -23,6 +24,7 @@ from multisafepay.util.json_encoder import DecimalEncoder
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
+from odoo.modules.module import get_module_resource
 
 from ..helpers.error_payload import (
     _ErrorPayload,
@@ -84,16 +86,7 @@ class PosPaymentMethod(models.Model):
         default=False,
         help="Ask MultiSafepay to validate the shopping cart total against the payment amount. Enable this only when Cloud POS payments always cover the full POS order amount.",
     )
-    msp_cloud_confirmation_channel = fields.Selection(
-        [
-            ("webhook", "Webhook only"),
-            ("both", "Webhook and socket"),
-            ("event_stream", "Socket only"),
-        ],
-        string="Confirmation Channel",
-        default="webhook",
-        help="Cloud POS confirmations currently use webhook notifications only. Other channels are reserved until backend support is confirmed.",
-    )
+
     msp_cloud_timeout_seconds = fields.Integer(
         string="Timeout (seconds)",
         default=60,
@@ -119,13 +112,23 @@ class PosPaymentMethod(models.Model):
         for payment_method in self:
             payment_method.msp_cloud_dev_settings_enabled = dev_settings_enabled
 
-    def _msp_cloud_confirmation_channel_value(self):
-        self.ensure_one()
-        return self.msp_cloud_confirmation_channel or "webhook"
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get(
+                "use_payment_terminal"
+            ) == MSP_CLOUD_PAYMENT_TERMINAL_CODE and not vals.get("image"):
+                icon_path = get_module_resource(
+                    "pos_multisafepay_cloud",
+                    "static/description",
+                    "pos_payment_icon.png",
+                )
+                if icon_path:
+                    with open(icon_path, "rb") as icon_file:
+                        vals["image"] = base64.b64encode(icon_file.read())
+        return super().create(vals_list)
 
-    def _msp_cloud_allows_webhook_confirmation(self, method=None):
-        self.ensure_one()
-        return self._msp_cloud_confirmation_channel_value() in {"webhook", "both"}
+
 
     @api.constrains(
         "use_payment_terminal",
@@ -394,19 +397,18 @@ class PosPaymentMethod(models.Model):
                 order_request.add_payment_options(payment_options)
             if customer:
                 order_request.add_customer(customer)
+            if checkout_options:
+                order_request.add_checkout_options(checkout_options)
 
             if amount_details:
                 order_request.add_amount_details(amount_details)
 
             sdk = self._get_multisafepay_cloud_sdk()
             order_manager = sdk.get_order_manager()
-            if _logger.isEnabledFor(logging.DEBUG):
-                _logger.debug(
-                    "MSP Cloud POS order request payload: %s",
-                    json.dumps(
-                        order_request.to_dict(), cls=DecimalEncoder, sort_keys=True
-                    ),
-                )
+            _logger.debug(
+                "MSP Cloud POS order request payload debug: %s",
+                json.dumps(order_request.to_dict(), cls=DecimalEncoder, sort_keys=True),
+            )
             create_response = order_manager.create(
                 order_request,
                 terminal_group_id=self.msp_cloud_terminal_group_id.strip(),
@@ -451,6 +453,12 @@ class PosPaymentMethod(models.Model):
                 receipt = self._api_get_cloud_receipt(payload["order_id"], sdk=sdk)
                 if receipt:
                     payload["receipt"] = receipt
+
+            _logger.info(
+                "Successfully created MultiSafepay Cloud POS order request %s on terminal %s.",
+                remote_order_id,
+                self.msp_cloud_terminal_id.strip(),
+            )
 
             return payload
         except Exception as error:
@@ -612,6 +620,13 @@ class PosPaymentMethod(models.Model):
                     "state": _Status.state(status),
                 }
             )
+
+            _logger.info(
+                "Successfully sent cancellation request for MultiSafepay Cloud POS order %s on terminal %s.",
+                order_id,
+                self.msp_cloud_terminal_id.strip(),
+            )
+
             return payload
         except Exception as error:
             _logger.exception(
@@ -765,7 +780,7 @@ class PosPaymentMethod(models.Model):
             )
             if existing_refund:
                 _logger.info(
-                    "Existing refund found for order %s amount %s %s, proceeding to create new refund",
+                    "Existing refund found for order %s amount %s %s. Proceeding to create new refund, as multiple identical partial refunds are valid and deduplication is handled by MultiSafepay API time windows.",
                     order_id,
                     amount,
                     currency,

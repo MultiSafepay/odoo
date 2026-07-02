@@ -32,12 +32,8 @@
                         required="use_payment_terminal == 'multisafepay_cloud'"
                     />
                     <field name="msp_cloud_account_api_key" password="True" />
-                    <field name="msp_cloud_validate_cart" />
-                    <field
-                        name="msp_cloud_confirmation_channel"
-                        required="use_payment_terminal == 'multisafepay_cloud'"
-                        readonly="1"
-                    />
+                    <field name="msp_cloud_validate_cart" invisible="1" />
+
                 </group>
                 <group
                     invisible="use_payment_terminal != 'multisafepay_cloud'"
@@ -50,12 +46,7 @@
                     </div>
                 </group>
                 <field name="msp_cloud_dev_settings_enabled" invisible="1" />
-                <group
-                    string="Developer Settings"
-                    invisible="use_payment_terminal != 'multisafepay_cloud' or not msp_cloud_dev_settings_enabled"
-                    colspan="2"
-                    col="2"
-                >
+                <group string="Developer Settings" invisible="1" colspan="2" col="2">
                     <field name="msp_cloud_custom_api_url" />
                 </group>
             </xpath>

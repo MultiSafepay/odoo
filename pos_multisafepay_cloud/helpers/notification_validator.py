@@ -27,11 +27,15 @@ class _NotificationValidator:
         :param pos.payment.method payment_method: The associated payment method.
         :param bytes/str raw_body: The raw request body of the webhook.
         :param str auth_header: The Auth header containing signature data.
-        :return: True if signature is valid or auth parameters are absent, False otherwise.
+        :return: True if signature is valid, False otherwise.
         :rtype: bool
         """
         if not raw_body or not auth_header:
-            return True
+            _logger.warning(
+                "MSP Cloud POS notification for order %s is missing the body or Auth header; rejecting.",
+                payment_name,
+            )
+            return False
 
         api_keys = cls._get_api_keys(payment_method)
         if not api_keys:
@@ -41,7 +45,7 @@ class _NotificationValidator:
             )
             return False
 
-        return cls._validate_with_api_keys(
+        return cls._validate_webhook_signature(
             payment_name, raw_body, auth_header, api_keys
         )
 
@@ -59,7 +63,7 @@ class _NotificationValidator:
         return api_keys
 
     @staticmethod
-    def _validate_with_api_keys(payment_name, raw_body, auth_header, api_keys):
+    def _validate_webhook_signature(payment_name, raw_body, auth_header, api_keys):
         """Attempt validation against a list of API keys."""
         validation_error = None
         for api_key in api_keys:

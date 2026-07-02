@@ -5,7 +5,7 @@
     "website": "https://github.com//multisafepay",
     "license": "AGPL-3",
     "category": "Point of Sale",
-    "version": "18.0.1.0.0",
+    "version": "18.0.2.2.1",
     "application": True,
     "depends": [
         "point_of_sale",
