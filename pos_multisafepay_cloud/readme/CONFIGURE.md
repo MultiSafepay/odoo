@@ -8,7 +8,3 @@
     - **MSP Cloud Merchant Account API Key**
     - **MSP Cloud Environment**
 
-The default confirmation channel is **Webhook only** because webhook
-requests provide clearer HTTP and log traceability. **Socket only**
-refers to the backend MultiSafepay event stream; it does not disable the
-Odoo POS frontend websocket used by bus notifications.
