@@ -7,7 +7,6 @@
     - **MSP Cloud Terminal Group API Key**
     - **MSP Cloud Merchant Account API Key**
     - **MSP Cloud Environment**
-    - **Confirmation Channel**
 
 The default confirmation channel is **Webhook only** because webhook
 requests provide clearer HTTP and log traceability. **Socket only**
