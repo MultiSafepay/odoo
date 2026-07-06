@@ -341,39 +341,38 @@ class PosPaymentMethod(models.Model):
             }
         )
 
-        amount_in_cents = _Utils.amount_to_minor_units(data.get("amount"))
-        currency = data.get("currency") or "EUR"
-        shopping_cart_data = data.get("shopping_cart")
-        shopping_cart = _OrderPayloadBuilder.shopping_cart(
-            self,
-            shopping_cart_data,
-        )
-        checkout_options = _OrderPayloadBuilder.checkout_options(
-            self,
-            shopping_cart,
-        )
-        shopping_cart_summary = _OrderPayloadBuilder.shopping_cart_summary(
-            shopping_cart_data
-        )
-        amount_details = _OrderPayloadBuilder.amount_details(
-            shopping_cart_data,
-            tip_amount_override=data.get("tip_amount"),
-        )
-        customer = _OrderPayloadBuilder.customer(data.get("customer"))
-        order_description = _OrderPayloadBuilder.order_description(
-            data,
-            remote_order_id,
-            shopping_cart_summary,
-        )
-        payment_options = (
-            PaymentOptions(**{})
-            .add_notification_method("POST")
-            .add_notification_url(
-                f"{self.get_base_url()}/pos_multisafepay_cloud/notification"
-            )
-        )
-
         try:
+            amount_in_cents = _Utils.amount_to_minor_units(data.get("amount"))
+            currency = data.get("currency") or "EUR"
+            shopping_cart_data = data.get("shopping_cart")
+            shopping_cart = _OrderPayloadBuilder.shopping_cart(
+                self,
+                shopping_cart_data,
+            )
+            checkout_options = _OrderPayloadBuilder.checkout_options(
+                self,
+                shopping_cart,
+            )
+            shopping_cart_summary = _OrderPayloadBuilder.shopping_cart_summary(
+                shopping_cart_data
+            )
+            amount_details = _OrderPayloadBuilder.amount_details(
+                shopping_cart_data,
+                tip_amount_override=data.get("tip_amount"),
+            )
+            customer = _OrderPayloadBuilder.customer(data.get("customer"))
+            order_description = _OrderPayloadBuilder.order_description(
+                data,
+                remote_order_id,
+                shopping_cart_summary,
+            )
+            payment_options = (
+                PaymentOptions(**{})
+                .add_notification_method("POST")
+                .add_notification_url(
+                    f"{self.get_base_url()}/pos_multisafepay_cloud/notification"
+                )
+            )
             plugin = (
                 Plugin()
                 .add_plugin_version("2.1.2")
@@ -400,6 +399,17 @@ class PosPaymentMethod(models.Model):
 
             if amount_details:
                 order_request.add_amount_details(amount_details)
+
+            # Keep the POS cart available until this point because the code above
+            # still derives local request metadata from it: the terminal description,
+            # tip/amount details and cart-validation checkout options. The Cloud POS
+            # terminal order request itself must not send shopping_cart or
+            # checkout_options to the Python SDK/API, because those fields belong to
+            # full checkout/cart validation flows and can make terminal payments fail
+            # when the POS amount intentionally differs from the full cart payload.
+            # Set them explicitly to None only at the SDK boundary so the original POS
+            # payload remains intact for tracker creation, logging and later flows.
+            order_request.add_shopping_cart(None).add_checkout_options(None)
 
             sdk = self._get_multisafepay_cloud_sdk()
             order_manager = sdk.get_order_manager()
