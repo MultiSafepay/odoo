@@ -41,6 +41,12 @@ class PaymentProvider(models.Model):
         copy=False,
     )
 
+    multisafepay_validate_shopping_cart = fields.Boolean(
+        string="Validate Shopping Cart",
+        help="Ensures the shopping cart items and taxes match the total order amount according to MultiSafepay's rounding rules.",
+        default=True,
+    )
+
     # ===================================
     # CRUD METHODS (ODOO)
     # ===================================
