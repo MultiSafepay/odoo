@@ -26,6 +26,11 @@ msgid "API Key"
 msgstr ""
 
 #. module: payment_multisafepay
+#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_provider__multisafepay_validate_shopping_cart
+msgid "Validate Shopping Cart"
+msgstr ""
+
+#. module: payment_multisafepay
 #. odoo-python
 #: code:addons/payment_multisafepay/controllers/main.py:0
 msgid "An unexpected error occurred. Please try again."
@@ -201,6 +206,13 @@ msgstr ""
 msgid ""
 "The API key for the Multisafepay account. This is used to authenticate "
 "requests to the Multisafepay API."
+msgstr ""
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,help:payment_multisafepay.field_payment_provider__multisafepay_validate_shopping_cart
+msgid ""
+"Ensures the shopping cart items and taxes match the total order amount "
+"according to MultiSafepay's rounding rules."
 msgstr ""
 
 #. module: payment_multisafepay
