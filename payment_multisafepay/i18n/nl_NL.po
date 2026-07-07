@@ -342,3 +342,8 @@ msgstr ""
 msgid ""
 "Ensures the shopping cart items and taxes match the total order amount according to MultiSafepay's rounding rules."
 msgstr ""
+
+#. module: payment_multisafepay
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay.payment_provider_form_multisafepay
+msgid "Advanced"
+msgstr ""
