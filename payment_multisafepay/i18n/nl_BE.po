@@ -335,15 +335,15 @@ msgstr "Uw betaling is verwerkt."
 #. module: payment_multisafepay
 #: model:ir.model.fields,field_description:payment_multisafepay.field_payment_provider__multisafepay_validate_shopping_cart
 msgid "Validate Shopping Cart"
-msgstr ""
+msgstr "Winkelwagen valideren"
 
 #. module: payment_multisafepay
 #: model:ir.model.fields,help:payment_multisafepay.field_payment_provider__multisafepay_validate_shopping_cart
 msgid ""
 "Ensures the shopping cart items and taxes match the total order amount according to MultiSafepay's rounding rules."
-msgstr ""
+msgstr "Zorgt ervoor dat de winkelwagenitems en belastingen overeenkomen met het totale orderbedrag volgens de afrondingsregels van MultiSafepay."
 
 #. module: payment_multisafepay
 #: model_terms:ir.ui.view,arch_db:payment_multisafepay.payment_provider_form_multisafepay
 msgid "Advanced"
-msgstr ""
+msgstr "Geavanceerd"

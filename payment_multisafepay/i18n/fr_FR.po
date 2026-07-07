@@ -335,15 +335,15 @@ msgstr "Votre paiement a été traité."
 #. module: payment_multisafepay
 #: model:ir.model.fields,field_description:payment_multisafepay.field_payment_provider__multisafepay_validate_shopping_cart
 msgid "Validate Shopping Cart"
-msgstr ""
+msgstr "Valider le panier"
 
 #. module: payment_multisafepay
 #: model:ir.model.fields,help:payment_multisafepay.field_payment_provider__multisafepay_validate_shopping_cart
 msgid ""
 "Ensures the shopping cart items and taxes match the total order amount according to MultiSafepay's rounding rules."
-msgstr ""
+msgstr "Assure que les articles du panier et les taxes correspondent au montant total de la commande selon les règles d'arrondi de MultiSafepay."
 
 #. module: payment_multisafepay
 #: model_terms:ir.ui.view,arch_db:payment_multisafepay.payment_provider_form_multisafepay
 msgid "Advanced"
-msgstr ""
+msgstr "Avancé"
