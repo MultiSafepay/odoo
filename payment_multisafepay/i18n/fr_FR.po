@@ -21,6 +21,11 @@ msgid "<i class=\"fa fa-refresh\"/> Sync Payment Methods"
 msgstr "<i class=\"fa fa-refresh\"/> Synchroniser les méthodes de paiement"
 
 #. module: payment_multisafepay
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay.payment_provider_form_multisafepay
+msgid "Advanced"
+msgstr "Avancé"
+
+#. module: payment_multisafepay
 #: model:ir.model.fields,field_description:payment_multisafepay.field_payment_provider__multisafepay_api_key
 msgid "API Key"
 msgstr "Clé API"
