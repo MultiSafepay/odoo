@@ -1077,17 +1077,20 @@ class MultiSafepayController(http.Controller):
         shopping_cart = ShoppingCart(items=cart_items)
         # Generate checkout options from cart (includes tax tables)
         checkout_options = CheckoutOptions.generate_from_shopping_cart(shopping_cart)
+        provider = getattr(payment_transaction, "provider_id", None)
 
         if checkout_options:
-            # Keep cart validation enabled for all flows.
-            # For partial payment links we send a synthetic installment item
-            # that matches the transaction amount to satisfy validation.
-            checkout_options.add_validate_cart(True)
+            validate_cart = (
+                provider.multisafepay_validate_shopping_cart if provider else True
+            )
+
+            checkout_options.add_validate_cart(validate_cart)
 
             if is_partial_payment_link:
                 _logger.debug(
-                    "Cart validation enabled with synthetic installment cart "
+                    "Cart validation %s with synthetic installment cart "
                     "(ref=%s, source_total=%s, tx_amount=%s)",
+                    "enabled" if validate_cart else "disabled",
                     payment_transaction.reference,
                     source_total_amount,
                     payment_transaction.amount,
@@ -1110,7 +1113,6 @@ class MultiSafepayController(http.Controller):
         odoo_method_code = payment_transaction.payment_method_code
 
         # Convert to MultiSafepay format using the provider's mapping function
-        provider = getattr(payment_transaction, "provider_id", None)
         if provider:
             multisafepay_gateway_code = provider._map_odoo_to_multisafepay_code(
                 odoo_method_code

@@ -18,5 +18,6 @@
         <field name="allow_tokenization" eval="False" />
         <field name="capture_manually" eval="False" />
         <field name="allow_express_checkout" eval="False" />
+        <field name="multisafepay_validate_shopping_cart" eval="True" />
     </record>
 </odoo>
