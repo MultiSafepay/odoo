@@ -267,10 +267,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             try {
                 return this._handle_initial_response(line, response, mspCloudUid);
             } catch (error) {
-                console.error(
-                    "MultiSafepay Cloud POS response handling failed",
-                    error
-                );
+                console.error("MultiSafepay Cloud POS response handling failed", error);
                 this._show_error(
                     _t(
                         "MultiSafepay Cloud POS response handling failed. Check the browser console and Odoo logs for details."

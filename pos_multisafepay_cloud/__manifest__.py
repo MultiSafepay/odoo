@@ -10,7 +10,7 @@
     "depends": [
         "point_of_sale",
     ],
-    "external_dependencies": {"python": ["multisafepay", "requests"]},
+    "external_dependencies": {"python": ["multisafepay==3.1.0", "requests"]},
     "data": [
         "security/ir.model.access.csv",
         "views/pos_payment_method_views.xml",
