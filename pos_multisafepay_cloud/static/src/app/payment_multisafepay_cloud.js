@@ -462,8 +462,6 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
                     response.transaction_id ||
                     line.transaction_id,
                 payment_ref_no: response.order_id || sourcePaymentLine.transaction_id,
-                msp_cloud_refund_source_order_id:
-                    response.order_id || sourcePaymentLine.transaction_id,
             });
             return true;
         }
