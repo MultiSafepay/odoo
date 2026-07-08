@@ -1,0 +1,244 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* pos_multisafepay_cloud
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-01 00:00:00+0000\n"
+"PO-Revision-Date: 2024-01-01 00:00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: Spanish \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+msgid "Cancel MultiSafepay Cloud payment"
+msgstr "Cancelar pago MultiSafepay Cloud"
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+msgid "Configure a Terminal Group API Key for Terminal Group ID '%(terminal_group_id)s'."
+msgstr "Configura una API Key para el Grupo de Terminales '%(terminal_group_id)s'."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+msgid "Connection Error"
+msgstr "Error de Conexión"
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+msgid "Could not cancel the MultiSafepay Cloud POS payment."
+msgstr "No se ha podido cancelar el pago en MultiSafepay Cloud POS."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+msgid "Could not connect to Odoo to cancel the payment."
+msgstr "No se pudo conectar con Odoo para cancelar el pago."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+msgid "Could not connect to Odoo to refund the payment. Check your connection and try again."
+msgstr "No se pudo conectar con Odoo para reembolsar el pago. Revisa tu conexión e inténtalo de nuevo."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+msgid "Could not connect to Odoo to reverse the payment. Check your connection and try again."
+msgstr "No se pudo conectar con Odoo para revertir el pago. Revisa tu conexión e inténtalo de nuevo."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+msgid "Could not connect to Odoo. Check your connection and try again."
+msgstr "No se pudo conectar con Odoo. Revisa tu conexión e inténtalo de nuevo."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/helpers/error_payload.py
+msgid "Could not connect to the MultiSafepay Cloud POS API. Please check your internet connection."
+msgstr "No se pudo conectar a la API de MultiSafepay Cloud POS. Revisa tu conexión a internet."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+msgid "Could not contact the MultiSafepay Cloud POS API."
+msgstr "No se pudo contactar con la API de MultiSafepay Cloud POS."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+msgid "Could not fetch MultiSafepay Cloud POS order status."
+msgstr "No se pudo obtener el estado del pedido de MultiSafepay Cloud POS."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py
+msgid "Could not find the MultiSafepay Cloud POS payment to cancel."
+msgstr "No se encontró el pago de MultiSafepay Cloud POS a cancelar."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py
+msgid "Could not find the MultiSafepay Cloud POS payment to reverse."
+msgstr "No se encontró el pago de MultiSafepay Cloud POS a revertir."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py
+msgid "Could not find the original MultiSafepay Cloud POS payment to refund."
+msgstr "No se encontró el pago original de MultiSafepay Cloud POS a reembolsar."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+msgid "Could not refund the MultiSafepay Cloud POS payment."
+msgstr "No se pudo reembolsar el pago de MultiSafepay Cloud POS."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+msgid "Discard"
+msgstr "Descartar"
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+msgid "Force Cancel"
+msgstr "Forzar Cancelación"
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+msgid "MultiSafepay Cloud"
+msgstr "MultiSafepay Cloud"
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+msgid "MultiSafepay Cloud Error"
+msgstr "Error de MultiSafepay Cloud"
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+msgid "MultiSafepay Cloud POS cancellation failed."
+msgstr "La cancelación en MultiSafepay Cloud POS ha fallado."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+msgid "MultiSafepay Cloud POS order creation did not return order data."
+msgstr "La creación del pedido en MultiSafepay Cloud POS no devolvió datos."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+msgid "MultiSafepay Cloud POS order creation failed."
+msgstr "La creación del pedido en MultiSafepay Cloud POS ha fallado."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+msgid "MultiSafepay Cloud POS order creation returned an invalid order payload."
+msgstr "La creación del pedido en MultiSafepay Cloud POS devolvió datos inválidos."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+msgid "MultiSafepay Cloud POS refund failed."
+msgstr "El reembolso en MultiSafepay Cloud POS ha fallado."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+msgid "MultiSafepay Cloud POS reversal failed."
+msgstr "La anulación en MultiSafepay Cloud POS ha fallado."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+msgid "MultiSafepay Cloud payment request failed."
+msgstr "La solicitud de pago en MultiSafepay Cloud ha fallado."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py
+msgid "No MultiSafepay Cloud POS payment was found for this notification."
+msgstr "No se encontró ningún pago de MultiSafepay Cloud POS para esta notificación."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py
+msgid "Only paid MultiSafepay Cloud POS payments can be refunded."
+msgstr "Solo se pueden reembolsar pagos de MultiSafepay Cloud POS completados."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py
+msgid "Only paid MultiSafepay Cloud POS payments can be reversed."
+msgstr "Solo se pueden revertir pagos de MultiSafepay Cloud POS completados."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+msgid "Order #"
+msgstr "Pedido #"
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/static/src/app/cloud_pos_payload_builder.js
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/helpers/order_payload_builder.py
+msgid "POS item"
+msgstr "Artículo TPV"
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py
+msgid "POS refund for #%(order_id)s"
+msgstr "Reembolso TPV para #%(order_id)s"
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py
+msgid "POS reversal for #%(order_id)s"
+msgstr "Anulación TPV para #%(order_id)s"
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+msgid "POS reversal for #%s"
+msgstr "Anulación TPV para #%s"
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+msgid "Select the original MultiSafepay Cloud POS payment to refund."
+msgstr "Selecciona el pago original de MultiSafepay Cloud POS para reembolsar."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+msgid "Set MSP Cloud Merchant Account API Key on the payment method to poll real Cloud POS statuses and refund completed payments."
+msgstr "Configura la API Key de Cuenta de Comercio para consultar estados reales y realizar reembolsos."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+msgid "Set MSP Cloud Terminal Group API Key on the payment method."
+msgstr "Configura la API Key del Grupo de Terminales en el método de pago."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+msgid "Set MSP Cloud Terminal Group ID on the payment method."
+msgstr "Configura el ID del Grupo de Terminales en el método de pago."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+msgid "Set MSP Cloud Terminal ID on the payment method."
+msgstr "Configura el ID del Terminal en el método de pago."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py
+msgid "The MultiSafepay Cloud POS notification has no order reference."
+msgstr "La notificación de MultiSafepay Cloud POS no tiene referencia de pedido."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py
+msgid "The MultiSafepay Cloud POS notification signature is invalid."
+msgstr "La firma de la notificación de MultiSafepay Cloud POS no es válida."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py
+msgid "The MultiSafepay Cloud POS payment is already paid and cannot be cancelled."
+msgstr "El pago de MultiSafepay Cloud POS ya está pagado y no puede cancelarse."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+msgid "The MultiSafepay Cloud POS refund amount must be greater than zero."
+msgstr "El importe a reembolsar debe ser mayor que cero."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py
+msgid "The original MultiSafepay Cloud POS payment is already fully refunded."
+msgstr "El pago original ya ha sido reembolsado en su totalidad."
+
+#. module: pos_multisafepay_cloud
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+msgid "This will cancel the active MultiSafepay Cloud POS payment on the terminal."
+msgstr "Esto cancelará el pago activo en el terminal MultiSafepay Cloud POS."
+
