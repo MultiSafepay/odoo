@@ -18,8 +18,6 @@ from multisafepay.api.paths.orders.request.components.payment_options import (
     PaymentOptions,
 )
 from multisafepay.api.paths.orders.request.components.plugin import Plugin
-from multisafepay.client import ScopedCredentialResolver
-from multisafepay.client.credential_resolver import AuthScope
 from multisafepay.util.json_encoder import DecimalEncoder
 
 from odoo import _, api, fields, models
@@ -831,19 +829,10 @@ class PosPaymentMethod(models.Model):
                 and self.msp_cloud_terminal_group_api_key
             ):
                 terminal_group_id = self.msp_cloud_terminal_group_id.strip()
-                refund_response = order_manager.client.create_post_request(
-                    f"json/orders/{order_manager.encode_path_segment(str(order_id))}/refunds",
-                    request_body=json.dumps(
-                        refund_payload.to_dict(), cls=DecimalEncoder
-                    ),
-                    auth_scope=AuthScope(
-                        scope=ScopedCredentialResolver.AUTH_SCOPE_TERMINAL_GROUP,
-                        group_id=terminal_group_id,
-                    ),
-                    context={
-                        "order_id": str(order_id),
-                        "terminal_group_id": terminal_group_id,
-                    },
+                refund_response = order_manager.refund(
+                    str(order_id),
+                    refund_payload,
+                    terminal_group_id=terminal_group_id,
                 )
             else:
                 refund_response = order_manager.refund(str(order_id), refund_payload)
