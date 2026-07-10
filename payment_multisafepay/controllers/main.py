@@ -441,11 +441,11 @@ class MultiSafepayController(http.Controller):
 
             except Exception as validation_error:
                 _logger.error(
-                    "Webhook validation failed for transaction %s: %s",
+                    "Webhook failed for transaction %s: %s",
                     transactionid,
                     str(validation_error),
                 )
-                return request.make_response("Webhook validation failed", status=403)
+                return request.make_response("Webhook failed", status=403)
 
         except Forbidden as e:
             _logger.error("Forbidden access to MultiSafepay webhook: %s", str(e))
