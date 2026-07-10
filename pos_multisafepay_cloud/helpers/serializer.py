@@ -70,15 +70,15 @@ class _Serializer:
             return {
                 str(key): cls.json_safe_payload(value) for key, value in payload.items()
             }
-        if isinstance(payload, list | tuple | set):
+        if isinstance(payload, (list, tuple, set)):
             return [cls.json_safe_payload(value) for value in payload]
         if isinstance(payload, Decimal):
             if payload == payload.to_integral_value():
                 return int(payload)
             return float(payload)
-        if isinstance(payload, date | datetime):
+        if isinstance(payload, (date, datetime)):
             return payload.isoformat()
-        if isinstance(payload, str | int | float | bool) or payload is None:
+        if isinstance(payload, (str, int, float, bool)) or payload is None:
             return payload
         value = getattr(payload, "value", None)
         if value is not None:
