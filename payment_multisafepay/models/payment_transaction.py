@@ -166,14 +166,13 @@ class PaymentTransaction(models.Model):
             self._set_canceled()
 
         elif odoo_state == "error":
-            message = "MSP status '%s' → setting transaction to error (ref=%s)" % (
+            _logger.debug(
+                "MSP status '%s' → setting transaction to error (ref=%s)",
                 status,
                 self.reference,
             )
 
-            _logger.debug(message)
-
-            self._set_error('Transactions declined in MultiSafepay')
+            self._set_error("Transactions declined in MultiSafepay")
 
         elif odoo_state == "pending":
             _logger.debug(
