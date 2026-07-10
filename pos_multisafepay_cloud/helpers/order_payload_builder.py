@@ -68,9 +68,12 @@ class _OrderPayloadBuilder:
         :return: AmountDetails structure or None.
         :rtype: multisafepay.api.paths.orders.request.components.AmountDetails or None
         """
-        if tip_amount_override is not None and float(tip_amount_override) > 0:
-            tip_amount = _Utils.parse_decimal(tip_amount_override)
-        else:
+        tip_amount = (
+            _Utils.parse_decimal(tip_amount_override)
+            if tip_amount_override is not None
+            else Decimal("0")
+        )
+        if tip_amount <= 0:
             tip_amount = cls.shopping_cart_tip_amount(shopping_cart_data)
 
         tip_amount_in_cents = _Utils.amount_to_minor_units(tip_amount)
