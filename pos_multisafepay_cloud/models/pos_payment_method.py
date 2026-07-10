@@ -651,109 +651,12 @@ class PosPaymentMethod(models.Model):
                 operation="cancel",
             )
 
-    def _api_find_cloud_refund_transaction(
-        self, order_id, amount=None, currency=None, sdk=None
-    ):
-        """Look up an existing matching refund to make retries idempotent.
-
-        :param str order_id: Original Cloud POS order id.
-        :param float amount: Refund amount to match.
-        :param str currency: Refund currency code to match.
-        :param multisafepay.Sdk sdk: Optional prebuilt SDK instance.
-        :return: Existing refund payload, or an empty dict when no match exists.
-        :rtype: dict
-        """
-        self.ensure_one()
-
-        validation_error = self._validate_cloud_pos_configuration(
-            require_account_key=True
-        )
-        if validation_error:
-            return {}
-
-        amount_in_cents = _Utils.amount_to_minor_units(amount)
-        target_currency = (currency or "").upper()
-        created_from = fields.Datetime.subtract(fields.Datetime.now(), days=7)
-
-        try:
-            sdk = sdk or self._get_multisafepay_cloud_sdk()
-            transaction_response = sdk.get_transaction_manager().get_transactions(
-                {
-                    "created_from": created_from.strftime("%Y-%m-%dT%H:%M:%S"),
-                    "limit": 100,
-                }
-            )
-            listing = transaction_response.get_data() if transaction_response else None
-            transactions = (
-                listing.get_data() if listing and hasattr(listing, "get_data") else []
-            )
-
-            for transaction in transactions or []:
-                transaction_payload = _Serializer.serialize_model(transaction)
-                if str(transaction_payload.get("order_id") or "") != str(order_id):
-                    continue
-
-                transaction_type = (transaction_payload.get("type") or "").lower()
-                if transaction_type not in {"refund", "reversal", "returned-refund"}:
-                    continue
-
-                if transaction_payload.get("financial_status") not in {
-                    None,
-                    "completed",
-                }:
-                    continue
-                if transaction_payload.get("status") not in {
-                    None,
-                    "completed",
-                    "refunded",
-                }:
-                    continue
-
-                if (
-                    amount_in_cents
-                    and int(transaction_payload.get("amount") or 0) != amount_in_cents
-                ):
-                    continue
-                if (
-                    target_currency
-                    and (transaction_payload.get("currency") or "").upper()
-                    != target_currency
-                ):
-                    continue
-
-                refund_transaction_id = transaction_payload.get("transaction_id")
-                transaction_payload.update(
-                    {
-                        "id": refund_transaction_id or str(order_id),
-                        "order_id": str(order_id),
-                        "transaction_id": refund_transaction_id or str(order_id),
-                        "refund_id": refund_transaction_id or str(order_id),
-                        "amount": transaction_payload.get("amount") or amount_in_cents,
-                        "currency": transaction_payload.get("currency")
-                        or currency
-                        or "EUR",
-                        "status": "refunded",
-                        "state": "success",
-                        "already_refunded": True,
-                    }
-                )
-                return transaction_payload
-        except Exception as error:
-            _logger.info(
-                "MSP Cloud POS existing refund lookup failed (order_id=%s): %s",
-                order_id,
-                _ErrorPayload.format_exception(error),
-            )
-
-        return {}
-
     def _api_refund_cloud_pos_order(
         self, order_id, amount, currency, description=None, sdk=None
     ):
         """Refund a paid Cloud POS order through the backend API flow.
 
-        This method performs the actual MultiSafepay refund call. It also checks for
-        an existing matching refund first so POS retries can be handled safely.
+        This method performs the actual MultiSafepay refund call.
 
         :param str order_id: Original Cloud POS order id.
         :param float amount: Refund amount in major units.
@@ -779,22 +682,6 @@ class PosPaymentMethod(models.Model):
 
         try:
             sdk = sdk or self._get_multisafepay_cloud_sdk()
-            existing_refund = self._api_find_cloud_refund_transaction(
-                order_id,
-                amount=amount,
-                currency=currency,
-                sdk=sdk,
-            )
-            if existing_refund:
-                _logger.info(
-                    "Existing refund found for order %s amount %s %s. Proceeding to create new refund, as multiple identical partial refunds are valid and deduplication is handled by MultiSafepay API time windows.",
-                    order_id,
-                    amount,
-                    currency,
-                )
-                # Continue to create a new refund (partial or additional)
-                pass
-
             order_manager = sdk.get_order_manager()
             refund_payload = (
                 RefundOrderRequest(**{})
