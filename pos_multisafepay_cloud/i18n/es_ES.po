@@ -4,241 +4,681 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
+"Project-Id-Version: Odoo Server 18.0+e-20260217\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-01 00:00:00+0000\n"
-"PO-Revision-Date: 2024-01-01 00:00:00+0000\n"
+"POT-Creation-Date: 2026-07-10 10:20+0000\n"
+"PO-Revision-Date: 2026-07-10 10:20+0000\n"
 "Last-Translator: \n"
-"Language-Team: Spanish \n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+#: model_terms:ir.ui.view,arch_db:pos_multisafepay_cloud.view_pos_payment_method_form_multisafepay_cloud
+msgid ""
+"<i class=\"fa fa-exclamation-triangle me-2\"/>\n"
+"                        <strong>Cloud POS reference strategy.</strong>\n"
+"                        Cloud POS uses the POS receipt reference as the remote order ID and suffixes retries as reference-1, reference-2, etc."
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/helpers/notification_payload.py:0
+msgid ""
+"A terminal-side tip was detected in MultiSafepay. Tips must be added in Odoo"
+" so the POS order, shopping cart and accounting stay aligned."
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,help:pos_multisafepay_cloud.field_pos_payment_method__msp_cloud_terminal_group_api_key
+msgid "API key used for the configured Terminal Group ID."
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,help:pos_multisafepay_cloud.field_pos_payment_method__msp_cloud_validate_cart
+msgid ""
+"Ask MultiSafepay to validate the shopping cart total against the payment "
+"amount. Enable this only when Cloud POS payments always cover the full POS "
+"order amount."
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__msp_cloud_attempt_base
+msgid "Attempt Base"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__msp_cloud_attempt_number
+msgid "Attempt Number"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#. odoo-javascript
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js:0
 msgid "Cancel MultiSafepay Cloud payment"
-msgstr "Cancelar pago MultiSafepay Cloud"
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
-msgid "Configure a Terminal Group API Key for Terminal Group ID '%(terminal_group_id)s'."
-msgstr "Configura una API Key para el Grupo de Terminales '%(terminal_group_id)s'."
+#: model:ir.model.fields.selection,name:pos_multisafepay_cloud.selection__pos_multisafepay_cloud_payment__status__canceled
+msgid "Canceled"
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__name
+msgid "Cloud POS Order ID"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/helpers/error_payload.py:0
+msgid ""
+"Cloud POS authentication failed because Terminal Group ID is missing on the "
+"payment method."
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/helpers/error_payload.py:0
+msgid ""
+"Cloud POS authentication failed for Terminal Group ID "
+"'%(terminal_group_id)s'. Verify the Terminal Group API Key on the payment "
+"method."
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/helpers/error_payload.py:0
+msgid ""
+"Cloud POS authentication failed. Verify Terminal Group ID and Terminal Group"
+" API Key on the payment method."
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__msp_cloud_uid
+msgid "Cloud UID"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields.selection,name:pos_multisafepay_cloud.selection__pos_multisafepay_cloud_payment__status__completed
+msgid "Completed"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py:0
+msgid ""
+"Configure a Terminal Group API Key for Terminal Group ID "
+"'%(terminal_group_id)s'."
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#. odoo-javascript
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js:0
 msgid "Connection Error"
-msgstr "Error de Conexión"
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py:0
 msgid "Could not cancel the MultiSafepay Cloud POS payment."
-msgstr "No se ha podido cancelar el pago en MultiSafepay Cloud POS."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+#. odoo-javascript
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js:0
 msgid "Could not connect to Odoo to cancel the payment."
-msgstr "No se pudo conectar con Odoo para cancelar el pago."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
-msgid "Could not connect to Odoo to refund the payment. Check your connection and try again."
-msgstr "No se pudo conectar con Odoo para reembolsar el pago. Revisa tu conexión e inténtalo de nuevo."
+#. odoo-javascript
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js:0
+msgid ""
+"Could not connect to Odoo to refund the payment. Check your connection and "
+"try again."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
-msgid "Could not connect to Odoo to reverse the payment. Check your connection and try again."
-msgstr "No se pudo conectar con Odoo para revertir el pago. Revisa tu conexión e inténtalo de nuevo."
+#. odoo-javascript
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js:0
+msgid ""
+"Could not connect to Odoo to reverse the payment. Check your connection and "
+"try again."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+#. odoo-javascript
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js:0
 msgid "Could not connect to Odoo. Check your connection and try again."
-msgstr "No se pudo conectar con Odoo. Revisa tu conexión e inténtalo de nuevo."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/helpers/error_payload.py
-msgid "Could not connect to the MultiSafepay Cloud POS API. Please check your internet connection."
-msgstr "No se pudo conectar a la API de MultiSafepay Cloud POS. Revisa tu conexión a internet."
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/helpers/error_payload.py:0
+msgid ""
+"Could not connect to the MultiSafepay Cloud POS API. Please check your "
+"internet connection."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py:0
 msgid "Could not contact the MultiSafepay Cloud POS API."
-msgstr "No se pudo contactar con la API de MultiSafepay Cloud POS."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py:0
 msgid "Could not fetch MultiSafepay Cloud POS order status."
-msgstr "No se pudo obtener el estado del pedido de MultiSafepay Cloud POS."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py:0
 msgid "Could not find the MultiSafepay Cloud POS payment to cancel."
-msgstr "No se encontró el pago de MultiSafepay Cloud POS a cancelar."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py:0
 msgid "Could not find the MultiSafepay Cloud POS payment to reverse."
-msgstr "No se encontró el pago de MultiSafepay Cloud POS a revertir."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py:0
 msgid "Could not find the original MultiSafepay Cloud POS payment to refund."
-msgstr "No se encontró el pago original de MultiSafepay Cloud POS a reembolsar."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py:0
 msgid "Could not refund the MultiSafepay Cloud POS payment."
-msgstr "No se pudo reembolsar el pago de MultiSafepay Cloud POS."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_payment_method__msp_cloud_custom_api_url
+msgid "Custom API URL"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields.selection,name:pos_multisafepay_cloud.selection__pos_multisafepay_cloud_payment__status__declined
+msgid "Declined"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,help:pos_multisafepay_cloud.field_pos_payment_method__msp_cloud_account_api_key
+msgid ""
+"Default MultiSafepay Site API Key used for refunds and account-level status "
+"calls."
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model_terms:ir.ui.view,arch_db:pos_multisafepay_cloud.view_pos_payment_method_form_multisafepay_cloud
+msgid "Developer Settings"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#. odoo-javascript
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js:0
 msgid "Discard"
-msgstr "Descartar"
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields.selection,name:pos_multisafepay_cloud.selection__pos_multisafepay_cloud_payment__stream_state__done
+msgid "Done"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields.selection,name:pos_multisafepay_cloud.selection__pos_multisafepay_cloud_payment__status__error
+#: model:ir.model.fields.selection,name:pos_multisafepay_cloud.selection__pos_multisafepay_cloud_payment__stream_state__error
+msgid "Error"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__events_stream_url
+msgid "Events Stream URL"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__events_token
+msgid "Events Token"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields.selection,name:pos_multisafepay_cloud.selection__pos_multisafepay_cloud_payment__status__expired
+msgid "Expired"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields.selection,name:pos_multisafepay_cloud.selection__pos_multisafepay_cloud_payment__status__failed
+msgid "Failed"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#. odoo-javascript
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js:0
 msgid "Force Cancel"
-msgstr "Forzar Cancelación"
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__id
+msgid "ID"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields.selection,name:pos_multisafepay_cloud.selection__pos_multisafepay_cloud_payment__stream_state__idle
+msgid "Idle"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields.selection,name:pos_multisafepay_cloud.selection__pos_multisafepay_cloud_payment__status__initialized
+msgid "Initialized"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__last_event_id
+msgid "Last Event ID"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,help:pos_multisafepay_cloud.field_pos_payment_method__msp_cloud_timeout_seconds
+msgid "Maximum wait time when polling Cloud POS order status or event stream."
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_payment_method__msp_cloud_dev_settings_enabled
+msgid "Msp Cloud Dev Settings Enabled"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#. odoo-javascript
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js:0
 msgid "MultiSafepay Cloud"
-msgstr "MultiSafepay Cloud"
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+#. odoo-javascript
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js:0
 msgid "MultiSafepay Cloud Error"
-msgstr "Error de MultiSafepay Cloud"
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+#. odoo-javascript
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js:0
 msgid "MultiSafepay Cloud POS cancellation failed."
-msgstr "La cancelación en MultiSafepay Cloud POS ha fallado."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/helpers/error_payload.py:0
+msgid ""
+"MultiSafepay Cloud POS could not start this payment attempt. The previous "
+"terminal transaction may still be active, expired, or already cancelled. "
+"Check the terminal before retrying."
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py:0
 msgid "MultiSafepay Cloud POS order creation did not return order data."
-msgstr "La creación del pedido en MultiSafepay Cloud POS no devolvió datos."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py:0
 msgid "MultiSafepay Cloud POS order creation failed."
-msgstr "La creación del pedido en MultiSafepay Cloud POS ha fallado."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
-msgid "MultiSafepay Cloud POS order creation returned an invalid order payload."
-msgstr "La creación del pedido en MultiSafepay Cloud POS devolvió datos inválidos."
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py:0
+msgid ""
+"MultiSafepay Cloud POS order creation returned an invalid order payload."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+#. odoo-javascript
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js:0
 msgid "MultiSafepay Cloud POS refund failed."
-msgstr "El reembolso en MultiSafepay Cloud POS ha fallado."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+#. odoo-javascript
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js:0
 msgid "MultiSafepay Cloud POS reversal failed."
-msgstr "La anulación en MultiSafepay Cloud POS ha fallado."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+#. odoo-javascript
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js:0
 msgid "MultiSafepay Cloud payment request failed."
-msgstr "La solicitud de pago en MultiSafepay Cloud ha fallado."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/controllers/main.py:0
 msgid "No MultiSafepay Cloud POS payment was found for this notification."
-msgstr "No se encontró ningún pago de MultiSafepay Cloud POS para esta notificación."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py:0
 msgid "Only paid MultiSafepay Cloud POS payments can be refunded."
-msgstr "Solo se pueden reembolsar pagos de MultiSafepay Cloud POS completados."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py:0
 msgid "Only paid MultiSafepay Cloud POS payments can be reversed."
-msgstr "Solo se pueden revertir pagos de MultiSafepay Cloud POS completados."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+#. odoo-javascript
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js:0
 msgid "Order #"
-msgstr "Pedido #"
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/static/src/app/cloud_pos_payload_builder.js
+#: model:ir.model.fields,help:pos_multisafepay_cloud.field_pos_payment_method__msp_cloud_custom_api_url
+msgid ""
+"Override the API base URL for development. The required SDK dev flags are "
+"enabled automatically when this is set."
+msgstr ""
+
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/helpers/order_payload_builder.py
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/helpers/order_payload_builder.py:0
 msgid "POS item"
-msgstr "Artículo TPV"
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py:0
 msgid "POS refund for #%(order_id)s"
-msgstr "Reembolso TPV para #%(order_id)s"
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py:0
 msgid "POS reversal for #%(order_id)s"
-msgstr "Anulación TPV para #%(order_id)s"
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py:0
 msgid "POS reversal for #%s"
-msgstr "Anulación TPV para #%s"
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
+#: model:ir.model.fields.selection,name:pos_multisafepay_cloud.selection__pos_multisafepay_cloud_payment__status__paid
+msgid "Paid"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields.selection,name:pos_multisafepay_cloud.selection__pos_multisafepay_cloud_payment__status__partial_refunded
+msgid "Partially Refunded"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__payment_method_id
+msgid "Payment Method"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields.selection,name:pos_multisafepay_cloud.selection__pos_multisafepay_cloud_payment__status__pending
+msgid "Pending"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model,name:pos_multisafepay_cloud.model_pos_multisafepay_cloud_payment
+msgid "PoS MultiSafepay Cloud Payment"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model,name:pos_multisafepay_cloud.model_pos_payment_method
+msgid "Point of Sale Payment Methods"
+msgstr "Métodos de pago en el punto de venta "
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model,name:pos_multisafepay_cloud.model_pos_payment
+msgid "Point of Sale Payments"
+msgstr "Pagos en el punto de venta"
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields.selection,name:pos_multisafepay_cloud.selection__pos_multisafepay_cloud_payment__status__processing
+msgid "Processing"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__receipt_data
+msgid "Receipt Data"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__refund_transaction_id
+msgid "Refund Transaction ID"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields.selection,name:pos_multisafepay_cloud.selection__pos_multisafepay_cloud_payment__status__refunded
+msgid "Refunded"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__remote_transaction_id
+msgid "Remote Transaction ID"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__msp_latest_response
+msgid "Response"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__reversal_response
+msgid "Reversal Response"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__reversed_at
+msgid "Reversed At"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#. odoo-javascript
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js:0
 msgid "Select the original MultiSafepay Cloud POS payment to refund."
-msgstr "Selecciona el pago original de MultiSafepay Cloud POS para reembolsar."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
-msgid "Set MSP Cloud Merchant Account API Key on the payment method to poll real Cloud POS statuses and refund completed payments."
-msgstr "Configura la API Key de Cuenta de Comercio para consultar estados reales y realizar reembolsos."
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__session_id
+msgid "Session"
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py:0
+msgid ""
+"Set MSP Cloud Site API Key on the payment method to poll real Cloud POS "
+"statuses and refund completed payments."
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py:0
 msgid "Set MSP Cloud Terminal Group API Key on the payment method."
-msgstr "Configura la API Key del Grupo de Terminales en el método de pago."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py:0
 msgid "Set MSP Cloud Terminal Group ID on the payment method."
-msgstr "Configura el ID del Grupo de Terminales en el método de pago."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py:0
 msgid "Set MSP Cloud Terminal ID on the payment method."
-msgstr "Configura el ID del Terminal en el método de pago."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py
-msgid "The MultiSafepay Cloud POS notification has no order reference."
-msgstr "La notificación de MultiSafepay Cloud POS no tiene referencia de pedido."
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_payment_method__msp_cloud_account_api_key
+msgid "Site API Key"
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__status
+msgid "Status"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__stream_lock_until
+msgid "Stream Lock Until"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__stream_state
+msgid "Stream State"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields.selection,name:pos_multisafepay_cloud.selection__pos_multisafepay_cloud_payment__stream_state__streaming
+msgid "Streaming"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_payment_method__msp_cloud_terminal_group_api_key
+msgid "Terminal Group API Key"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_payment_method__msp_cloud_terminal_group_id
+msgid "Terminal Group ID"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_multisafepay_cloud_payment__terminal_id
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_payment_method__msp_cloud_terminal_id
+msgid "Terminal ID"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py:0
+msgid ""
+"Terminal ID '%(terminal_id)s' with Terminal Group ID '%(terminal_group_id)s'"
+" is already configured on payment method '%(payment_method_name)s'. Use one "
+"payment method per terminal configuration."
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,help:pos_multisafepay_cloud.field_pos_payment_method__msp_cloud_terminal_group_id
+msgid ""
+"Terminal group identifier used by the Cloud POS API auth scope. Use a "
+"dedicated payment method per terminal configuration."
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/controllers/main.py:0
 msgid "The MultiSafepay Cloud POS notification signature is invalid."
-msgstr "La firma de la notificación de MultiSafepay Cloud POS no es válida."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py
-msgid "The MultiSafepay Cloud POS payment is already paid and cannot be cancelled."
-msgstr "El pago de MultiSafepay Cloud POS ya está pagado y no puede cancelarse."
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/helpers/error_payload.py:0
+msgid ""
+"The MultiSafepay Cloud POS payment could not be cancelled because the "
+"terminal transaction is no longer available. It may already be cancelled or "
+"expired."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py:0
+msgid ""
+"The MultiSafepay Cloud POS payment is already paid and cannot be cancelled."
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/helpers/error_payload.py:0
+msgid ""
+"The MultiSafepay Cloud POS payment is no longer available as an active "
+"terminal transaction. It may have timed out or been cancelled on the "
+"terminal. Check the terminal before retrying."
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/models/pos_payment_method.py:0
 msgid "The MultiSafepay Cloud POS refund amount must be greater than zero."
-msgstr "El importe a reembolsar debe ser mayor que cero."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/helpers/error_payload.py:0
+msgid ""
+"The MultiSafepay Cloud POS terminal did not return a final result in time. "
+"Check the terminal status before retrying the payment."
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#. odoo-python
+#: code:addons/pos_multisafepay_cloud/models/pos_multisafepay_cloud_payment.py:0
 msgid "The original MultiSafepay Cloud POS payment is already fully refunded."
-msgstr "El pago original ya ha sido reembolsado en su totalidad."
+msgstr ""
 
 #. module: pos_multisafepay_cloud
-#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js
-msgid "This will cancel the active MultiSafepay Cloud POS payment on the terminal."
-msgstr "Esto cancelará el pago activo en el terminal MultiSafepay Cloud POS."
+#. odoo-javascript
+#: code:addons/pos_multisafepay_cloud/static/src/app/payment_multisafepay_cloud.js:0
+msgid ""
+"This will cancel the active MultiSafepay Cloud POS payment on the terminal."
+msgstr ""
 
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_payment_method__msp_cloud_timeout_seconds
+msgid "Timeout (seconds)"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,help:pos_multisafepay_cloud.field_pos_payment_method__msp_cloud_terminal_id
+msgid "Use a dedicated payment method per terminal configuration."
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields,field_description:pos_multisafepay_cloud.field_pos_payment_method__msp_cloud_validate_cart
+msgid "Validate Shopping Cart"
+msgstr ""
+
+#. module: pos_multisafepay_cloud
+#: model:ir.model.fields.selection,name:pos_multisafepay_cloud.selection__pos_multisafepay_cloud_payment__status__void
+msgid "Void"
+msgstr ""
