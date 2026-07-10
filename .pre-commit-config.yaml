@@ -48,13 +48,13 @@ repos:
       # update the NOT INSTALLABLE ADDONS section above
       - id: oca-update-pre-commit-excluded-addons
       - id: oca-fix-manifest-website
-        args: ["https://github.com//multisafepay"]
+        args: ["https://github.com/MultiSafepay/odoo"]
       - id: oca-gen-addon-readme
         args:
           - --addons-dir=.
           - --branch=18.0
-          - --org-name=
-          - --repo-name=multisafepay
+          - --org-name=MultiSafepay
+          - --repo-name=odoo
           - --if-source-changed
           - --keep-source-digest
           - --convert-fragments-to-markdown
