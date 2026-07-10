@@ -173,7 +173,7 @@ class PaymentTransaction(models.Model):
 
             _logger.debug(message)
 
-            self._set_error('Transactions declined or chargedback in MultiSafepay')
+            self._set_error('Transactions declined in MultiSafepay')
 
         elif odoo_state == "pending":
             _logger.debug(
