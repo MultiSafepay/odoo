@@ -171,8 +171,8 @@ class PaymentTransaction(models.Model):
                 status,
                 self.reference,
             )
-            # Fix: Odoo 19 compatibility - _set_error() no longer accepts message parameter
-            self._set_error()
+
+            self._set_error("Transaction was declined in MultiSafepay.")
 
         elif odoo_state == "pending":
             _logger.debug(
