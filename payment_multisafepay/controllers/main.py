@@ -748,6 +748,14 @@ class MultiSafepayController(http.Controller):
 
         # Validate transaction data
         self._validate_transaction(payment_transaction)
+        _logger.debug("Transaction validation passed")
+
+        # Get payment provider once and validate it upfront
+        provider = getattr(payment_transaction, "provider_id", None)
+        if not provider:
+            _logger.error("Payment provider not found on transaction.")
+            raise ValidationError(_("Payment provider not found."))
+        _logger.debug("Payment provider retrieved: %s", provider.code)
 
         # Prepare amount and currency (convert to cents)
         currency, amount, currency_id = self._prepare_amount_and_currency(
@@ -1079,15 +1087,15 @@ class MultiSafepayController(http.Controller):
         checkout_options = CheckoutOptions.generate_from_shopping_cart(shopping_cart)
 
         if checkout_options:
-            # Keep cart validation enabled for all flows.
-            # For partial payment links we send a synthetic installment item
-            # that matches the transaction amount to satisfy validation.
-            checkout_options.add_validate_cart(True)
+            validate_cart = provider.multisafepay_validate_shopping_cart
+
+            checkout_options.add_validate_cart(validate_cart)
 
             if is_partial_payment_link:
                 _logger.debug(
-                    "Cart validation enabled with synthetic installment cart "
+                    "Cart validation %s with synthetic installment cart "
                     "(ref=%s, source_total=%s, tx_amount=%s)",
+                    "enabled" if validate_cart else "disabled",
                     payment_transaction.reference,
                     source_total_amount,
                     payment_transaction.amount,
@@ -1110,13 +1118,9 @@ class MultiSafepayController(http.Controller):
         odoo_method_code = payment_transaction.payment_method_code
 
         # Convert to MultiSafepay format using the provider's mapping function
-        provider = getattr(payment_transaction, "provider_id", None)
-        if provider:
-            multisafepay_gateway_code = provider._map_odoo_to_multisafepay_code(
-                odoo_method_code
-            )
-        else:
-            multisafepay_gateway_code = odoo_method_code.upper()
+        multisafepay_gateway_code = provider._map_odoo_to_multisafepay_code(
+            odoo_method_code
+        )
 
         _logger.debug(
             "Mapping Odoo method '%s' to MultiSafepay gateway '%s'",
@@ -1143,12 +1147,7 @@ class MultiSafepayController(http.Controller):
         if checkout_options:
             order_request.add_checkout_options(checkout_options)
 
-        # Get payment provider and initialize MultiSafepay SDK client
-        provider = getattr(payment_transaction, "provider_id", None)
-        if not provider:
-            _logger.error("Payment provider not found on transaction.")
-            raise ValidationError(_("Payment provider not found."))
-
+        # Initialize MultiSafepay SDK client
         multisafepay_sdk = provider.get_multisafepay_sdk()
 
         if not multisafepay_sdk:

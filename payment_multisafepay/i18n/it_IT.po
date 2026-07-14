@@ -21,9 +21,19 @@ msgid "<i class=\"fa fa-refresh\"/> Sync Payment Methods"
 msgstr "<i class=\"fa fa-refresh\"/> Sincronizza metodi di pagamento"
 
 #. module: payment_multisafepay
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay.payment_provider_form_multisafepay
+msgid "Advanced"
+msgstr "Avanzate"
+
+#. module: payment_multisafepay
 #: model:ir.model.fields,field_description:payment_multisafepay.field_payment_provider__multisafepay_api_key
 msgid "API Key"
 msgstr "Chiave API"
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_provider__multisafepay_validate_shopping_cart
+msgid "Validate Shopping Cart"
+msgstr "Convalida carrello"
 
 #. module: payment_multisafepay
 #. odoo-python
@@ -229,6 +239,15 @@ msgid ""
 msgstr ""
 "La chiave API per l'account Multisafepay. Viene utilizzata per autenticare "
 "le richieste all'API Multisafepay."
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,help:payment_multisafepay.field_payment_provider__multisafepay_validate_shopping_cart
+msgid ""
+"Ensures the shopping cart items and taxes match the total order amount "
+"according to MultiSafepay's rounding rules."
+msgstr ""
+"Garantisce che gli articoli e le imposte del carrello corrispondano "
+"all'importo totale dell'ordine secondo le regole di arrotondamento di MultiSafepay."
 
 #. module: payment_multisafepay
 #: model:ir.model.fields,help:payment_multisafepay.field_payment_method__main_currency_id

@@ -21,8 +21,18 @@ msgid "<i class=\"fa fa-refresh\"/> Sync Payment Methods"
 msgstr ""
 
 #. module: payment_multisafepay
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay.payment_provider_form_multisafepay
+msgid "Advanced"
+msgstr ""
+
+#. module: payment_multisafepay
 #: model:ir.model.fields,field_description:payment_multisafepay.field_payment_provider__multisafepay_api_key
 msgid "API Key"
+msgstr ""
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_provider__multisafepay_validate_shopping_cart
+msgid "Validate Shopping Cart"
 msgstr ""
 
 #. module: payment_multisafepay
@@ -201,6 +211,13 @@ msgstr ""
 msgid ""
 "The API key for the Multisafepay account. This is used to authenticate "
 "requests to the Multisafepay API."
+msgstr ""
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,help:payment_multisafepay.field_payment_provider__multisafepay_validate_shopping_cart
+msgid ""
+"Ensures the shopping cart items and taxes match the total order amount "
+"according to MultiSafepay's rounding rules."
 msgstr ""
 
 #. module: payment_multisafepay
