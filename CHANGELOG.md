@@ -9,6 +9,10 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [18.0.2.3.0] - 2026-07-14
+### Added
+- ODOO-248: Add Validate Shopping Cart setting field
+
 ## [18.0.2.2.1] - 2026-06-17
 ### Fixed
 - ODOO-232: Fix t-if clause avoiding incorrect nested if statements
