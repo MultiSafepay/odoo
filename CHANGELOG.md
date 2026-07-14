@@ -9,6 +9,13 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [19.0.2.3.0] - 2026-07-14
+### Added
+- ODOO-247: Add Validate Shopping Cart setting field
+
+### Fixed
+- ODOO-252: Fix missing 1 required positional argument: 'state_message' on set_error()
+
 ## [19.0.2.2.3] - 2026-06-17
 ### Fixed
 - ODOO-235: Fix plugin version within the MultiSafepay order request and release of 19.0.2.2.3
