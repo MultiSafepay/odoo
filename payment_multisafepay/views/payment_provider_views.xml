@@ -35,6 +35,15 @@
             <xpath expr="//field[@name='allow_express_checkout']" position="attributes">
                 <attribute name="readonly">code == 'multisafepay'</attribute>
             </xpath>
+            <xpath expr="//page[@name='configuration']" position="inside">
+                <group
+                    name="multisafepay_advanced_configuration"
+                    string="Advanced"
+                    invisible="code != 'multisafepay'"
+                >
+                    <field name="multisafepay_validate_shopping_cart" />
+                </group>
+            </xpath>
         </field>
     </record>
 </odoo>
