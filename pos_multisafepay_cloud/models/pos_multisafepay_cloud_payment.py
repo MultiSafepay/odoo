@@ -101,8 +101,13 @@ class PosMultiSafepayCloudPayment(models.Model):
         payment_method = self.env["pos.payment.method"].browse(
             data.get("payment_method_id")
         )
+        currency = payment_method._get_cloud_pos_currency(data.get("currency"))
         values = _OdooPayloadBuilder.create_values(
-            response, data, payment_method.msp_cloud_terminal_id, status
+            response,
+            data,
+            payment_method.msp_cloud_terminal_id,
+            status,
+            currency,
         )
 
         _logger.info(

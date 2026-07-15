@@ -341,8 +341,11 @@ class PosPaymentMethod(models.Model):
         )
 
         try:
-            amount_in_cents = _Utils.amount_to_minor_units(data.get("amount"))
-            currency = data.get("currency") or "EUR"
+            currency_code = data.get("currency")
+            currency = self._get_cloud_pos_currency(currency_code)
+            amount_in_minor_units = _Utils.amount_to_minor_units(
+                data.get("amount"), currency
+            )
             shopping_cart_data = data.get("shopping_cart")
             shopping_cart = _OrderPayloadBuilder.shopping_cart(
                 self,
@@ -357,7 +360,8 @@ class PosPaymentMethod(models.Model):
             )
             amount_details = _OrderPayloadBuilder.amount_details(
                 shopping_cart_data,
-                tip_amount_override=data.get("tip_amount"),
+                currency,
+                tip_amount=data.get("tip_amount"),
             )
             customer = _OrderPayloadBuilder.customer(data.get("customer"))
             order_description = _OrderPayloadBuilder.order_description(
@@ -384,8 +388,8 @@ class PosPaymentMethod(models.Model):
                 .add_type("redirect")
                 .add_order_id(remote_order_id)
                 .add_description(order_description)
-                .add_amount(amount_in_cents)
-                .add_currency(currency)
+                .add_amount(amount_in_minor_units)
+                .add_currency(currency_code)
                 .add_gateway_info({"terminal_id": self.msp_cloud_terminal_id.strip()})
                 .add_plugin(plugin)
             )
@@ -674,8 +678,13 @@ class PosPaymentMethod(models.Model):
         if validation_error:
             return validation_error
 
-        amount_in_cents = _Utils.amount_to_minor_units(amount)
-        if amount_in_cents <= 0:
+        currency_code = currency
+        currency_record = self._get_cloud_pos_currency(currency_code)
+        refund_amount = _Utils.parse_decimal(amount).copy_abs()
+        amount_in_minor_units = _Utils.amount_to_minor_units(
+            refund_amount, currency_record
+        )
+        if amount_in_minor_units <= 0:
             return _ErrorPayload.build(
                 _("The MultiSafepay Cloud POS refund amount must be greater than zero.")
             )
@@ -685,8 +694,8 @@ class PosPaymentMethod(models.Model):
             order_manager = sdk.get_order_manager()
             refund_payload = (
                 RefundOrderRequest(**{})
-                .add_amount(amount_in_cents)
-                .add_currency(currency or "EUR")
+                .add_amount(amount_in_minor_units)
+                .add_currency(currency_code)
                 .add_description(
                     description or _("POS reversal for #%s") % str(order_id)
                 )
@@ -712,8 +721,8 @@ class PosPaymentMethod(models.Model):
                     "order_id": str(order_id),
                     "transaction_id": refund_transaction_id or str(order_id),
                     "refund_id": refund_transaction_id or str(order_id),
-                    "amount": amount_in_cents,
-                    "currency": currency or "EUR",
+                    "amount": amount_in_minor_units,
+                    "currency": currency_code,
                     "status": "refunded",
                     "state": "success",
                 }
@@ -734,6 +743,21 @@ class PosPaymentMethod(models.Model):
                 error=error,
                 operation="refund",
             )
+
+    def _get_cloud_pos_currency(self, currency_code=None):
+        """Return the Odoo currency record used for Cloud POS amount precision."""
+        if not currency_code:
+            raise ValueError(_("Currency is required for MultiSafepay Cloud POS."))
+        currency = (
+            self.env["res.currency"]
+            .with_context(active_test=False)
+            .search([("name", "=", currency_code)], limit=1)
+        )
+        if not currency:
+            raise ValueError(
+                _("Currency %s is not configured in Odoo.") % currency_code
+            )
+        return currency
 
     def _validate_cloud_pos_configuration(self, require_account_key=False):
         """Validate the Cloud POS configuration required for API calls.

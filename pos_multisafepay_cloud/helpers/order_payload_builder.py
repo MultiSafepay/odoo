@@ -60,53 +60,27 @@ class _OrderPayloadBuilder:
         return ShoppingCart(items=cart_items) if cart_items else None
 
     @classmethod
-    def amount_details(cls, shopping_cart_data, tip_amount_override=None):
+    def amount_details(cls, shopping_cart_data, currency, tip_amount=None):
         """Build amount details such as tips for the Cloud POS request.
 
         :param dict shopping_cart_data: Cart payload dictionary.
-        :param float|int tip_amount_override: Direct tip amount if provided by frontend.
+        :param res.currency currency: Odoo currency used for amount precision.
+        :param float|int tip_amount: Direct tip amount if provided by frontend.
         :return: AmountDetails structure or None.
         :rtype: multisafepay.api.paths.orders.request.components.AmountDetails or None
         """
-        tip_amount = (
-            _Utils.parse_decimal(tip_amount_override)
-            if tip_amount_override is not None
-            else Decimal("0")
-        )
-        if tip_amount <= 0:
-            tip_amount = cls.shopping_cart_tip_amount(shopping_cart_data)
-
-        tip_amount_in_cents = _Utils.amount_to_minor_units(tip_amount)
-        if tip_amount_in_cents <= 0:
+        if tip_amount is None:
             return None
 
-        return AmountDetails().add_tip(Tip().add_amount(tip_amount_in_cents))
+        parsed_tip_amount = _Utils.parse_decimal(tip_amount)
 
-    @staticmethod
-    def shopping_cart_tip_amount(shopping_cart_data):
-        """Calculate the tip amount represented in POS shopping cart lines.
+        tip_amount_in_minor_units = _Utils.amount_to_minor_units(
+            parsed_tip_amount, currency
+        )
+        if tip_amount_in_minor_units <= 0:
+            return None
 
-        :param dict shopping_cart_data: Cart payload dictionary.
-        :return: Calculated tip amount.
-        :rtype: Decimal
-        """
-        if not isinstance(shopping_cart_data, dict):
-            return Decimal("0")
-
-        items_data = shopping_cart_data.get("items")
-        if not isinstance(items_data, list):
-            return Decimal("0")
-
-        tip_amount = Decimal("0")
-        for item_data in items_data:
-            if not isinstance(item_data, dict) or not item_data.get("msp_cloud_is_tip"):
-                continue
-
-            unit_price = _Utils.parse_decimal(item_data.get("unit_price"))
-            quantity = _Utils.parse_decimal(item_data.get("quantity") or 0)
-            tip_amount += abs(unit_price * quantity)
-
-        return tip_amount
+        return AmountDetails().add_tip(Tip().add_amount(tip_amount_in_minor_units))
 
     @classmethod
     def cart_item(cls, payment_method, item_data):

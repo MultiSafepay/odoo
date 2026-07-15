@@ -48,36 +48,46 @@ export function getOrderLines(order) {
     return order?.get_orderlines?.() || order?.lines || [];
 }
 
+export function getLineProduct(line) {
+    return line.product_id || line.getProduct?.() || null;
+}
+
+export function isTipLine(line, pos) {
+    if (typeof line?.isTipLine === "function") {
+        return line.isTipLine();
+    }
+    const tipProduct = pos?.config?.tip_product_id;
+    const product = getLineProduct(line);
+    return Boolean(tipProduct?.id && product?.id && product.id === tipProduct.id);
+}
+
+export function buildTipAmount(order, pos) {
+    if (!pos?.config?.iface_tipproduct || !pos?.config?.tip_product_id) {
+        return null;
+    }
+    if (order?.tip_amount !== undefined && order?.tip_amount !== null) {
+        return order.tip_amount;
+    }
+    if (typeof order?.getTip === "function") {
+        return order.getTip();
+    }
+    return 0;
+}
+
 export function buildShoppingCart(order, pos) {
     const orderLines = getOrderLines(order);
     if (!orderLines.length) {
         return null;
     }
 
-    const tipProductId =
-        pos?.config?.tip_product_id?.[0] ||
-        pos?.config?.tip_product_id?.id ||
-        pos?.config?.tip_product_id;
-
     const items = orderLines.map((line) => {
-        const product = line.product_id || line.product || line.get_product?.();
-        let productId = null;
-        let productName = null;
-        let taxes = [];
+        const product = getLineProduct(line);
+        const productId = product?.id || null;
+        const productName =
+            product?.display_name || product?.name || product?.full_product_name;
+        const taxes = product?.taxes_id || [];
 
-        if (Array.isArray(product)) {
-            productId = product[0];
-            productName = product[1];
-        } else if (product && typeof product === "object") {
-            productId = product.id;
-            productName =
-                product.display_name || product.name || product.full_product_name;
-            taxes = product.taxes_id || [];
-        }
-
-        const isTip = Boolean(
-            tipProductId && productId && String(productId) === String(tipProductId)
-        );
+        const isTip = isTipLine(line, pos);
         const taxRate = taxes.length ? taxes[0].amount || 0 : 0;
 
         const possiblePrices =
@@ -249,6 +259,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
         const paymentConfirmation = this._register_pending_payment(uuid, mspCloudUid);
         const customer = buildCustomer(order);
         const shoppingCart = buildShoppingCart(order, this.pos);
+        const tipAmount = buildTipAmount(order, this.pos);
         const data = {
             msp_cloud_uid: mspCloudUid,
             msp_cloud_attempt_base: mspCloudAttemptBase,
@@ -258,6 +269,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             order_id: order.uuid,
             currency: this.pos.currency.name,
             amount: line.amount,
+            tip_amount: tipAmount,
             customer,
             shopping_cart: shoppingCart,
             session_id:

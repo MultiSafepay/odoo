@@ -30,15 +30,23 @@ class _Utils:
             return Decimal("0")
 
     @classmethod
-    def amount_to_minor_units(cls, amount):
+    def amount_to_minor_units(cls, amount, currency):
         """Convert a major-unit amount to MultiSafepay minor units.
 
         :param float/Decimal/str amount: The amount value in major units.
-        :return: Value converted to integer cents/minor units.
+        :param res.currency currency: Odoo currency used for rounding and precision.
+        :return: Value converted to integer minor units.
         :rtype: int
         """
-        amount_decimal = cls.parse_decimal(abs(amount or 0))
-        return int((amount_decimal * Decimal("100")).quantize(Decimal("1")))
+        if not currency:
+            raise ValueError("Currency is required to determine decimal precision.")
+        decimal_places = getattr(currency, "decimal_places", None)
+        if decimal_places is None:
+            raise ValueError("Currency decimal_places is not defined.")
+
+        amount_decimal = cls.parse_decimal(amount)
+        rounded_amount = cls.parse_decimal(currency.round(float(amount_decimal)))
+        return int(rounded_amount.scaleb(int(decimal_places)))
 
     @staticmethod
     def sanitize_order_id(value, fallback):

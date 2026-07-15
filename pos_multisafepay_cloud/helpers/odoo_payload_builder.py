@@ -19,19 +19,20 @@ class _OdooPayloadBuilder:
     """
 
     @staticmethod
-    def create_values(response, data, terminal_id, status):
+    def create_values(response, data, terminal_id, status, currency):
         """Prepare values to create a new tracking payment record in Odoo.
 
         :param dict response: The SDK response when initializing the order.
         :param dict data: The initial checkout data sent by the POS frontend.
         :param str terminal_id: The ID of the terminal processing the request.
         :param str status: The initial normalized status.
+        :param res.currency currency: Odoo currency used for amount precision.
         :return: A dictionary of field values for pos.multisafepay.cloud.payment creation.
         :rtype: dict
         """
         payload = response | {"status": status}
         payload.setdefault("state", _Status.state(status))
-        payload.update(_OrderContextBuilder.from_payload(data))
+        payload.update(_OrderContextBuilder.from_payload(data, currency))
 
         values = {
             "name": response.get("order_id") or response.get("id"),
