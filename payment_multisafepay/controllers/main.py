@@ -1188,13 +1188,14 @@ class MultiSafepayController(http.Controller):
             .add_customer(customer)
             .add_delivery(delivery)
             .add_description(description.description if description.description else "")
-            .add_shopping_cart(shopping_cart)
             .add_plugin(plugin)
             .add_second_chance(second_chance)
         )
 
-        if checkout_options:
-            order_request.add_checkout_options(checkout_options)
+        if provider.multisafepay_active_shopping_cart:
+            order_request.add_shopping_cart(shopping_cart)
+            if checkout_options:
+                order_request.add_checkout_options(checkout_options)
 
         # Initialize MultiSafepay SDK client
         multisafepay_sdk = provider.get_multisafepay_sdk()
@@ -1233,6 +1234,17 @@ class MultiSafepayController(http.Controller):
             _logger.error("API response: %s", create_response.get_raw())
 
             # Provide a precise message; caller will redirect with it
+            raw_response = create_response.get_raw() or {}
+            error_code = raw_response.get("error_code") if isinstance(raw_response, dict) else None
+            error_info = raw_response.get("error_info") if isinstance(raw_response, dict) else ""
+
+            # Fallback in case the SDK returns a stringified dictionary instead of a real dict
+            if not isinstance(raw_response, dict) and "'error_code': 1027" in str(raw_response):
+                error_code = "1027"
+
+            if str(error_code) == "1027":
+                raise ValidationError(error_info or _("Cart amount must equal transaction amount."))
+
             raise ValidationError(
                 _(
                     'There was a problem processing your payment. Possible reasons could be: "insufficient funds", or "verification failed".'

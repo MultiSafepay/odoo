@@ -47,6 +47,13 @@ class PaymentProvider(models.Model):
         default=True,
     )
 
+    multisafepay_active_shopping_cart = fields.Boolean(
+        string="Active Shopping Cart",
+        help="Enable this option to send the cart items to the MultiSafepay payment page. "
+        "When disabled, only the total order amount is sent. Note: If disabled, payment methods which require a shopping cart (BNPL) won't work: Riverty, in3, Klarna, and Billink.",
+        default=False,
+    )
+
     # ===================================
     # CRUD METHODS (ODOO)
     # ===================================

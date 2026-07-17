@@ -41,7 +41,15 @@
                     string="Advanced"
                     invisible="code != 'multisafepay'"
                 >
-                    <field name="multisafepay_validate_shopping_cart" />
+                    <label for="multisafepay_active_shopping_cart" string="Active Shopping Cart"/>
+                    <div class="o_row">
+                        <field name="multisafepay_active_shopping_cart" nolabel="1" />
+                        <span class="badge text-bg-info ms-2" title="Experimental Feature">BETA</span>
+                    </div>
+                    <field name="multisafepay_validate_shopping_cart" invisible="not multisafepay_active_shopping_cart" />
+                    <div colspan="2" class="alert alert-warning" role="alert" invisible="multisafepay_active_shopping_cart">
+                        <strong>Warning:</strong> Without the Shopping Cart enabled, "Pay After Delivery" (BNPL) payment methods cannot be used. Some standard Odoo scenarios might not be fully supported.
+                    </div>
                 </group>
             </xpath>
         </field>
