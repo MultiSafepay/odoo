@@ -1,2 +1,2 @@
 # generated from manifests external_dependencies
-multisafepay==3.0.0
+multisafepay==3.1.0
