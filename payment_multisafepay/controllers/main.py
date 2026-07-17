@@ -1230,11 +1230,11 @@ class MultiSafepayController(http.Controller):
                 json.dumps(sanitized_request, default=str),
             )
 
-            # Log create_response for debugging
-            _logger.error("API response: %s", create_response.get_raw())
-
-            # Provide a precise message; caller will redirect with it
+            # Cache raw response to avoid duplicate execution
             raw_response = create_response.get_raw() or {}
+
+            # Log create_response for debugging
+            _logger.error("API response: %s", raw_response)
             error_code = (
                 raw_response.get("error_code")
                 if isinstance(raw_response, dict)
