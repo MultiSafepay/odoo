@@ -1235,15 +1235,25 @@ class MultiSafepayController(http.Controller):
 
             # Provide a precise message; caller will redirect with it
             raw_response = create_response.get_raw() or {}
-            error_code = raw_response.get("error_code") if isinstance(raw_response, dict) else None
-            error_info = raw_response.get("error_info") if isinstance(raw_response, dict) else ""
+            error_code = (
+                raw_response.get("error_code")
+                if isinstance(raw_response, dict)
+                else None
+            )
+            error_info = (
+                raw_response.get("error_info") if isinstance(raw_response, dict) else ""
+            )
 
             # Fallback in case the SDK returns a stringified dictionary instead of a real dict
-            if not isinstance(raw_response, dict) and "'error_code': 1027" in str(raw_response):
+            if not isinstance(raw_response, dict) and "'error_code': 1027" in str(
+                raw_response
+            ):
                 error_code = "1027"
 
             if str(error_code) == "1027":
-                raise ValidationError(error_info or _("Cart amount must equal transaction amount."))
+                raise ValidationError(
+                    error_info or _("Cart amount must equal transaction amount.")
+                )
 
             raise ValidationError(
                 _(

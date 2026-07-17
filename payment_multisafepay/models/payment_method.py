@@ -194,19 +194,26 @@ class PaymentMethod(models.Model):
             )
 
         # Apply BNPL filtering if shopping cart is disabled
-        providers = self.env["payment.provider"].browse(provider_ids) if isinstance(provider_ids, list) else provider_ids
+        providers = (
+            self.env["payment.provider"].browse(provider_ids)
+            if isinstance(provider_ids, list)
+            else provider_ids
+        )
         multisafepay_providers = providers.filtered(lambda p: p.code == "multisafepay")
-        if any(not getattr(p, "multisafepay_active_shopping_cart", False) for p in multisafepay_providers):
+        if any(
+            not getattr(p, "multisafepay_active_shopping_cart", False)
+            for p in multisafepay_providers
+        ):
             methods_before_bnpl = payment_methods
-            
+
             def is_not_bnpl(method):
                 if not method.code.startswith(const.PAYMENT_METHOD_PREFIX):
                     return True
-                clean_code = method.code[len(const.PAYMENT_METHOD_PREFIX):]
+                clean_code = method.code[len(const.PAYMENT_METHOD_PREFIX) :]
                 return clean_code not in const.BNPL_METHODS
-                
+
             payment_methods = payment_methods.filtered(is_not_bnpl)
-            
+
             filtered_out_bnpl = methods_before_bnpl - payment_methods
             payment_utils.add_to_report(
                 report,
