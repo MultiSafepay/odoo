@@ -57,7 +57,6 @@
                         invisible="not multisafepay_active_shopping_cart"
                     />
                     <div
-                        colspan="2"
                         class="alert alert-warning"
                         role="alert"
                         invisible="multisafepay_active_shopping_cart"
