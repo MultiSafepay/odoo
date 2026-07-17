@@ -41,7 +41,29 @@
                     string="Advanced"
                     invisible="code != 'multisafepay'"
                 >
-                    <field name="multisafepay_validate_shopping_cart" />
+                    <label
+                        for="multisafepay_active_shopping_cart"
+                        string="BNPL Support"
+                    />
+                    <div class="o_row">
+                        <field name="multisafepay_active_shopping_cart" nolabel="1" />
+                        <span
+                            class="badge text-bg-info ms-2"
+                            title="Experimental Feature"
+                        >BETA</span>
+                    </div>
+                    <field
+                        name="multisafepay_validate_shopping_cart"
+                        invisible="not multisafepay_active_shopping_cart"
+                    />
+                    <div
+                        class="alert alert-warning"
+                        role="alert"
+                        invisible="multisafepay_active_shopping_cart"
+                    >
+                        <strong
+                    >Warning:</strong> If is disabled, the payment methods which require shopping cart and named as BNPL, won't work: Riverty - Afterpay, in3, Klarna and Billink.
+                    </div>
                 </group>
             </xpath>
         </field>
