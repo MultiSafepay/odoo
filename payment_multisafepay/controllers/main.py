@@ -1252,7 +1252,7 @@ class MultiSafepayController(http.Controller):
 
             if str(error_code) == "1027":
                 raise ValidationError(
-                    error_info or _("Cart amount must equal transaction amount.")
+                    error_info or _("There was a problem processing your payment.")
                 )
 
             raise ValidationError(
