@@ -11,6 +11,7 @@ Handles redirect flow for MultiSafepay payments
 import copy
 import json
 import logging
+from decimal import Decimal, InvalidOperation
 from typing import cast
 from urllib.parse import quote_plus
 
@@ -712,6 +713,42 @@ class MultiSafepayController(http.Controller):
 
         return transaction_units != total_units
 
+    @staticmethod
+    def _get_line_tax_rate_percentage(line):
+        """Return the tax percentage to send for an invoice or sale order line."""
+        taxes = getattr(line, "tax_ids", None)
+        if not taxes:
+            taxes = getattr(line, "tax_id", None)
+        if not taxes:
+            return None
+
+        try:
+            taxes = list(taxes)
+        except TypeError:
+            taxes = [taxes]
+
+        try:
+            price_subtotal = Decimal(str(getattr(line, "price_subtotal", 0) or 0))
+            price_total = Decimal(str(getattr(line, "price_total", 0) or 0))
+        except (InvalidOperation, TypeError, ValueError):
+            price_subtotal = Decimal("0")
+            price_total = Decimal("0")
+
+        if price_subtotal:
+            tax_amount = price_total - price_subtotal
+            tax_rate = (tax_amount / price_subtotal) * Decimal("100")
+            if tax_rate >= 0:
+                return tax_rate.quantize(Decimal("0.0000000001"))
+
+        tax_rate = Decimal("0")
+        for tax in taxes:
+            try:
+                if getattr(tax, "amount_type", "percent") == "percent":
+                    tax_rate += Decimal(str(tax.amount or 0))
+            except (InvalidOperation, TypeError, ValueError):
+                continue
+        return tax_rate if tax_rate >= 0 else Decimal("0")
+
     def _get_partners_from_transaction(self, payment_transaction):
         """Get invoice and shipping partners from transaction
 
@@ -775,6 +812,13 @@ class MultiSafepayController(http.Controller):
         # Validate transaction data
         self._validate_transaction(payment_transaction)
         _logger.debug("Transaction validation passed")
+
+        # Get payment provider once and validate it upfront
+        provider = getattr(payment_transaction, "provider_id", None)
+        if not provider:
+            _logger.error("Payment provider not found on transaction.")
+            raise ValidationError(_("Payment provider not found."))
+        _logger.debug("Payment provider retrieved: %s", provider.code)
 
         # Prepare amount and currency (convert to cents)
         currency, amount, currency_id = self._prepare_amount_and_currency(
@@ -923,7 +967,7 @@ class MultiSafepayController(http.Controller):
         # Create a Plugin object with the necessary details
         plugin = (
             Plugin(**{})
-            .add_plugin_version("2.2.1")
+            .add_plugin_version("2.3.0")
             .add_shop("Odoo")
             .add_shop_version("18.0")
             .add_shop_root_url(url)
@@ -1049,13 +1093,7 @@ class MultiSafepayController(http.Controller):
             is_invoice_line = source_type == "invoice"
 
             # Extract tax rate for MultiSafepay tax calculations
-            tax_table_selector = None
-            # Try tax_ids first (account.move.line - Many2many)
-            if hasattr(line, "tax_ids") and line.tax_ids:
-                tax_table_selector = line.tax_ids[0].amount
-            # Fallback to tax_id (sale.order.line - Many2one)
-            elif hasattr(line, "tax_id") and line.tax_id:
-                tax_table_selector = line.tax_id.amount
+            tax_rate_percentage = self._get_line_tax_rate_percentage(line)
 
             # Build merchant_item_id: SKU → product.id → line.id
             if product and product.default_code:
@@ -1116,8 +1154,8 @@ class MultiSafepayController(http.Controller):
                 .add_weight(Weight(value=line_weight, unit="kg"))
             )
 
-            if tax_table_selector is not None:
-                cart_item.add_tax_rate_percentage(tax_table_selector)
+            if tax_rate_percentage is not None:
+                cart_item.add_tax_rate_percentage(tax_rate_percentage)
             else:
                 cart_item.add_tax_rate_percentage(0)
 
@@ -1129,15 +1167,15 @@ class MultiSafepayController(http.Controller):
         checkout_options = CheckoutOptions.generate_from_shopping_cart(shopping_cart)
 
         if checkout_options:
-            # Keep cart validation enabled for all flows.
-            # For partial payment links we send a synthetic installment item
-            # that matches the transaction amount to satisfy validation.
-            checkout_options.add_validate_cart(True)
+            validate_cart = provider.multisafepay_validate_shopping_cart
+
+            checkout_options.add_validate_cart(validate_cart)
 
             if is_partial_payment_link:
                 _logger.debug(
-                    "Cart validation enabled with synthetic installment cart "
+                    "Cart validation %s with synthetic installment cart "
                     "(ref=%s, source_total=%s, tx_amount=%s)",
+                    "enabled" if validate_cart else "disabled",
                     payment_transaction.reference,
                     source_total_amount,
                     payment_transaction.amount,
@@ -1160,13 +1198,9 @@ class MultiSafepayController(http.Controller):
         odoo_method_code = payment_transaction.payment_method_code
 
         # Convert to MultiSafepay format using the provider's mapping function
-        provider = getattr(payment_transaction, "provider_id", None)
-        if provider:
-            multisafepay_gateway_code = provider._map_odoo_to_multisafepay_code(
-                odoo_method_code
-            )
-        else:
-            multisafepay_gateway_code = odoo_method_code.upper()
+        multisafepay_gateway_code = provider._map_odoo_to_multisafepay_code(
+            odoo_method_code
+        )
 
         _logger.debug(
             "Mapping Odoo method '%s' to MultiSafepay gateway '%s'",
@@ -1185,20 +1219,16 @@ class MultiSafepayController(http.Controller):
             .add_customer(customer)
             .add_delivery(delivery)
             .add_description(description.description if description.description else "")
-            .add_shopping_cart(shopping_cart)
             .add_plugin(plugin)
             .add_second_chance(second_chance)
         )
 
-        if checkout_options:
-            order_request.add_checkout_options(checkout_options)
+        if provider.multisafepay_active_shopping_cart:
+            order_request.add_shopping_cart(shopping_cart)
+            if checkout_options:
+                order_request.add_checkout_options(checkout_options)
 
-        # Get payment provider and initialize MultiSafepay SDK client
-        provider = getattr(payment_transaction, "provider_id", None)
-        if not provider:
-            _logger.error("Payment provider not found on transaction.")
-            raise ValidationError(_("Payment provider not found."))
-
+        # Initialize MultiSafepay SDK client
         multisafepay_sdk = provider.get_multisafepay_sdk()
 
         if not multisafepay_sdk:
@@ -1231,10 +1261,31 @@ class MultiSafepayController(http.Controller):
                 json.dumps(sanitized_request, default=str),
             )
 
-            # Log create_response for debugging
-            _logger.error("API response: %s", create_response.get_raw())
+            # Cache raw response to avoid duplicate execution
+            raw_response = create_response.get_raw() or {}
 
-            # Provide a precise message; caller will redirect with it
+            # Log create_response for debugging
+            _logger.error("API response: %s", raw_response)
+            error_code = (
+                raw_response.get("error_code")
+                if isinstance(raw_response, dict)
+                else None
+            )
+            error_info = (
+                raw_response.get("error_info") if isinstance(raw_response, dict) else ""
+            )
+
+            # Fallback in case the SDK returns a stringified dictionary instead of a real dict
+            if not isinstance(raw_response, dict) and "'error_code': 1027" in str(
+                raw_response
+            ):
+                error_code = "1027"
+
+            if str(error_code) == "1027":
+                raise ValidationError(
+                    error_info or _("There was a problem processing your payment.")
+                )
+
             raise ValidationError(
                 _(
                     'There was a problem processing your payment. Possible reasons could be: "insufficient funds", or "verification failed".'

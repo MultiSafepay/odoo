@@ -41,6 +41,18 @@ class PaymentProvider(models.Model):
         copy=False,
     )
 
+    multisafepay_validate_shopping_cart = fields.Boolean(
+        string="Validate Shopping Cart",
+        help="Ensures the shopping cart items and taxes match the total order amount according to MultiSafepay's rounding rules.",
+        default=True,
+    )
+
+    multisafepay_active_shopping_cart = fields.Boolean(
+        string="BNPL Support",
+        help="Activate this option to show the cart items on the MultiSafepay payment page, which is required to support BNPL. Note: If is disabled, the payment methods which require shopping cart and usually named as BNPL, won't work: Riverty - Afterpay, in3, Klarna and Billink.",
+        default=False,
+    )
+
     # ===================================
     # CRUD METHODS (ODOO)
     # ===================================

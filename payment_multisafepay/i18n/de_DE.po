@@ -331,3 +331,19 @@ msgstr "Ihre Zahlung wurde verarbeitet, wartet aber auf Genehmigung."
 #: model_terms:payment.provider,done_msg:payment_multisafepay.payment_provider_multisafepay
 msgid "Your payment has been processed."
 msgstr "Ihre Zahlung wurde verarbeitet."
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_provider__multisafepay_validate_shopping_cart
+msgid "Validate Shopping Cart"
+msgstr "Validieren Sie den Einkaufswagen"
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,help:payment_multisafepay.field_payment_provider__multisafepay_validate_shopping_cart
+msgid ""
+"Ensures the shopping cart items and taxes match the total order amount according to MultiSafepay's rounding rules."
+msgstr "Stellt sicher, dass die Artikel im Einkaufswagen und Steuern dem Gesamtbestellbetrag gemäß MultiSafepay's Rundungsregeln entsprechen."
+
+#. module: payment_multisafepay
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay.payment_provider_form_multisafepay
+msgid "Advanced"
+msgstr "Erweitert"

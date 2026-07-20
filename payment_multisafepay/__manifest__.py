@@ -5,7 +5,7 @@
     "website": "https://github.com/MultiSafepay/odoo",
     "license": "AGPL-3",
     "category": "Accounting/Payment Providers",
-    "version": "18.0.2.2.1",
+    "version": "18.0.2.3.0",
     "application": True,
     "post_init_hook": "post_init_hook",
     "uninstall_hook": "uninstall_hook",

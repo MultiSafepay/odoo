@@ -1,11 +1,11 @@
 {
     "name": "MultiSafepay Enhanced",
     "summary": """Advanced MultiSafepay business logic integration""",
-    "author": "MultiSafepay, Odoo Community Association (OCA)",
+    "author": "MultiSafepay",
     "website": "https://github.com/MultiSafepay/odoo",
     "license": "AGPL-3",
     "category": "Sales",
-    "version": "18.0.2.2.1",
+    "version": "18.0.2.3.0",
     "application": True,
     "depends": [
         "payment_multisafepay",
@@ -15,7 +15,7 @@
         "sale_stock",
         "sale_management",
     ],
-    "external_dependencies": {"python": ["multisafepay==3.1.0", "requests"]},
+    "external_dependencies": {"python": ["multisafepay==3.1.0"]},
     "data": [
         "views/payment_method_views.xml",
         "views/payment_transaction_views.xml",
