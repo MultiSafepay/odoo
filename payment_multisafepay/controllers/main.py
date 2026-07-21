@@ -1139,13 +1139,15 @@ class MultiSafepayController(http.Controller):
             .add_customer(customer)
             .add_delivery(delivery)
             .add_description(description.description if description.description else "")
-            .add_shopping_cart(shopping_cart)
             .add_plugin(plugin)
             .add_second_chance(second_chance)
         )
 
-        if checkout_options:
-            order_request.add_checkout_options(checkout_options)
+        if provider.multisafepay_active_shopping_cart:
+            order_request.add_shopping_cart(shopping_cart)
+
+            if checkout_options:
+                order_request.add_checkout_options(checkout_options)
 
         # Initialize MultiSafepay SDK client
         multisafepay_sdk = provider.get_multisafepay_sdk()
