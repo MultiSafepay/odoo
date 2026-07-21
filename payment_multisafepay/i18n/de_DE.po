@@ -347,3 +347,30 @@ msgstr "Stellt sicher, dass die Artikel im Einkaufswagen und Steuern dem Gesamtb
 #: model_terms:ir.ui.view,arch_db:payment_multisafepay.payment_provider_form_multisafepay
 msgid "Advanced"
 msgstr "Erweitert"
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_provider__multisafepay_active_shopping_cart
+msgid "BNPL Support"
+msgstr "BNPL-Unterstützung"
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,help:payment_multisafepay.field_payment_provider__multisafepay_active_shopping_cart
+msgid ""
+"Activate this option to show the cart items on the MultiSafepay payment page, which is required to support BNPL. Note: If is disabled, the payment methods which require shopping cart and usually named as BNPL, won't work: Riverty - Afterpay, in3, Klarna and Billink."
+msgstr "Aktivieren Sie diese Option, um die Warenkorbartikel auf der MultiSafepay-Zahlungsseite anzuzeigen, was für die BNPL-Unterstützung erforderlich ist. Hinweis: Wenn deaktiviert, funktionieren die Zahlungsmethoden, die einen Warenkorb erfordern und üblicherweise als BNPL bezeichnet werden, nicht: Riverty - Afterpay, in3, Klarna und Billink."
+
+#. module: payment_multisafepay
+#. odoo-python
+#: code:addons/payment_multisafepay/controllers/main.py:0
+msgid "There was a problem processing your payment."
+msgstr "Bei der Verarbeitung Ihrer Zahlung ist ein Problem aufgetreten."
+
+#. module: payment_multisafepay
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay.payment_provider_form_multisafepay
+msgid "Warning:"
+msgstr "Warnung:"
+
+#. module: payment_multisafepay
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay.payment_provider_form_multisafepay
+msgid "If is disabled, the payment methods which require shopping cart and named as BNPL, won't work: Riverty - Afterpay, in3, Klarna and Billink."
+msgstr "Wenn deaktiviert, funktionieren die Zahlungsmethoden, die einen Warenkorb erfordern und als BNPL bezeichnet werden, nicht: Riverty - Afterpay, in3, Klarna und Billink."

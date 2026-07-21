@@ -347,3 +347,30 @@ msgstr "Assicura che gli articoli del carrello e le tasse corrispondano all'impo
 #: model_terms:ir.ui.view,arch_db:payment_multisafepay.payment_provider_form_multisafepay
 msgid "Advanced"
 msgstr "Avanzato"
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_provider__multisafepay_active_shopping_cart
+msgid "BNPL Support"
+msgstr "Supporto BNPL"
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,help:payment_multisafepay.field_payment_provider__multisafepay_active_shopping_cart
+msgid ""
+"Activate this option to show the cart items on the MultiSafepay payment page, which is required to support BNPL. Note: If is disabled, the payment methods which require shopping cart and usually named as BNPL, won't work: Riverty - Afterpay, in3, Klarna and Billink."
+msgstr "Attiva questa opzione per mostrare gli articoli del carrello nella pagina di pagamento MultiSafepay, necessario per il supporto BNPL. Nota: Se disattivato, i metodi di pagamento che richiedono il carrello e solitamente denominati BNPL non funzioneranno: Riverty - Afterpay, in3, Klarna e Billink."
+
+#. module: payment_multisafepay
+#. odoo-python
+#: code:addons/payment_multisafepay/controllers/main.py:0
+msgid "There was a problem processing your payment."
+msgstr "Si è verificato un problema durante l'elaborazione del pagamento."
+
+#. module: payment_multisafepay
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay.payment_provider_form_multisafepay
+msgid "Warning:"
+msgstr "Attenzione:"
+
+#. module: payment_multisafepay
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay.payment_provider_form_multisafepay
+msgid "If is disabled, the payment methods which require shopping cart and named as BNPL, won't work: Riverty - Afterpay, in3, Klarna and Billink."
+msgstr "Se disattivato, i metodi di pagamento che richiedono il carrello e denominati BNPL non funzioneranno: Riverty - Afterpay, in3, Klarna e Billink."
