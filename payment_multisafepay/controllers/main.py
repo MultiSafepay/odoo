@@ -1183,12 +1183,12 @@ class MultiSafepayController(http.Controller):
             )
 
             # Log create_response for debugging
-            _logger.error("API response: %s", create_response.get_raw())
+            _logger.error("API response: %s", (create_response.get_raw() or {}))
 
             # Order creation failed - provide user-friendly error message
             raise ValidationError(
                 _(
-                    'There was a problem processing your payment. Possible reasons could be: "insufficient funds", or "verification failed".'
+                    "There was a problem processing your payment. Please try again or use a different payment method."
                 )
             )
 
