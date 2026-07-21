@@ -281,11 +281,11 @@ msgstr "Der technische Code dieses Zahlungsanbieters."
 #. odoo-python
 #: code:addons/payment_multisafepay/controllers/main.py:0
 msgid ""
-"There was a problem processing your payment. Possible reasons could be: "
-"\"insufficient funds\", or \"verification failed\"."
+"There was a problem processing your payment. Please try again or use a "
+"different payment method."
 msgstr ""
-"Bei der Verarbeitung Ihrer Zahlung ist ein Problem aufgetreten. Mögliche Gründe könnten sein: "
-"\"unzureichende Mittel\", oder \"Überprüfung fehlgeschlagen\"."
+"Bei der Verarbeitung Ihrer Zahlung ist ein Problem aufgetreten. Bitte "
+"versuchen Sie es erneut oder verwenden Sie eine andere Zahlungsmethode."
 
 #. module: payment_multisafepay
 #. odoo-python
@@ -350,3 +350,39 @@ msgstr "Ihre Zahlung wurde verarbeitet, wartet aber auf Genehmigung."
 #: model_terms:payment.provider,done_msg:payment_multisafepay.payment_provider_multisafepay
 msgid "Your payment has been processed."
 msgstr "Ihre Zahlung wurde verarbeitet."
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_provider__multisafepay_active_shopping_cart
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay.payment_provider_form_multisafepay
+msgid "BNPL Support"
+msgstr "BNPL-Unterstützung"
+
+#. module: payment_multisafepay
+#: model:ir.model.fields,help:payment_multisafepay.field_payment_provider__multisafepay_active_shopping_cart
+msgid ""
+"Activate this option to show the cart items on the MultiSafepay payment "
+"page, which is required to support BNPL. Note: If disabled, the payment "
+"methods that require a shopping cart and are commonly known as BNPL won't "
+"work: Riverty - Afterpay, in3, Klarna and Billink."
+msgstr ""
+"Aktivieren Sie diese Option, um die Warenkorbartikel auf der MultiSafepay-"
+"Zahlungsseite anzuzeigen, was zur Unterstützung von BNPL erforderlich ist. "
+"Hinweis: Wenn deaktiviert, funktionieren die Zahlungsmethoden, die einen "
+"Warenkorb erfordern und allgemein als BNPL bekannt sind, nicht: Riverty - "
+"Afterpay, in3, Klarna und Billink."
+
+#. module: payment_multisafepay
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay.payment_provider_form_multisafepay
+msgid "BETA"
+msgstr "BETA"
+
+#. module: payment_multisafepay
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay.payment_provider_form_multisafepay
+msgid ""
+"<strong>Warning:</strong> If disabled, the payment methods that require a "
+"shopping cart and are known as BNPL won't work: Riverty - Afterpay, in3, "
+"Klarna and Billink."
+msgstr ""
+"<strong>Warnung:</strong> Wenn deaktiviert, funktionieren die "
+"Zahlungsmethoden, die einen Warenkorb erfordern und als BNPL bekannt sind, "
+"nicht: Riverty - Afterpay, in3, Klarna und Billink."

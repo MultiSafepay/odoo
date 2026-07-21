@@ -7,6 +7,8 @@ import logging
 
 from odoo import api, fields, models
 
+from .. import const
+
 try:
     from odoo.http import request
 except ImportError:
@@ -184,6 +186,37 @@ class PaymentMethod(models.Model):
                 report, filtered_out, "amount", {"amount": amount}
             )
 
+        # Apply BNPL filtering if shopping cart is disabled
+        providers = (
+            self.env["payment.provider"].browse(provider_ids)
+            if isinstance(provider_ids, list)
+            else provider_ids
+        )
+
+        multisafepay_providers = providers.filtered(lambda p: p.code == "multisafepay")
+
+        if any(
+            not getattr(p, "multisafepay_active_shopping_cart", False)
+            for p in multisafepay_providers
+        ):
+            methods_before_bnpl = payment_methods
+
+            def is_not_bnpl(method):
+                if not method.code.startswith(const.PAYMENT_METHOD_PREFIX):
+                    return True
+                clean_code = method.code[len(const.PAYMENT_METHOD_PREFIX) :]
+                return clean_code not in const.BNPL_METHODS
+
+            payment_methods = payment_methods.filtered(is_not_bnpl)
+
+            filtered_out_bnpl = methods_before_bnpl - payment_methods
+            self._report_filtered_methods(
+                report,
+                filtered_out_bnpl,
+                "bnpl",
+                "Shopping cart is disabled, 'Pay After Delivery' (BNPL) methods are unavailable",
+            )
+
         return payment_methods
 
     # ===================================
@@ -282,10 +315,10 @@ class PaymentMethod(models.Model):
         :type report: dict or None
         :param filtered_methods: Recordset of methods that were filtered out
         :type filtered_methods: recordset
-        :param filter_type: Type of filter ('amount' or 'pricelist')
+        :param filter_type: Type of filter ('amount' or 'pricelist', or 'bnpl')
         :type filter_type: str
-        :param context: Dictionary with context data (e.g., {'amount': 100.0} or {'pricelist': recordset})
-        :type context: dict
+        :param context: Dictionary with context data (e.g., {'amount': 100.0} or {'pricelist': recordset}) or a string message for simple filters like 'bnpl'
+        :type context: dict or str
         :return: None
         """
         if report is None or not filtered_methods:
@@ -299,6 +332,12 @@ class PaymentMethod(models.Model):
             elif filter_type == "pricelist":
                 reason_parts = self._generate_pricelist_filter_reasons(
                     method, context.get("pricelist")
+                )
+            elif filter_type == "bnpl":
+                reason_parts = (
+                    [context]
+                    if isinstance(context, str)
+                    else [f"Filtered by {filter_type}"]
                 )
             else:
                 reason_parts = [f"Filtered by {filter_type}"]

@@ -1139,13 +1139,15 @@ class MultiSafepayController(http.Controller):
             .add_customer(customer)
             .add_delivery(delivery)
             .add_description(description.description if description.description else "")
-            .add_shopping_cart(shopping_cart)
             .add_plugin(plugin)
             .add_second_chance(second_chance)
         )
 
-        if checkout_options:
-            order_request.add_checkout_options(checkout_options)
+        if provider.multisafepay_active_shopping_cart:
+            order_request.add_shopping_cart(shopping_cart)
+
+            if checkout_options:
+                order_request.add_checkout_options(checkout_options)
 
         # Initialize MultiSafepay SDK client
         multisafepay_sdk = provider.get_multisafepay_sdk()
@@ -1181,12 +1183,12 @@ class MultiSafepayController(http.Controller):
             )
 
             # Log create_response for debugging
-            _logger.error("API response: %s", create_response.get_raw())
+            _logger.error("API response: %s", (create_response.get_raw() or {}))
 
             # Order creation failed - provide user-friendly error message
             raise ValidationError(
                 _(
-                    'There was a problem processing your payment. Possible reasons could be: "insufficient funds", or "verification failed".'
+                    "There was a problem processing your payment. Please try again or use a different payment method."
                 )
             )
 
