@@ -62,7 +62,7 @@
                         invisible="multisafepay_active_shopping_cart"
                     >
                         <strong
-                    >Warning:</strong> If is disabled, the payment methods which require shopping cart and named as BNPL, won't work: Riverty - Afterpay, in3, Klarna and Billink.
+                    >Warning:</strong> If disabled, the payment methods that require a shopping cart and are known as BNPL won't work: Riverty - Afterpay, in3, Klarna and Billink.
                     </div>
                 </group>
             </xpath>
