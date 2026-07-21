@@ -1261,34 +1261,12 @@ class MultiSafepayController(http.Controller):
                 json.dumps(sanitized_request, default=str),
             )
 
-            # Cache raw response to avoid duplicate execution
-            raw_response = create_response.get_raw() or {}
-
-            # Log create_response for debugging
-            _logger.error("API response: %s", raw_response)
-            error_code = (
-                raw_response.get("error_code")
-                if isinstance(raw_response, dict)
-                else None
-            )
-            error_info = (
-                raw_response.get("error_info") if isinstance(raw_response, dict) else ""
-            )
-
-            # Fallback in case the SDK returns a stringified dictionary instead of a real dict
-            if not isinstance(raw_response, dict) and "'error_code': 1027" in str(
-                raw_response
-            ):
-                error_code = "1027"
-
-            if str(error_code) == "1027":
-                raise ValidationError(
-                    error_info or _("There was a problem processing your payment.")
-                )
+            # Log create_response for debugging.
+            _logger.error("API response: %s", (create_response.get_raw() or {}))
 
             raise ValidationError(
                 _(
-                    'There was a problem processing your payment. Possible reasons could be: "insufficient funds", or "verification failed".'
+                    "There was a problem processing your payment. Please try again or use a different payment method."
                 )
             )
 
