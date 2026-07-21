@@ -59,6 +59,7 @@
                     <div
                         class="alert alert-warning"
                         role="alert"
+                        colspan="2"
                         invisible="multisafepay_active_shopping_cart"
                     >
                         <strong
