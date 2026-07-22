@@ -734,11 +734,16 @@ class MultiSafepayController(http.Controller):
             price_subtotal = Decimal("0")
             price_total = Decimal("0")
 
+        def _format_rate(rate):
+            if rate > 0:
+                return rate.quantize(Decimal("0.0000000001")).normalize()
+            return Decimal("0")
+
         if price_subtotal:
             tax_amount = price_total - price_subtotal
             tax_rate = (tax_amount / price_subtotal) * Decimal("100")
             if tax_rate >= 0:
-                return tax_rate.quantize(Decimal("0.0000000001"))
+                return _format_rate(tax_rate)
 
         tax_rate = Decimal("0")
         for tax in taxes:
@@ -747,7 +752,7 @@ class MultiSafepayController(http.Controller):
                     tax_rate += Decimal(str(tax.amount or 0))
             except (InvalidOperation, TypeError, ValueError):
                 continue
-        return tax_rate if tax_rate >= 0 else Decimal("0")
+        return _format_rate(tax_rate)
 
     def _get_partners_from_transaction(self, payment_transaction):
         """Get invoice and shipping partners from transaction
@@ -1261,34 +1266,12 @@ class MultiSafepayController(http.Controller):
                 json.dumps(sanitized_request, default=str),
             )
 
-            # Cache raw response to avoid duplicate execution
-            raw_response = create_response.get_raw() or {}
-
-            # Log create_response for debugging
-            _logger.error("API response: %s", raw_response)
-            error_code = (
-                raw_response.get("error_code")
-                if isinstance(raw_response, dict)
-                else None
-            )
-            error_info = (
-                raw_response.get("error_info") if isinstance(raw_response, dict) else ""
-            )
-
-            # Fallback in case the SDK returns a stringified dictionary instead of a real dict
-            if not isinstance(raw_response, dict) and "'error_code': 1027" in str(
-                raw_response
-            ):
-                error_code = "1027"
-
-            if str(error_code) == "1027":
-                raise ValidationError(
-                    error_info or _("There was a problem processing your payment.")
-                )
+            # Log create_response for debugging.
+            _logger.error("API response: %s", (create_response.get_raw() or {}))
 
             raise ValidationError(
                 _(
-                    'There was a problem processing your payment. Possible reasons could be: "insufficient funds", or "verification failed".'
+                    "There was a problem processing your payment. Please try again or use a different payment method."
                 )
             )
 

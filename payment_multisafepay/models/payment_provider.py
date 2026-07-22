@@ -49,7 +49,7 @@ class PaymentProvider(models.Model):
 
     multisafepay_active_shopping_cart = fields.Boolean(
         string="BNPL Support",
-        help="Activate this option to show the cart items on the MultiSafepay payment page, which is required to support BNPL. Note: If is disabled, the payment methods which require shopping cart and usually named as BNPL, won't work: Riverty - Afterpay, in3, Klarna and Billink.",
+        help="Activate this option to show the cart items on the MultiSafepay payment page, which is required to support BNPL. Note: If disabled, the payment methods that require a shopping cart and are commonly known as BNPL won't work: Riverty - Afterpay, in3, Klarna and Billink.",
         default=False,
     )
 
