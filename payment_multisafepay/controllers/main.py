@@ -735,16 +735,16 @@ class MultiSafepayController(http.Controller):
             price_total = Decimal("0")
 
         def _format_rate(rate):
-            if rate > 0:
-                return rate.quantize(Decimal("0.0000000001")).normalize()
-            return Decimal("0")
+            if not rate:
+                return Decimal("0")
+            return rate.quantize(Decimal("0.0000000001")).normalize()
 
         if price_subtotal:
             tax_amount = price_total - price_subtotal
-            tax_rate = (tax_amount / price_subtotal) * Decimal("100")
-            if tax_rate >= 0:
-                return _format_rate(tax_rate)
+            return _format_rate((tax_amount / price_subtotal) * Decimal("100"))
 
+        # Defensive fallback: This block should not normally be reached because valid
+        # order/invoice lines always have price_subtotal. Retained for edge cases.
         tax_rate = Decimal("0")
         for tax in taxes:
             try:
