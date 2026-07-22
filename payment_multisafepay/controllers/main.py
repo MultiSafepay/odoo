@@ -11,6 +11,7 @@ Handles redirect flow for MultiSafepay payments
 import copy
 import json
 import logging
+from decimal import Decimal, InvalidOperation
 from typing import cast
 from urllib.parse import quote_plus
 
@@ -695,6 +696,46 @@ class MultiSafepayController(http.Controller):
 
         return transaction_units != total_units
 
+    @staticmethod
+    def _get_line_tax_rate_percentage(line):
+        """Return the tax percentage to send for an invoice or sale order line."""
+        taxes = getattr(line, "tax_ids", None)
+        if not taxes:
+            taxes = getattr(line, "tax_id", None)
+        if not taxes:
+            return None
+
+        try:
+            taxes = list(taxes)
+        except TypeError:
+            taxes = [taxes]
+
+        try:
+            price_subtotal = Decimal(str(getattr(line, "price_subtotal", 0) or 0))
+            price_total = Decimal(str(getattr(line, "price_total", 0) or 0))
+        except (InvalidOperation, TypeError, ValueError):
+            price_subtotal = Decimal("0")
+            price_total = Decimal("0")
+
+        def _format_rate(rate):
+            if rate > 0:
+                return rate.quantize(Decimal("0.0000000001")).normalize()
+            return Decimal("0")
+
+        if price_subtotal:
+            tax_amount = price_total - price_subtotal
+            if tax_amount >= 0:
+                return _format_rate((tax_amount / price_subtotal) * Decimal("100"))
+
+        tax_rate = Decimal("0")
+        for tax in taxes:
+            try:
+                if getattr(tax, "amount_type", "percent") == "percent":
+                    tax_rate += Decimal(str(tax.amount or 0))
+            except (InvalidOperation, TypeError, ValueError):
+                continue
+        return _format_rate(tax_rate)
+
     def _get_partners_from_transaction(self, payment_transaction):
         """Get invoice and shipping partners from transaction
 
@@ -1011,9 +1052,7 @@ class MultiSafepayController(http.Controller):
             is_invoice_line = source_type == "invoice"
 
             # Extract tax rate for MultiSafepay tax calculations
-            tax_table_selector = None
-            if hasattr(line, "tax_ids") and line.tax_ids:
-                tax_table_selector = line.tax_ids[0].amount
+            tax_rate_percentage = self._get_line_tax_rate_percentage(line)
 
             # Build merchant_item_id: SKU → product.id → line.id
             if product and product.default_code:
@@ -1074,8 +1113,8 @@ class MultiSafepayController(http.Controller):
                 .add_weight(Weight(value=line_weight, unit="kg"))
             )
 
-            if tax_table_selector is not None:
-                cart_item.add_tax_rate_percentage(tax_table_selector)
+            if tax_rate_percentage is not None:
+                cart_item.add_tax_rate_percentage(tax_rate_percentage)
             else:
                 cart_item.add_tax_rate_percentage(0)
 
