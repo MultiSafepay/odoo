@@ -16,15 +16,17 @@ from ..helpers.utils import (
 _logger = logging.getLogger(__name__)
 
 SENSITIVE_LOG_KEYS = (
-    "token",
+    "email",
+    "phone",
+    "ip_address",
+    "forwarded_ip",
+    "first_name",
+    "last_name",
+    "address1",
+    "address2",
+    "house_number",
+    "zip_code",
     "auth",
-    "key",
-    "secret",
-    "signature",
-    "hmac",
-    "hash",
-    "checksum",
-    "password",
 )
 
 
