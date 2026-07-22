@@ -1,7 +1,7 @@
 {
     "name": "MultiSafepay",
     "summary": """E-commerce is part of our DNA""",
-    "author": "MultiSafepay, Odoo Community Association (OCA)",
+    "author": "MultiSafepay",
     "website": "https://github.com/MultiSafepay/odoo",
     "license": "AGPL-3",
     "category": "Accounting/Payment Providers",
