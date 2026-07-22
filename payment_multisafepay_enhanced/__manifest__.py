@@ -2,7 +2,7 @@
     "name": "MultiSafepay Enhanced",
     "summary": """Advanced MultiSafepay business logic integration""",
     "author": "MultiSafepay",
-    "website": "https://github.com/MultiSafepay/odoo",
+    "website": "https://www.multisafepay.com/",
     "license": "AGPL-3",
     "category": "Sales",
     "version": "18.0.2.3.0",

@@ -2,7 +2,7 @@
     "name": "MultiSafepay",
     "summary": """E-commerce is part of our DNA""",
     "author": "MultiSafepay",
-    "website": "https://github.com/MultiSafepay/odoo",
+    "website": "https://www.multisafepay.com/",
     "license": "AGPL-3",
     "category": "Accounting/Payment Providers",
     "version": "18.0.2.3.0",
