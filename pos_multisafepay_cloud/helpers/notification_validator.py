@@ -37,8 +37,8 @@ class _NotificationValidator:
             )
             return False
 
-        api_keys = cls._get_api_keys(payment_method)
-        if not api_keys:
+        api_key = cls._get_api_key(payment_method)
+        if not api_key:
             _logger.warning(
                 "MSP Cloud POS notification for order %s has an Auth header, but no API key is configured to validate it.",
                 payment_name,
@@ -46,43 +46,35 @@ class _NotificationValidator:
             return False
 
         return cls._validate_webhook_signature(
-            payment_name, raw_body, auth_header, api_keys
+            payment_name, raw_body, auth_header, api_key
         )
 
     @staticmethod
-    def _get_api_keys(payment_method):
-        """Extract configured API keys from the payment method."""
-        api_keys = []
-        for api_key in (
-            payment_method.msp_cloud_terminal_group_api_key,
-            payment_method.msp_cloud_account_api_key,
-        ):
-            api_key = (api_key or "").strip()
-            if api_key and api_key not in api_keys:
-                api_keys.append(api_key)
-        return api_keys
+    def _get_api_key(payment_method):
+        """Extract configured API key from the payment method."""
+        api_key = payment_method.msp_cloud_terminal_group_api_key
+        return (api_key or "").strip()
 
     @staticmethod
-    def _validate_webhook_signature(payment_name, raw_body, auth_header, api_keys):
+    def _validate_webhook_signature(payment_name, raw_body, auth_header, api_key):
         """Attempt validation against a list of API keys."""
         validation_error = None
-        for api_key in api_keys:
-            try:
-                if Webhook.validate(
-                    request=raw_body,
-                    auth=auth_header,
-                    api_key=api_key,
-                    validation_time_in_seconds=600,
-                ):
-                    return True
-            except Exception as error:
-                validation_error = error
+
+        try:
+            if Webhook.validate(
+                request=raw_body,
+                auth=auth_header,
+                api_key=api_key,
+                validation_time_in_seconds=600,
+            ):
+                return True
+        except Exception as error:
+            validation_error = error
 
         if validation_error:
             _logger.warning(
-                "MSP Cloud POS notification signature validation failed for order %s with %s configured API key(s): %s",
-                payment_name,
-                len(api_keys),
+                "MSP Cloud POS notification signature validation failed with error: %s",
                 validation_error,
             )
+
         return False
