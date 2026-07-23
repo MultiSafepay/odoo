@@ -9,7 +9,17 @@ from odoo import api, models
 
 
 class PosPayment(models.Model):
-    """Extend POS payment to load fields for Cloud POS refunds."""
+    """Extension of the core `pos.payment` model for MultiSafepay Cloud POS integration.
+
+    This class extends Odoo's native Point of Sale payment record handling to ensure
+    that all relevant payment details (transaction IDs, payment statuses, reference
+    numbers, tickets, and UUIDs) are loaded into the POS UI cache.
+
+    Key Functions:
+    - `_load_pos_data_fields`: Extends the list of fields loaded for `pos.payment`
+      records in the POS UI, enabling cashiers to select and refund original MultiSafepay
+      Cloud POS transactions directly from the POS interface.
+    """
 
     _inherit = "pos.payment"
 

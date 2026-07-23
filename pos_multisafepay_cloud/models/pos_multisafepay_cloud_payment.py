@@ -24,12 +24,38 @@ _logger = logging.getLogger(__name__)
 
 
 class PosMultiSafepayCloudPayment(models.Model):
-    """Track ongoing and completed Cloud POS terminal transactions.
+    """Model for tracking and managing MultiSafepay Cloud POS payment attempts.
 
-    This model acts as a bridge and state machine between Odoo POS
-    and the MultiSafepay Cloud POS API, tracking payment attempts,
-    reversals, and webhook notifications independently of the core
-    Odoo POS orders.
+    This model acts as a backend bridge and state machine between Odoo POS and the
+    MultiSafepay Cloud POS API. It tracks individual payment attempts, status transitions,
+    terminal receipts, webhook notifications, cancellations, voids, and refunds
+    independently of native Odoo POS orders.
+
+    Key Functional Components:
+
+    1. Public Interface & Workflow Entry Points:
+       - `create_payment_request`: Creates and initializes a local tracking payment record.
+       - `multisafepay_cloud_rpc_poll_payment_status`: Retrieves the latest status of an active terminal payment request.
+       - `multisafepay_cloud_rpc_cancel_payment_request`: Cancels an ongoing payment request on the terminal.
+       - `multisafepay_cloud_rpc_reverse_payment_request`: Triggers a void or reversal for an uncompleted transaction.
+       - `multisafepay_cloud_rpc_refund_payment_request`: Processes full or partial refunds for completed payments.
+
+    2. Status Synchronization & Webhook Processing:
+       - `_force_remote_status_check`: Forces a live remote API call to update local transaction state.
+       - `_record_status_refresh_error`: Handles and logs errors occurring during status checks.
+       - `_apply_notification_payload`: Updates payment state from incoming MultiSafepay webhooks.
+       - `_cancel_missing_payment_request`: Handles cancellation when remote record is uninitialized.
+       - `_find_payment`: Utility to locate tracking records by order ID or Cloud UID.
+       - `_find_source_pos_payment`: Identifies original POS payment records for refund processing.
+       - `_refresh_status`: Queries the MultiSafepay API to refresh and sync transaction status.
+
+    3. Transaction Mechanics & Lifecycle Actions:
+       - `_cancel_payment_request`: Executes the cancellation API call and updates state.
+       - `_reverse_payment_request`: Executes payment reversal logic with MultiSafepay.
+       - `_refund_payment_request`: Performs refund API operations and links refund transactions.
+       - `_mark_as_canceled`: Updates internal status and response payloads to canceled state.
+       - `_mark_as_refunded`: Updates internal status and response payloads to refunded state.
+       - `_build_status_payload`: Formats the standard status dictionary returned to the POS frontend.
     """
 
     _name = "pos.multisafepay.cloud.payment"
@@ -120,8 +146,11 @@ class PosMultiSafepayCloudPayment(models.Model):
         return self.sudo().create(values)
 
     @api.model
-    def poll_payment_status(self, order_id=None, msp_cloud_uid=None):
+    def multisafepay_cloud_rpc_poll_payment_status(self, order_id=None, msp_cloud_uid=None):
         """Handle a status request for a Cloud POS payment, updating it if pending.
+
+        [FRONTEND RPC ENTRYPOINT]
+        Primary polling endpoint invoked directly by POS JavaScript frontend.
 
         :param str order_id: The Cloud POS order ID.
         :param str msp_cloud_uid: The Cloud UID reference.
@@ -139,10 +168,13 @@ class PosMultiSafepayCloudPayment(models.Model):
         return payment._build_status_payload()
 
     @api.model
-    def cancel_payment_request(
+    def multisafepay_cloud_rpc_cancel_payment_request(
         self, order_id=None, msp_cloud_uid=None, payment_method_id=None
     ):
         """Handle cancellation of a Cloud POS payment.
+
+        [FRONTEND RPC ENTRYPOINT]
+        Cancellation endpoint invoked directly by POS JavaScript frontend.
 
         :param str order_id: The Cloud POS order ID.
         :param str msp_cloud_uid: The Cloud UID reference.
@@ -164,10 +196,13 @@ class PosMultiSafepayCloudPayment(models.Model):
         return payment._cancel_payment_request()
 
     @api.model
-    def reverse_payment_request(
+    def multisafepay_cloud_rpc_reverse_payment_request(
         self, order_id=None, msp_cloud_uid=None, amount=None, currency=None
     ):
         """Handle reversal of a paid Cloud POS payment.
+
+        [FRONTEND RPC ENTRYPOINT]
+        Reversal endpoint invoked directly by POS JavaScript frontend.
 
         :param str order_id: The Cloud POS order ID.
         :param str msp_cloud_uid: The Cloud UID reference.
@@ -184,7 +219,7 @@ class PosMultiSafepayCloudPayment(models.Model):
         return payment._reverse_payment_request(amount=amount, currency=currency)
 
     @api.model
-    def refund_payment_request(
+    def multisafepay_cloud_rpc_refund_payment_request(
         self,
         refunded_payment_id=None,
         order_id=None,
@@ -193,6 +228,9 @@ class PosMultiSafepayCloudPayment(models.Model):
         currency=None,
     ):
         """Process and request a refund for an original payment.
+
+        [FRONTEND RPC ENTRYPOINT]
+        Refund endpoint invoked directly by POS JavaScript frontend.
 
         :param str/int refunded_payment_id: The original pos.payment ID.
         :param str order_id: The Cloud POS order ID.

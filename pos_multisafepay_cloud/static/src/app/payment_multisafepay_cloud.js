@@ -5,23 +5,49 @@
 // See the LICENSE.md file for more information.
 // See the DISCLAIMER.md file for disclaimer details
 
-import {_t} from "@web/core/l10n/translation";
-import {PaymentInterface} from "@point_of_sale/app/payment/payment_interface";
-import {register_payment_method} from "@point_of_sale/app/store/pos_store";
+/**
+ * MultiSafepay Cloud POS JavaScript Payment Interface Integration.
+ *
+ * This module extends Odoo's Point of Sale `PaymentInterface` to enable seamless payment
+ * processing, cancellations, reversals, and refunds through MultiSafepay Cloud POS terminals.
+ *
+ * Overview of Key Modules and Workflow:
+ * 1. Helper Utilities: Build customer profile, shopping cart items, tip amounts, and identify refundable lines.
+ * 2. Payment Interface (`PaymentMultiSafepayCloud`):
+ *    - Checkout Entry Point (`send_payment_request`): Prepares order payload and invokes backend RPC `multisafepay_cloud_rpc_payment_request`.
+ *    - Status Polling (`_schedule_status_poll` & `handle_multisafepay_cloud_status_response`): Polls Odoo backend via `multisafepay_cloud_rpc_poll_payment_status` every 2s until terminal transaction reaches a final state.
+ *    - Terminal Cancellation (`send_payment_cancel`): Asks cashier confirmation and invokes `multisafepay_cloud_rpc_cancel_payment_request`.
+ *    - Payment Reversals (`send_payment_reversal`): Voids uncompleted transactions via `multisafepay_cloud_rpc_reverse_payment_request`.
+ *    - Refund Requests (`_send_refund_request`): Issues full/partial refunds via `multisafepay_cloud_rpc_refund_payment_request`.
+ */
+
+import { _t } from "@web/core/l10n/translation";
+import { PaymentInterface } from "@point_of_sale/app/payment/payment_interface";
+import { register_payment_method } from "@point_of_sale/app/store/pos_store";
 import {
     AlertDialog,
     ConfirmationDialog,
 } from "@web/core/confirmation_dialog/confirmation_dialog";
-import {Utils} from "@pos_multisafepay_cloud/app/utils";
+import { Utils } from "@pos_multisafepay_cloud/app/utils";
 
+/**
+ * Extract and sanitize partner details from a POS order to build a MultiSafepay customer dictionary.
+ *
+ * @param {Object} order - The active POS order.
+ * @returns {Object|null} Customer object containing billing/shipping address or null if no partner attached.
+ */
 export function buildCustomer(order) {
+    // Retrieve partner object from POS order
     const partner =
         order?.partner_id || order?.getPartner?.() || order?.partner || null;
     if (!partner) {
         return null;
     }
+
+    // Split full customer name into first and last names for MultiSafepay API compliance
     const partnerName = partner.name || partner.display_name || "";
     const [firstName, lastName] = Utils.splitCustomerName(partnerName);
+
     const customer = {
         name: partnerName,
         reference: Utils.sanitizeOrderId(partner.id || partner.barcode || partnerName),
@@ -37,6 +63,8 @@ export function buildCustomer(order) {
         phone: partner.phone || partner.mobile || "",
         email: partner.email || "",
     };
+
+    // Strip empty attributes to prevent API validation rejections
     return Object.fromEntries(
         Object.entries(customer).filter(
             ([, value]) => value !== null && value !== undefined && value !== ""
@@ -44,14 +72,33 @@ export function buildCustomer(order) {
     );
 }
 
+/**
+ * Safely retrieve order lines array across different Odoo POS data structures.
+ *
+ * @param {Object} order - The active POS order.
+ * @returns {Array} List of order line objects.
+ */
 export function getOrderLines(order) {
     return order?.get_orderlines?.() || order?.lines || [];
 }
 
+/**
+ * Resolve the product record from a POS order line.
+ *
+ * @param {Object} line - Order line object.
+ * @returns {Object|null} Product record object or null.
+ */
 export function getLineProduct(line) {
     return line.product_id || line.getProduct?.() || null;
 }
 
+/**
+ * Check if a POS order line corresponds to a tip product.
+ *
+ * @param {Object} line - Order line object.
+ * @param {Object} pos - The active POS store instance.
+ * @returns {Boolean} True if line is a tip product.
+ */
 export function isTipLine(line, pos) {
     if (typeof line?.isTipLine === "function") {
         return line.isTipLine();
@@ -61,6 +108,13 @@ export function isTipLine(line, pos) {
     return Boolean(tipProduct?.id && product?.id && product.id === tipProduct.id);
 }
 
+/**
+ * Calculate total tip amount attached to a POS order.
+ *
+ * @param {Object} order - The active POS order.
+ * @param {Object} pos - The active POS store instance.
+ * @returns {Number|null} Tip amount value or null if tipping disabled.
+ */
 export function buildTipAmount(order, pos) {
     if (!pos?.config?.iface_tipproduct || !pos?.config?.tip_product_id) {
         return null;
@@ -74,6 +128,13 @@ export function buildTipAmount(order, pos) {
     return 0;
 }
 
+/**
+ * Build a structured MultiSafepay shopping cart payload from POS order lines.
+ *
+ * @param {Object} order - The active POS order.
+ * @param {Object} pos - The active POS store instance.
+ * @returns {Object|null} Cart payload containing items array or null if empty.
+ */
 export function buildShoppingCart(order, pos) {
     const orderLines = getOrderLines(order);
     if (!orderLines.length) {
@@ -87,9 +148,11 @@ export function buildShoppingCart(order, pos) {
             product?.display_name || product?.name || product?.full_product_name;
         const taxes = product?.taxes_id || [];
 
+        // Identify tip lines to tag line items appropriately
         const isTip = isTipLine(line, pos);
         const taxRate = taxes.length ? taxes[0].amount || 0 : 0;
 
+        // Resolve unit price with fallbacks across Odoo versions
         const possiblePrices =
             [
                 line.price_unit,
@@ -107,6 +170,7 @@ export function buildShoppingCart(order, pos) {
                     : undefined,
             ].find((p) => p !== undefined && p !== null && p !== 0) || 0;
 
+        // Resolve line quantity
         const possibleQty =
             [
                 line.qty,
@@ -127,20 +191,32 @@ export function buildShoppingCart(order, pos) {
         };
     });
 
-    return {items};
+    return { items };
 }
 
+/**
+ * Check if a POS payment line is an eligible MultiSafepay Cloud payment that can be refunded.
+ *
+ * @param {Object} paymentLine - The payment line record.
+ * @returns {Boolean} True if line is a valid MultiSafepay Cloud payment line.
+ */
 export function isRefundableMspCloudPaymentLine(paymentLine) {
     return Boolean(
         paymentLine &&
-            paymentLine.amount > 0 &&
-            !paymentLine.is_change &&
-            paymentLine.payment_method_id?.use_payment_terminal ===
-                "multisafepay_cloud" &&
-            (paymentLine.transaction_id || paymentLine.id)
+        paymentLine.amount > 0 &&
+        !paymentLine.is_change &&
+        paymentLine.payment_method_id?.use_payment_terminal ===
+        "multisafepay_cloud" &&
+        (paymentLine.transaction_id || paymentLine.id)
     );
 }
 
+/**
+ * Filter and collect refundable MultiSafepay Cloud payment lines from original source orders.
+ *
+ * @param {Object} order - The active POS refund order.
+ * @returns {Array} List of refundable payment line records.
+ */
 export function getRefundableMspCloudPaymentLines(order) {
     const sourceOrderLines = getOrderLines(order)
         .map((orderLine) => orderLine.refunded_orderline_id)
@@ -157,9 +233,18 @@ export function getRefundableMspCloudPaymentLines(order) {
     return [...paymentLinesByKey.values()];
 }
 
+/**
+ * Resolve the original MultiSafepay Cloud payment line associated with a refund payment line.
+ *
+ * @param {Object} order - The active POS order.
+ * @param {Object} refundPaymentLine - The refund payment line.
+ * @returns {Object|null} Matching original payment line or null.
+ */
 export function getRefundSourcePaymentLine(order, refundPaymentLine) {
     const refundablePaymentLines = getRefundableMspCloudPaymentLines(order);
     const refundedPaymentId = refundPaymentLine.refundedPaymentId;
+
+    // Match explicitly selected payment line by ID/UUID
     if (refundedPaymentId) {
         return refundablePaymentLines.find(
             (line) =>
@@ -167,6 +252,7 @@ export function getRefundSourcePaymentLine(order, refundPaymentLine) {
                 String(line.uuid) === String(refundedPaymentId)
         );
     }
+    // Auto-select if exactly 1 MultiSafepay payment exists on source order
     return refundablePaymentLines.length === 1 ? refundablePaymentLines[0] : null;
 }
 
@@ -216,6 +302,12 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
     /**
      * Initiate a payment or refund request for the given payment line UUID.
      *
+     * Workflow:
+     * - If amount < 0, delegates to `_send_refund_request`.
+     * - Formats attempt ID and registers pending promise resolver.
+     * - Assembles customer, cart, and tip payloads.
+     * - Invokes backend RPC `multisafepay_cloud_rpc_payment_request`.
+     *
      * @param {String} uuid - Unique payment line identifier.
      * @returns {Promise<boolean>} Resolves to true if payment succeeded.
      */
@@ -228,11 +320,14 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             return false;
         }
 
+        // Intercept negative payment amounts to route through terminal refund workflow
         if (line.amount < 0) {
             return this._send_refund_request(order, line);
         }
 
         this.pendingPaymentLineUuid = uuid;
+
+        // Construct unique payment attempt tracking IDs (e.g. ORDER-1) for retry safety
         const mspCloudAttemptBase =
             line.msp_cloud_attempt_base || Utils.buildAttemptBase(order);
         const mspCloudAttemptNumber = line.msp_cloud_attempt_number || 0;
@@ -241,8 +336,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             mspCloudAttemptNumber
         );
 
-        // Set directly for immediate in-memory access (critical for _is_current_pending_payment).
-        // Also call update() to persist reactively if the field exists in the DB schema.
+        // Direct in-memory assignment for instant reactivity in _is_current_pending_payment
         line.msp_cloud_attempt_base = mspCloudAttemptBase;
         line.msp_cloud_attempt_number = mspCloudAttemptNumber + 1;
         line.msp_cloud_uid = mspCloudUid;
@@ -253,9 +347,10 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
                 msp_cloud_uid: mspCloudUid,
             });
         } catch {
-            // Field may not be in DB schema yet; direct assignment above is the fallback.
+            // Fallback if database schema does not persist custom tracking fields
         }
 
+        // Register pending Promise resolver; POS UI pauses until terminal completes or cancels
         const paymentConfirmation = this._register_pending_payment(uuid, mspCloudUid);
         const customer = buildCustomer(order);
         const shoppingCart = buildShoppingCart(order, this.pos);
@@ -279,6 +374,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             payment_method_id: this.payment_method_id.id,
         };
 
+        // Send RPC to backend pos.payment.method and handle initial terminal response
         this._submit_payment(data, uuid, mspCloudUid)
             .then((response) =>
                 this._handle_initial_response(line, response, mspCloudUid)
@@ -292,25 +388,34 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
     /**
      * Cancel a pending payment transaction on the terminal screen.
      *
+     * Workflow:
+     * - Prompts cashier confirmation dialog ("Force Cancel").
+     * - Invokes backend RPC `multisafepay_cloud_rpc_cancel_payment_request`.
+     * - Resolves checkout promise to false and resets line status to 'retry'.
+     *
      * @param {Object} order - The active POS order.
      * @param {String} uuid - Unique payment line identifier.
      * @returns {Promise<boolean>} Resolves to true if cancel request succeeded.
      */
     async send_payment_cancel(order, uuid) {
         return new Promise((resolve) => {
+            const line = order?.get_paymentline_by_uuid(uuid);
+
+            // Ask cashier confirmation before canceling terminal prompt
             this.dialog.add(ConfirmationDialog, {
-                title: _t("Cancel MultiSafepay Cloud payment"),
+                title: _t("Cancel MultiSafepay Payment"),
                 body: _t(
-                    "This will cancel the active MultiSafepay Cloud POS payment on the terminal."
+                    "Cancel this payment attempt on the terminal? If the terminal is unresponsive, click Force Cancel to unlock Odoo POS."
                 ),
                 confirmLabel: _t("Force Cancel"),
                 confirm: async () => {
                     const line = order?.get_paymentline_by_uuid(uuid);
 
+                    // Invoke RPC cancellation on pos.multisafepay.cloud.payment
                     const response = await this.orm.silent
                         .call(
                             "pos.multisafepay.cloud.payment",
-                            "cancel_payment_request",
+                            "multisafepay_cloud_rpc_cancel_payment_request",
                             [],
                             {
                                 order_id: line?.transaction_id,
@@ -329,6 +434,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
                         return true;
                     }
 
+                    // Validate response status to ensure cancellation was acknowledged
                     const state = (response.state || "").toLowerCase();
                     const status = (response.status || "").toLowerCase();
                     if (
@@ -339,13 +445,14 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
                     ) {
                         this._show_error(
                             response.detail ||
-                                _t("MultiSafepay Cloud POS cancellation failed."),
+                            _t("MultiSafepay Cloud POS cancellation failed."),
                             _t("MultiSafepay Cloud")
                         );
                         resolve(false);
                         return true;
                     }
 
+                    // Unlock POS UI and mark payment line as retryable
                     super.send_payment_cancel(...arguments);
                     this._resolve_pending_payment(uuid, false, line?.msp_cloud_uid);
                     if (this.pendingPaymentLineUuid === uuid) {
@@ -365,7 +472,9 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
     }
 
     /**
-     * Trigger a transaction reversal (void/cancellation) on the terminal.
+     * Trigger a transaction reversal (void/cancellation) on the terminal for an incomplete payment.
+     *
+     * Invokes backend RPC `multisafepay_cloud_rpc_reverse_payment_request`.
      *
      * @param {String} uuid - Unique payment line identifier.
      * @returns {Promise<boolean>} Resolves to true if reversal succeeded.
@@ -376,8 +485,9 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             return false;
         }
 
+        // Send reversal request to backend model pos.multisafepay.cloud.payment
         const response = await this.orm.silent
-            .call("pos.multisafepay.cloud.payment", "reverse_payment_request", [], {
+            .call("pos.multisafepay.cloud.payment", "multisafepay_cloud_rpc_reverse_payment_request", [], {
                 order_id: line.transaction_id,
                 msp_cloud_uid: line.msp_cloud_uid,
                 amount: line.amount,
@@ -397,6 +507,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             return false;
         }
 
+        // Check if transaction was successfully voided or refunded
         const state = (response.state || "").toLowerCase();
         const status = (response.status || "").toLowerCase();
         if (
@@ -422,11 +533,17 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
     /**
      * Send a refund request to MultiSafepay Cloud for a specific payment line.
      *
+     * Workflow:
+     * - Identifies original source payment line via `getRefundSourcePaymentLine`.
+     * - Invokes backend RPC `multisafepay_cloud_rpc_refund_payment_request`.
+     * - Updates payment line with refund transaction ID and reference.
+     *
      * @param {Object} order - The active POS order.
      * @param {Object} line - The payment line to refund.
      * @returns {Promise<boolean>} True if refund was successfully initiated.
      */
     async _send_refund_request(order, line) {
+        // Locate original completed payment line to link refund request
         const sourcePaymentLine = getRefundSourcePaymentLine(order, line);
         if (!sourcePaymentLine) {
             this._show_error(
@@ -437,8 +554,9 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
         }
 
         line.set_payment_status("waitingCard");
+        // Execute refund RPC call via pos.multisafepay.cloud.payment
         const response = await this.orm.silent
-            .call("pos.multisafepay.cloud.payment", "refund_payment_request", [], {
+            .call("pos.multisafepay.cloud.payment", "multisafepay_cloud_rpc_refund_payment_request", [], {
                 refunded_payment_id: sourcePaymentLine.id || sourcePaymentLine.uuid,
                 order_id: sourcePaymentLine.transaction_id,
                 msp_cloud_uid: sourcePaymentLine.msp_cloud_uid,
@@ -459,6 +577,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             return false;
         }
 
+        // Record refund ID and reference on payment line upon success
         const state = (response.state || "").toLowerCase();
         const status = (response.status || "").toLowerCase();
         if (state === "success" || ["refunded", "partial_refunded"].includes(status)) {
@@ -483,6 +602,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
 
     /**
      * Submit a payment request payload to the Odoo backend controller.
+     * Invokes RPC `multisafepay_cloud_rpc_payment_request` on `pos.payment.method`.
      *
      * @param {Object} data - Payload data including amount, currency, and cart.
      * @param {string|null} uuid - Optional unique payment line identifier.
@@ -491,7 +611,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
      */
     _submit_payment(data, uuid = null, mspCloudUid = null) {
         return this.orm.silent
-            .call("pos.payment.method", "multisafepay_cloud_payment_request", [
+            .call("pos.payment.method", "multisafepay_cloud_rpc_payment_request", [
                 [this.payment_method_id.id],
                 data,
             ])
@@ -528,12 +648,18 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
     /**
      * Process the initial response from Odoo after sending a payment request.
      *
+     * Workflow:
+     * - If state is 'success', resolves payment immediately.
+     * - If state is 'pending' or empty, starts status polling timer (`_schedule_status_poll`).
+     * - If failed, resets payment line status to 'retry'.
+     *
      * @param {Object} line - The active payment line record.
      * @param {Object} response - The response payload.
      * @param {String} mspCloudUid - Unique payment execution identifier.
      * @returns {Boolean} True if payment completed immediately.
      */
     _handle_initial_response(line, response, mspCloudUid) {
+        // Ignore response if cashier navigated away or changed attempt
         if (!this._is_current_pending_payment(line, mspCloudUid)) {
             return false;
         }
@@ -568,12 +694,14 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             msp_cloud_uid: remoteOrderId || line.msp_cloud_uid,
         });
 
+        // Fast-path resolution if terminal completed payment instantly
         if (state === "success") {
             this._show_msp_cloud_warning(response);
             this._resolve_pending_payment(line.uuid, true, mspCloudUid);
             return true;
         }
 
+        // Standard Cloud POS flow: transaction is pending on terminal, start polling loop
         if (!state || state === "pending") {
             if (line.payment_status !== "waitingCancel") {
                 line.set_payment_status("waitingCard");
@@ -582,6 +710,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             return true;
         }
 
+        // Terminal initialization failed; unlock line for retry
         this._show_error(
             response?.detail || _t("MultiSafepay Cloud payment request failed.")
         );
@@ -600,12 +729,13 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
     _register_pending_payment(uuid, mspCloudUid) {
         this._clear_poll_timeout(uuid);
         return new Promise((resolve) => {
-            this.paymentLineResolvers[uuid] = {mspCloudUid, resolve};
+            this.paymentLineResolvers[uuid] = { mspCloudUid, resolve };
         });
     }
 
     /**
-     * Schedule a polling task to check transaction status at short intervals.
+     * Schedule a polling task to check transaction status at short intervals (every 2000ms).
+     * Invokes `handle_multisafepay_cloud_status_response` on each interval.
      *
      * @param {String} uuid - Unique payment line identifier.
      * @param {String} mspCloudUid - Unique payment execution identifier.
@@ -614,6 +744,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
         this._clear_poll_timeout(uuid);
         this.paymentPollTimeouts[uuid] = setTimeout(async () => {
             const line = this.get_payment_line(uuid);
+            // Stop polling loop if payment line state was canceled or resolved elsewhere
             if (
                 !this._is_current_pending_payment(line, mspCloudUid) ||
                 !["waiting", "waitingCard", "waitingCancel"].includes(
@@ -623,8 +754,10 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
                 return;
             }
 
+            // Poll Odoo backend for updated webhook/API status
             await this.handle_multisafepay_cloud_status_response(uuid, mspCloudUid);
 
+            // Recursively schedule next poll tick if payment remains in pending state
             const refreshedLine = this.get_payment_line(uuid);
             if (
                 this._is_current_pending_payment(refreshedLine, mspCloudUid) &&
@@ -650,7 +783,8 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
     }
 
     /**
-     * Retrieve the transaction status from Odoo and trigger UI resolution if finalized.
+     * Retrieve the transaction status from Odoo database via RPC `multisafepay_cloud_rpc_poll_payment_status`.
+     * If the backend reports 'success' or 'failure', updates line and resolves checkout.
      *
      * @param {string|null} uuid - Optional unique payment line identifier.
      * @param {string|null} mspCloudUid - Optional unique payment execution identifier.
@@ -661,9 +795,10 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             return;
         }
 
+        // Poll backend ORM pos.multisafepay.cloud.payment for latest webhook/API status
         const paymentStatus = await this.orm.call(
             "pos.multisafepay.cloud.payment",
-            "poll_payment_status",
+            "multisafepay_cloud_rpc_poll_payment_status",
             [],
             {
                 order_id: line.transaction_id,
@@ -682,6 +817,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
                 line.transaction_id,
         });
 
+        // Terminal completed successfully; resolve checkout Promise with success=true
         const state = (paymentStatus.state || "").toLowerCase();
         if (state === "success") {
             this._show_msp_cloud_warning(paymentStatus);
@@ -689,6 +825,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             return;
         }
 
+        // Terminal transaction failed/declined; resolve checkout Promise with success=false
         if (state === "failure") {
             if (paymentStatus.detail) {
                 this._show_error(paymentStatus.detail, _t("MultiSafepay Cloud"));
@@ -739,12 +876,14 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             return false;
         }
 
+        // Clean up polling timer and resolver map to prevent memory leaks
         this._clear_poll_timeout(uuid);
         delete this.paymentLineResolvers[uuid];
         if (this.pendingPaymentLineUuid === uuid) {
             this.pendingPaymentLineUuid = null;
         }
 
+        // Unblock POS UI by resolving the pending checkout Promise
         pendingPayment.resolve(success);
         return true;
     }
@@ -775,10 +914,11 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             return false;
         }
         const pendingPayment = this.paymentLineResolvers[line.uuid];
+        // Safety check matching line UUID and msp_cloud_uid tracking token
         return Boolean(
             pendingPayment &&
-                (!mspCloudUid || pendingPayment.mspCloudUid === mspCloudUid) &&
-                line.msp_cloud_uid === pendingPayment.mspCloudUid
+            (!mspCloudUid || pendingPayment.mspCloudUid === mspCloudUid) &&
+            line.msp_cloud_uid === pendingPayment.mspCloudUid
         );
     }
 

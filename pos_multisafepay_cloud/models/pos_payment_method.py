@@ -51,7 +51,41 @@ MSP_CLOUD_PAYMENT_TERMINAL_SELECTION = (
 
 
 class PosPaymentMethod(models.Model):
-    """Extend POS payment methods with MultiSafepay Cloud POS settings."""
+    """Extension of `pos.payment.method` for MultiSafepay Cloud POS integration.
+
+    This class provides configuration settings, validation constraints, and API interaction
+    methods for processing Point of Sale transactions through MultiSafepay Cloud POS terminals.
+    It manages terminal credentials, builds API payloads, initializes payment requests,
+    handles terminal cancellations, polls status, and issues refunds.
+
+    Key Functional Components:
+
+    1. Configuration & Validation:
+       - `_compute_msp_cloud_dev_settings_enabled`: Determines if development mode settings are active.
+       - `create`: Ensures terminal configurations are validated upon creation.
+       - `_check_msp_cloud_terminal_configuration`: Validates terminal ID uniqueness and credentials.
+       - `_validate_cloud_pos_configuration`: Ensures required terminal parameters are present before API execution.
+
+    2. SDK & API Client Factory:
+       - `_get_multisafepay_cloud_sdk`: Constructs a configured MultiSafepay SDK instance using scoped API keys.
+
+    3. Transaction Lifecycle & API Methods:
+       - `multisafepay_cloud_rpc_payment_request`: Primary entry point for POS frontend payment requests.
+       - `_finalize_cloud_pos_payload`: Assembles the `OrderRequest` structure for terminal checkout.
+       - `_api_create_cloud_pos_order`: Sends the initial order creation payload to MultiSafepay Cloud POS.
+       - `_wait_for_cloud_order_event`: Waits or polls for terminal payment completion events.
+       - `_api_get_cloud_order_status`: Queries current transaction status from MultiSafepay API.
+       - `_api_get_cloud_receipt`: Retrieves printed transaction receipt data.
+       - `_api_cancel_cloud_pos_order`: Cancels an active or pending terminal transaction.
+       - `_api_refund_cloud_pos_order`: Triggers a refund or void for a previously completed terminal payment.
+
+    4. Order ID & Attempt Tracking Helpers:
+       - `_get_cloud_pos_currency`: Resolves ISO currency code and validates compatibility.
+       - `_build_cloud_pos_order_id`: Generates standard order identifiers for terminal transactions.
+       - `_next_cloud_pos_order_id`: Increments attempt numbers for retried payment attempts.
+       - `_format_cloud_pos_order_attempt_id`: Formats attempt-specific order ID strings.
+       - `_get_cloud_pos_order_attempt_number`: Parses the attempt index from an existing order ID.
+    """
 
     _inherit = "pos.payment.method"
 
@@ -210,10 +244,11 @@ class PosPaymentMethod(models.Model):
             MSP_CLOUD_PAYMENT_TERMINAL_SELECTION
         ]
 
-    def multisafepay_cloud_payment_request(self, data):
+    def multisafepay_cloud_rpc_payment_request(self, data):
         """Create a remote Cloud POS order and persist its tracking record.
 
-        This is the RPC entry point used by the POS frontend when a payment line is
+        [FRONTEND RPC ENTRYPOINT]
+        Primary RPC entry point called directly by the POS JavaScript frontend when a payment line is
         sent to the MultiSafepay Cloud terminal.
 
         :param dict data: POS payment payload including amount, currency and cart data.
