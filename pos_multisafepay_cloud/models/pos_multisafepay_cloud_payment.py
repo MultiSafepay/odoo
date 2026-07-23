@@ -438,7 +438,7 @@ class PosMultiSafepayCloudPayment(models.Model):
             if _Status.state(status) != "pending":
                 return
 
-        if not (self.payment_method_id.msp_cloud_account_api_key or "").strip():
+        if not (self.payment_method_id.msp_cloud_terminal_group_api_key or "").strip():
             return
 
         remote_status = self.payment_method_id._api_get_cloud_order_status(

@@ -25,11 +25,10 @@ class _SDKFactory:
 
     @classmethod
     def build(
-        cls, account_api_key, terminal_group_id, terminal_group_api_key, custom_api_url
+        cls, terminal_group_id, terminal_group_api_key, custom_api_url
     ):
         """Build an SDK client scoped to the configured terminal group.
 
-        :param str account_api_key: Merchant general API key.
         :param str terminal_group_id: Terminal group ID code.
         :param str terminal_group_api_key: Key assigned to the terminal group.
         :param str custom_api_url: Custom API URL for testing.
@@ -38,7 +37,6 @@ class _SDKFactory:
         """
         terminal_group_id = (terminal_group_id or "").strip()
         terminal_group_api_key = (terminal_group_api_key or "").strip()
-        bootstrap_api_key = (terminal_group_api_key or account_api_key or "").strip()
 
         terminal_group_api_keys = (
             {terminal_group_id: terminal_group_api_key}
@@ -46,7 +44,7 @@ class _SDKFactory:
             else None
         )
         credential_resolver = ScopedCredentialResolver(
-            default_api_key=bootstrap_api_key,
+            default_api_key=terminal_group_api_key,
             terminal_group_api_keys=terminal_group_api_keys,
         )
 

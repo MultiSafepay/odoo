@@ -99,11 +99,6 @@ class PosPaymentMethod(models.Model):
         copy=False,
         help="Terminal group identifier used by the Cloud POS API auth scope. Use a dedicated payment method per terminal configuration.",
     )
-    msp_cloud_account_api_key = fields.Char(
-        string="Site API Key",
-        copy=False,
-        help="Default MultiSafepay Site API Key used for refunds and account-level status calls.",
-    )
     msp_cloud_terminal_group_api_key = fields.Char(
         string="Terminal Group API Key",
         copy=False,
@@ -282,7 +277,6 @@ class PosPaymentMethod(models.Model):
         """
         self.ensure_one()
         return _SDKFactory.build(
-            account_api_key=self.msp_cloud_account_api_key,
             terminal_group_id=self.msp_cloud_terminal_group_id,
             terminal_group_api_key=self.msp_cloud_terminal_group_api_key,
             custom_api_url=self.msp_cloud_custom_api_url,
@@ -794,10 +788,9 @@ class PosPaymentMethod(models.Model):
             )
         return currency
 
-    def _validate_cloud_pos_configuration(self, require_account_key=False):
-        """Validate the Cloud POS configuration required for API calls.
+    def _validate_cloud_pos_configuration(self):
+        """Verify that mandatory Cloud POS terminal credentials are configured.
 
-        :param bool require_account_key: Whether the Site API Key is needed.
         :return: POS-facing error payload, or an empty dict when configuration is valid.
         :rtype: dict
         """
@@ -814,12 +807,6 @@ class PosPaymentMethod(models.Model):
         if not (self.msp_cloud_terminal_group_api_key or "").strip():
             return _ErrorPayload.build(
                 _("Set MSP Cloud Terminal Group API Key on the payment method.")
-            )
-        if require_account_key and not (self.msp_cloud_account_api_key or "").strip():
-            return _ErrorPayload.build(
-                _(
-                    "Set MSP Cloud Site API Key on the payment method to poll real Cloud POS statuses and refund completed payments."
-                )
             )
         return {}
 
