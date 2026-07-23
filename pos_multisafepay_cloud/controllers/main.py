@@ -96,15 +96,8 @@ class PosMultiSafepayCloudController(http.Controller):
             elif status_code == 404:
                 _logger.warning("MSP Cloud POS notification rejected: %s", log_data)
                 # Mask 404 to prevent information leakage
-                return request.make_response("OK", status=200)
+                return request.make_response("OK", status=404)
 
-            else:
-                # Catch-all for any other unexpected status code
-                _logger.warning("MSP Cloud POS notification rejected: %s", log_data)
-                return request.make_response(
-                    status_payload.get("detail") or "Notification rejected",
-                    status=status_code,
-                )
         except Exception as e:
             _logger.exception(
                 "MSP Cloud POS GET notification failed with unhandled exception: %s", e
@@ -221,15 +214,8 @@ class PosMultiSafepayCloudController(http.Controller):
             elif status_code in (403, 404):
                 _logger.warning("MSP Cloud POS notification rejected: %s", log_data)
                 # Mask 403 and 404 to prevent information leakage
-                return request.make_response("OK", status=200)
+                return request.make_response("KO", status=status_code)
 
-            else:
-                # Catch-all for any other unexpected status code
-                _logger.warning("MSP Cloud POS notification rejected: %s", log_data)
-                return request.make_response(
-                    notification.get("detail") or "Notification rejected",
-                    status=status_code,
-                )
         except Exception as e:
             _logger.exception(
                 "MSP Cloud POS POST notification failed with unhandled exception: %s", e
