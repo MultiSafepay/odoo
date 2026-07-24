@@ -17,7 +17,7 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - ODOO-260: Upgrade Python SDK dependency
 
 ### Fixed
-- ODOO-268: Fix multiple tax rates in a single order
+- ODOO-268: Fix miscalculation of total amount in shopping cart, within the order request, when using multiple tax rates
 
 ## [19.0.2.3.0] - 2026-07-14
 ### Added
