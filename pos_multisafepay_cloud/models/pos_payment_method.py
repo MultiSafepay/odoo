@@ -343,9 +343,7 @@ class PosPaymentMethod(models.Model):
         """
         self.ensure_one()
 
-        validation_error = self._validate_cloud_pos_configuration(
-            require_account_key=False
-        )
+        validation_error = self._validate_cloud_pos_configuration()
         if validation_error:
             return validation_error
 
@@ -528,9 +526,7 @@ class PosPaymentMethod(models.Model):
         """
         self.ensure_one()
 
-        validation_error = self._validate_cloud_pos_configuration(
-            require_account_key=True
-        )
+        validation_error = self._validate_cloud_pos_configuration()
         if validation_error:
             return validation_error
 
@@ -590,9 +586,7 @@ class PosPaymentMethod(models.Model):
         """
         self.ensure_one()
 
-        validation_error = self._validate_cloud_pos_configuration(
-            require_account_key=False
-        )
+        validation_error = self._validate_cloud_pos_configuration()
         if validation_error:
             return {}
 
@@ -628,9 +622,7 @@ class PosPaymentMethod(models.Model):
         """
         self.ensure_one()
 
-        validation_error = self._validate_cloud_pos_configuration(
-            require_account_key=False
-        )
+        validation_error = self._validate_cloud_pos_configuration()
         if validation_error:
             return validation_error
 
@@ -701,9 +693,7 @@ class PosPaymentMethod(models.Model):
         """
         self.ensure_one()
 
-        validation_error = self._validate_cloud_pos_configuration(
-            require_account_key=True
-        )
+        validation_error = self._validate_cloud_pos_configuration()
         if validation_error:
             return validation_error
 
