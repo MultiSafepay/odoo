@@ -21,14 +21,14 @@
  *    - Refund Requests (`_send_refund_request`): Issues full/partial refunds via `multisafepay_cloud_rpc_refund_payment_request`.
  */
 
-import {_t} from "@web/core/l10n/translation";
-import {PaymentInterface} from "@point_of_sale/app/payment/payment_interface";
-import {register_payment_method} from "@point_of_sale/app/store/pos_store";
 import {
     AlertDialog,
     ConfirmationDialog,
 } from "@web/core/confirmation_dialog/confirmation_dialog";
+import {PaymentInterface} from "@point_of_sale/app/payment/payment_interface";
 import {Utils} from "@pos_multisafepay_cloud/app/utils";
+import {_t} from "@web/core/l10n/translation";
+import {register_payment_method} from "@point_of_sale/app/store/pos_store";
 
 /**
  * Extract and sanitize partner details from a POS order to build a MultiSafepay customer dictionary.
@@ -399,8 +399,6 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
      */
     async send_payment_cancel(order, uuid) {
         return new Promise((resolve) => {
-            const line = order?.get_paymentline_by_uuid(uuid);
-
             // Ask cashier confirmation before canceling terminal prompt
             this.dialog.add(ConfirmationDialog, {
                 title: _t("Cancel MultiSafepay Payment"),
@@ -669,8 +667,9 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
      * @returns {Boolean} True if payment completed immediately.
      */
     _handle_initial_response(line, response, mspCloudUid) {
+        let activeMspCloudUid = mspCloudUid;
         // Ignore response if cashier navigated away or changed attempt
-        if (!this._is_current_pending_payment(line, mspCloudUid)) {
+        if (!this._is_current_pending_payment(line, activeMspCloudUid)) {
             return false;
         }
 
@@ -678,13 +677,13 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             !["waiting", "waitingCard", "waitingCancel"].includes(line.payment_status)
         ) {
             line.set_payment_status("retry");
-            this._resolve_pending_payment(line.uuid, false, mspCloudUid);
+            this._resolve_pending_payment(line.uuid, false, activeMspCloudUid);
             return false;
         }
 
         if (!response) {
             line.set_payment_status("retry");
-            this._resolve_pending_payment(line.uuid, false, mspCloudUid);
+            this._resolve_pending_payment(line.uuid, false, activeMspCloudUid);
             return false;
         }
 
@@ -693,10 +692,10 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
         if (remoteOrderId) {
             this._update_pending_payment_attempt_id(
                 line.uuid,
-                mspCloudUid,
+                activeMspCloudUid,
                 remoteOrderId
             );
-            mspCloudUid = remoteOrderId;
+            activeMspCloudUid = remoteOrderId;
             line.msp_cloud_uid = remoteOrderId;
         }
         line.update({
@@ -707,7 +706,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
         // Fast-path resolution if terminal completed payment instantly
         if (state === "success") {
             this._show_msp_cloud_warning(response);
-            this._resolve_pending_payment(line.uuid, true, mspCloudUid);
+            this._resolve_pending_payment(line.uuid, true, activeMspCloudUid);
             return true;
         }
 
@@ -716,7 +715,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             if (line.payment_status !== "waitingCancel") {
                 line.set_payment_status("waitingCard");
             }
-            this._schedule_status_poll(line.uuid, mspCloudUid);
+            this._schedule_status_poll(line.uuid, activeMspCloudUid);
             return true;
         }
 
@@ -725,7 +724,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             response?.detail || _t("MultiSafepay Cloud payment request failed.")
         );
         line.set_payment_status("retry");
-        this._resolve_pending_payment(line.uuid, false, mspCloudUid);
+        this._resolve_pending_payment(line.uuid, false, activeMspCloudUid);
         return false;
     }
 
