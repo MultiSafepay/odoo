@@ -9,7 +9,7 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-## [19.0.2.4.0] - 2026-07-24
+## [18.0.2.4.0] - 2026-07-24
 
 ### Added
 - ODOO-256: Add optional shopping cart and restrict BNPL payment methods to this new setting field
