@@ -9,6 +9,17 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [19.0.2.4.0] - 2026-07-24
+
+### Added
+- ODOO-256: Add optional shopping cart and restrict BNPL payment methods to this new setting field
+
+### Changed
+- ODOO-259: Upgrade Python SDK dependency
+
+### Fixed
+- ODOO-255: Fix miscalculation of total amount in shopping cart, within the order request, when using multiple tax rates
+
 ## [18.0.2.3.0] - 2026-07-14
 ### Added
 - ODOO-248: Add Validate Shopping Cart setting field
