@@ -19,7 +19,7 @@ export class Utils {
             return ["", ""];
         }
         if (parts.length === 1) {
-            return [parts[0], parts[0]];
+            return [parts[0], ""];
         }
         return [parts[0], parts.slice(1).join(" ")];
     }
