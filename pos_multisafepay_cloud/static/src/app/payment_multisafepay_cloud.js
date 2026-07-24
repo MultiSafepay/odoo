@@ -50,7 +50,6 @@ export function buildCustomer(order) {
 
     const customer = {
         name: partnerName,
-        reference: Utils.sanitizeOrderId(partner.id || partner.barcode || partnerName),
         locale: partner.lang || "en_US",
         first_name: firstName,
         last_name: lastName,
