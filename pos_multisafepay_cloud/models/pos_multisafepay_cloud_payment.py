@@ -146,7 +146,9 @@ class PosMultiSafepayCloudPayment(models.Model):
         return self.sudo().create(values)
 
     @api.model
-    def multisafepay_cloud_rpc_poll_payment_status(self, order_id=None, msp_cloud_uid=None):
+    def multisafepay_cloud_rpc_poll_payment_status(
+        self, order_id=None, msp_cloud_uid=None
+    ):
         """Handle a status request for a Cloud POS payment, updating it if pending.
 
         [FRONTEND RPC ENTRYPOINT]
