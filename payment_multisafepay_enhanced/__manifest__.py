@@ -7,10 +7,10 @@
         """,
     "summary": """Advanced MultiSafepay business logic integration""",
     "author": "MultiSafepay",
-    "website": "https://github.com//multisafepay",
+    "website": "https://www.multisafepay.com/",
     "license": "AGPL-3",
     "category": "Sales",
-    "version": "19.0.2.3.0",
+    "version": "19.0.2.4.0",
     "application": True,
     "depends": [
         "payment_multisafepay",
