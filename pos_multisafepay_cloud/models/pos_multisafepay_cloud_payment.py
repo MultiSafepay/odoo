@@ -9,16 +9,19 @@ import logging
 
 from odoo import _, api, fields, models
 
-from ..helpers.frontend_response_builder import (
+# Odoo 18 -> 19 model adaptation (matching branch ODOO-236): in-module helper
+# imports use the absolute `odoo.addons.<module>` form (the 19.0 convention)
+# rather than relative `..helpers` imports.
+from odoo.addons.pos_multisafepay_cloud.helpers.frontend_response_builder import (
     _FrontendResponseBuilder,
 )
-from ..helpers.notification_payload import (
+from odoo.addons.pos_multisafepay_cloud.helpers.notification_payload import (
     _NotificationPayload,
 )
-from ..helpers.odoo_payload_builder import (
+from odoo.addons.pos_multisafepay_cloud.helpers.odoo_payload_builder import (
     _OdooPayloadBuilder,
 )
-from ..helpers.status import _Status
+from odoo.addons.pos_multisafepay_cloud.helpers.status import _Status
 
 _logger = logging.getLogger(__name__)
 
@@ -146,7 +149,9 @@ class PosMultiSafepayCloudPayment(models.Model):
         return self.sudo().create(values)
 
     @api.model
-    def multisafepay_cloud_rpc_poll_payment_status(self, order_id=None, msp_cloud_uid=None):
+    def multisafepay_cloud_rpc_poll_payment_status(
+        self, order_id=None, msp_cloud_uid=None
+    ):
         """Handle a status request for a Cloud POS payment, updating it if pending.
 
         [FRONTEND RPC ENTRYPOINT]

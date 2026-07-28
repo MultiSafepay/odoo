@@ -22,22 +22,28 @@ from multisafepay.util.json_encoder import DecimalEncoder
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
-from odoo.modules.module import get_module_resource
 
-from ..helpers.error_payload import (
+# Odoo 18 -> 19 model adaptation (matching branch ODOO-236):
+# - `odoo.modules.module.get_module_resource` was removed in 19.0; resolve
+#   in-module resource paths with `odoo.tools.file_path` instead.
+# - In-module helper imports use the absolute `odoo.addons.<module>` form
+#   (the 19.0 convention) rather than relative `..helpers` imports.
+from odoo.tools import file_path
+
+from odoo.addons.pos_multisafepay_cloud.helpers.error_payload import (
     _ErrorPayload,
 )
-from ..helpers.order_payload_builder import (
+from odoo.addons.pos_multisafepay_cloud.helpers.order_payload_builder import (
     _OrderPayloadBuilder,
 )
-from ..helpers.sdk_factory import (
+from odoo.addons.pos_multisafepay_cloud.helpers.sdk_factory import (
     _SDKFactory,
 )
-from ..helpers.serializer import (
+from odoo.addons.pos_multisafepay_cloud.helpers.serializer import (
     _Serializer,
 )
-from ..helpers.status import _Status
-from ..helpers.utils import (
+from odoo.addons.pos_multisafepay_cloud.helpers.status import _Status
+from odoo.addons.pos_multisafepay_cloud.helpers.utils import (
     _Utils,
 )
 
@@ -146,11 +152,12 @@ class PosPaymentMethod(models.Model):
             if vals.get(
                 "use_payment_terminal"
             ) == MSP_CLOUD_PAYMENT_TERMINAL_CODE and not vals.get("image"):
-                icon_path = get_module_resource(
-                    "pos_multisafepay_cloud",
-                    "static/description",
-                    "pos_payment_icon.png",
-                )
+                try:
+                    icon_path = file_path(
+                        "pos_multisafepay_cloud/static/description/pos_payment_icon.png"
+                    )
+                except (FileNotFoundError, ValueError):
+                    icon_path = None
                 if icon_path:
                     with open(icon_path, "rb") as icon_file:
                         vals["image"] = base64.b64encode(icon_file.read())

@@ -5,7 +5,7 @@
 
 """Odoo pos.payment model extension for MultiSafepay Cloud POS."""
 
-from odoo import api, models
+from odoo import api, fields, models
 
 
 class PosPayment(models.Model):
@@ -22,6 +22,11 @@ class PosPayment(models.Model):
     """
 
     _inherit = "pos.payment"
+
+    msp_cloud_refund_source_order_id = fields.Char(
+        string="MultiSafepay Cloud POS Refund Source Order ID",
+        help="The original MultiSafepay Cloud transaction ID/order ID from which this refund originates.",
+    )
 
     @api.model
     def _load_pos_data_fields(self, config_id):
@@ -46,6 +51,7 @@ class PosPayment(models.Model):
             "ticket",
             "transaction_id",
             "uuid",
+            "msp_cloud_refund_source_order_id",
         ]
         missing_fields = []
         for field_name in required_fields:

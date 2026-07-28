@@ -9,9 +9,15 @@ import logging
 from odoo import _, http
 from odoo.http import request
 
-from ..helpers.frontend_response_builder import _FrontendResponseBuilder
-from ..helpers.notification_payload import _NotificationPayload
-from ..helpers.notification_validator import _NotificationValidator
+from odoo.addons.pos_multisafepay_cloud.helpers.frontend_response_builder import (
+    _FrontendResponseBuilder,
+)
+from odoo.addons.pos_multisafepay_cloud.helpers.notification_payload import (
+    _NotificationPayload,
+)
+from odoo.addons.pos_multisafepay_cloud.helpers.notification_validator import (
+    _NotificationValidator,
+)
 
 _logger = logging.getLogger(__name__)
 

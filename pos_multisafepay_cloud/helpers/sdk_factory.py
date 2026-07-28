@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 from multisafepay import Sdk
 from multisafepay.client import ScopedCredentialResolver
 
-from ..helpers.transport import (
+from odoo.addons.pos_multisafepay_cloud.helpers.transport import (
     _get_cloud_pos_transport,
 )
 
@@ -24,9 +24,7 @@ class _SDKFactory:
     """
 
     @classmethod
-    def build(
-        cls, terminal_group_id, terminal_group_api_key, custom_api_url
-    ):
+    def build(cls, terminal_group_id, terminal_group_api_key, custom_api_url):
         """Build an SDK client scoped to the configured terminal group.
 
         :param str terminal_group_id: Terminal group ID code.

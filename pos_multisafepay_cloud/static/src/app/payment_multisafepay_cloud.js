@@ -21,14 +21,14 @@
  *    - Refund Requests (`_send_refund_request`): Issues full/partial refunds via `multisafepay_cloud_rpc_refund_payment_request`.
  */
 
-import { _t } from "@web/core/l10n/translation";
-import { PaymentInterface } from "@point_of_sale/app/payment/payment_interface";
-import { register_payment_method } from "@point_of_sale/app/store/pos_store";
+import {_t} from "@web/core/l10n/translation";
+import {PaymentInterface} from "@point_of_sale/app/utils/payment/payment_interface";
+import {register_payment_method} from "@point_of_sale/app/services/pos_store";
 import {
     AlertDialog,
     ConfirmationDialog,
 } from "@web/core/confirmation_dialog/confirmation_dialog";
-import { Utils } from "@pos_multisafepay_cloud/app/utils";
+import {Utils} from "@pos_multisafepay_cloud/app/utils";
 
 /**
  * Extract and sanitize partner details from a POS order to build a MultiSafepay customer dictionary.
@@ -79,7 +79,7 @@ export function buildCustomer(order) {
  * @returns {Array} List of order line objects.
  */
 export function getOrderLines(order) {
-    return order?.get_orderlines?.() || order?.lines || [];
+    return order?.getOrderlines?.() || order?.get_orderlines?.() || order?.lines || [];
 }
 
 /**
@@ -89,7 +89,7 @@ export function getOrderLines(order) {
  * @returns {Object|null} Product record object or null.
  */
 export function getLineProduct(line) {
-    return line.product_id || line.getProduct?.() || null;
+    return line.product_id || line.product || line.getProduct?.() || null;
 }
 
 /**
@@ -105,7 +105,12 @@ export function isTipLine(line, pos) {
     }
     const tipProduct = pos?.config?.tip_product_id;
     const product = getLineProduct(line);
-    return Boolean(tipProduct?.id && product?.id && product.id === tipProduct.id);
+    const tipProductId =
+        tipProduct?.id || (Array.isArray(tipProduct) ? tipProduct[0] : tipProduct);
+    const productId = product?.id || (Array.isArray(product) ? product[0] : product);
+    return Boolean(
+        tipProductId && productId && String(productId) === String(tipProductId)
+    );
 }
 
 /**
@@ -124,6 +129,9 @@ export function buildTipAmount(order, pos) {
     }
     if (typeof order?.getTip === "function") {
         return order.getTip();
+    }
+    if (typeof order?.get_tip === "function") {
+        return order.get_tip();
     }
     return 0;
 }
@@ -162,6 +170,9 @@ export function buildShoppingCart(order, pos) {
                 typeof line.get_unit_price === "function"
                     ? line.get_unit_price()
                     : undefined,
+                typeof line.getUnitPrice === "function"
+                    ? line.getUnitPrice()
+                    : undefined,
                 typeof line.get_price_with_tax === "function"
                     ? line.get_price_with_tax()
                     : undefined,
@@ -178,6 +189,7 @@ export function buildShoppingCart(order, pos) {
                 typeof line.get_quantity === "function"
                     ? line.get_quantity()
                     : undefined,
+                typeof line.getQuantity === "function" ? line.getQuantity() : undefined,
             ].find((q) => q !== undefined && q !== null) || 1;
 
         return {
@@ -191,7 +203,7 @@ export function buildShoppingCart(order, pos) {
         };
     });
 
-    return { items };
+    return {items};
 }
 
 /**
@@ -203,11 +215,11 @@ export function buildShoppingCart(order, pos) {
 export function isRefundableMspCloudPaymentLine(paymentLine) {
     return Boolean(
         paymentLine &&
-        paymentLine.amount > 0 &&
-        !paymentLine.is_change &&
-        paymentLine.payment_method_id?.use_payment_terminal ===
-        "multisafepay_cloud" &&
-        (paymentLine.transaction_id || paymentLine.id)
+            paymentLine.amount > 0 &&
+            !paymentLine.is_change &&
+            paymentLine.payment_method_id?.use_payment_terminal ===
+                "multisafepay_cloud" &&
+            (paymentLine.transaction_id || paymentLine.id)
     );
 }
 
@@ -265,7 +277,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
      */
     setup() {
         super.setup(...arguments);
-        this.enable_reversals();
+        this.supports_reversals = true;
         this.dialog = this.env.services.dialog;
         this.orm = this.env.services.orm;
         this.paymentLineResolvers = {};
@@ -288,15 +300,15 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
      * @returns {Object|null} The payment line matching the UUID.
      */
     get_payment_line(uuid = null) {
-        const order = this.pos.get_order();
+        const order = this.pos.getOrder();
         if (!order) {
             return null;
         }
         const targetUuid = uuid || this.pendingPaymentLineUuid;
-        if (targetUuid && order.get_paymentline_by_uuid) {
-            return order.get_paymentline_by_uuid(targetUuid);
+        if (targetUuid && order.getPaymentlineByUuid) {
+            return order.getPaymentlineByUuid(targetUuid);
         }
-        return order.get_selected_paymentline();
+        return order.getSelectedPaymentline();
     }
 
     /**
@@ -311,11 +323,11 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
      * @param {String} uuid - Unique payment line identifier.
      * @returns {Promise<boolean>} Resolves to true if payment succeeded.
      */
-    async send_payment_request(uuid) {
-        await super.send_payment_request(...arguments);
+    async sendPaymentRequest(uuid) {
+        await super.sendPaymentRequest(...arguments);
 
-        const order = this.pos.get_order();
-        const line = order?.get_paymentline_by_uuid(uuid);
+        const order = this.pos.getOrder();
+        const line = order?.getPaymentlineByUuid(uuid);
         if (!line) {
             return false;
         }
@@ -397,10 +409,8 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
      * @param {String} uuid - Unique payment line identifier.
      * @returns {Promise<boolean>} Resolves to true if cancel request succeeded.
      */
-    async send_payment_cancel(order, uuid) {
+    async sendPaymentCancel(order, uuid) {
         return new Promise((resolve) => {
-            const line = order?.get_paymentline_by_uuid(uuid);
-
             // Ask cashier confirmation before canceling terminal prompt
             this.dialog.add(ConfirmationDialog, {
                 title: _t("Cancel MultiSafepay Payment"),
@@ -409,7 +419,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
                 ),
                 confirmLabel: _t("Force Cancel"),
                 confirm: async () => {
-                    const line = order?.get_paymentline_by_uuid(uuid);
+                    const line = order?.getPaymentlineByUuid(uuid);
 
                     // Invoke RPC cancellation on pos.multisafepay.cloud.payment
                     const response = await this.orm.silent
@@ -445,7 +455,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
                     ) {
                         this._show_error(
                             response.detail ||
-                            _t("MultiSafepay Cloud POS cancellation failed."),
+                                _t("MultiSafepay Cloud POS cancellation failed."),
                             _t("MultiSafepay Cloud")
                         );
                         resolve(false);
@@ -453,13 +463,13 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
                     }
 
                     // Unlock POS UI and mark payment line as retryable
-                    super.send_payment_cancel(...arguments);
+                    super.sendPaymentCancel(...arguments);
                     this._resolve_pending_payment(uuid, false, line?.msp_cloud_uid);
                     if (this.pendingPaymentLineUuid === uuid) {
                         this.pendingPaymentLineUuid = null;
                     }
                     if (line) {
-                        line.set_payment_status("retry");
+                        line.setPaymentStatus("retry");
                     }
                     this.pos.paymentTerminalInProgress = false;
                     resolve(true);
@@ -479,7 +489,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
      * @param {String} uuid - Unique payment line identifier.
      * @returns {Promise<boolean>} Resolves to true if reversal succeeded.
      */
-    async send_payment_reversal(uuid) {
+    async sendPaymentReversal(uuid) {
         const line = this.get_payment_line(uuid);
         if (!line) {
             return false;
@@ -487,12 +497,17 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
 
         // Send reversal request to backend model pos.multisafepay.cloud.payment
         const response = await this.orm.silent
-            .call("pos.multisafepay.cloud.payment", "multisafepay_cloud_rpc_reverse_payment_request", [], {
-                order_id: line.transaction_id,
-                msp_cloud_uid: line.msp_cloud_uid,
-                amount: line.amount,
-                currency: this.pos.currency.name,
-            })
+            .call(
+                "pos.multisafepay.cloud.payment",
+                "multisafepay_cloud_rpc_reverse_payment_request",
+                [],
+                {
+                    order_id: line.transaction_id,
+                    msp_cloud_uid: line.msp_cloud_uid,
+                    amount: line.amount,
+                    currency: this.pos.currency.name,
+                }
+            )
             .catch(() => {
                 this._show_error(
                     _t(
@@ -553,16 +568,21 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             return false;
         }
 
-        line.set_payment_status("waitingCard");
+        line.setPaymentStatus("waitingCard");
         // Execute refund RPC call via pos.multisafepay.cloud.payment
         const response = await this.orm.silent
-            .call("pos.multisafepay.cloud.payment", "multisafepay_cloud_rpc_refund_payment_request", [], {
-                refunded_payment_id: sourcePaymentLine.id || sourcePaymentLine.uuid,
-                order_id: sourcePaymentLine.transaction_id,
-                msp_cloud_uid: sourcePaymentLine.msp_cloud_uid,
-                amount: line.amount,
-                currency: this.pos.currency.name,
-            })
+            .call(
+                "pos.multisafepay.cloud.payment",
+                "multisafepay_cloud_rpc_refund_payment_request",
+                [],
+                {
+                    refunded_payment_id: sourcePaymentLine.id || sourcePaymentLine.uuid,
+                    order_id: sourcePaymentLine.transaction_id,
+                    msp_cloud_uid: sourcePaymentLine.msp_cloud_uid,
+                    amount: line.amount,
+                    currency: this.pos.currency.name,
+                }
+            )
             .catch(() => {
                 this._show_error(
                     _t(
@@ -631,7 +651,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             return null;
         }
         if (line) {
-            line.set_payment_status("retry");
+            line.setPaymentStatus("retry");
         }
         const paymentUuid = uuid || line?.uuid || this.pendingPaymentLineUuid;
         if (paymentUuid) {
@@ -667,13 +687,13 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
         if (
             !["waiting", "waitingCard", "waitingCancel"].includes(line.payment_status)
         ) {
-            line.set_payment_status("retry");
+            line.setPaymentStatus("retry");
             this._resolve_pending_payment(line.uuid, false, mspCloudUid);
             return false;
         }
 
         if (!response) {
-            line.set_payment_status("retry");
+            line.setPaymentStatus("retry");
             this._resolve_pending_payment(line.uuid, false, mspCloudUid);
             return false;
         }
@@ -689,10 +709,15 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             mspCloudUid = remoteOrderId;
             line.msp_cloud_uid = remoteOrderId;
         }
-        line.update({
-            transaction_id: remoteOrderId || line.transaction_id,
-            msp_cloud_uid: remoteOrderId || line.msp_cloud_uid,
-        });
+        try {
+            line.update({
+                transaction_id: remoteOrderId || line.transaction_id,
+                msp_cloud_uid: remoteOrderId || line.msp_cloud_uid,
+            });
+        } catch {
+            line.transaction_id = remoteOrderId || line.transaction_id;
+            line.msp_cloud_uid = remoteOrderId || line.msp_cloud_uid;
+        }
 
         // Fast-path resolution if terminal completed payment instantly
         if (state === "success") {
@@ -704,7 +729,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
         // Standard Cloud POS flow: transaction is pending on terminal, start polling loop
         if (!state || state === "pending") {
             if (line.payment_status !== "waitingCancel") {
-                line.set_payment_status("waitingCard");
+                line.setPaymentStatus("waitingCard");
             }
             this._schedule_status_poll(line.uuid, mspCloudUid);
             return true;
@@ -714,7 +739,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
         this._show_error(
             response?.detail || _t("MultiSafepay Cloud payment request failed.")
         );
-        line.set_payment_status("retry");
+        line.setPaymentStatus("retry");
         this._resolve_pending_payment(line.uuid, false, mspCloudUid);
         return false;
     }
@@ -729,7 +754,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
     _register_pending_payment(uuid, mspCloudUid) {
         this._clear_poll_timeout(uuid);
         return new Promise((resolve) => {
-            this.paymentLineResolvers[uuid] = { mspCloudUid, resolve };
+            this.paymentLineResolvers[uuid] = {mspCloudUid, resolve};
         });
     }
 
@@ -856,7 +881,7 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
             return;
         }
 
-        line.handle_payment_response(success);
+        line.handlePaymentResponse(success);
     }
 
     /**
@@ -917,8 +942,8 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
         // Safety check matching line UUID and msp_cloud_uid tracking token
         return Boolean(
             pendingPayment &&
-            (!mspCloudUid || pendingPayment.mspCloudUid === mspCloudUid) &&
-            line.msp_cloud_uid === pendingPayment.mspCloudUid
+                (!mspCloudUid || pendingPayment.mspCloudUid === mspCloudUid) &&
+                line.msp_cloud_uid === pendingPayment.mspCloudUid
         );
     }
 

@@ -1,11 +1,11 @@
 {
-    "name": "POS MultiSafepay Cloud",
-    "summary": "MultiSafepay Cloud POS payments in Odoo POS",
+    "name": "PoS MultiSafepay Cloud",
+    "summary": "PoC for MultiSafepay Cloud POS payments in Odoo POS",
     "author": "MultiSafepay",
     "website": "https://www.multisafepay.com/",
     "license": "AGPL-3",
     "category": "Point of Sale",
-    "version": "18.0.2.3.0",
+    "version": "19.0.2.2.3",
     "application": True,
     "depends": [
         "point_of_sale",

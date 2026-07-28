@@ -3,10 +3,10 @@
 # See the LICENSE.md file for more information.
 # See the DISCLAIMER.md file for disclaimer details
 
-from ..helpers.error_payload import (
+from odoo.addons.pos_multisafepay_cloud.helpers.error_payload import (
     _ErrorPayload,
 )
-from ..helpers.status import _Status
+from odoo.addons.pos_multisafepay_cloud.helpers.status import _Status
 
 
 class _FrontendResponseBuilder:
