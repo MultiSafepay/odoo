@@ -194,7 +194,11 @@ const config = [{
     },
 
 }, {
-    files: ["**/*.esm.js", "**/*test.js"],
+    files: [
+        "**/*.esm.js",
+        "**/*test.js",
+        "pos_multisafepay_cloud/static/src/**/*.js",
+    ],
 
     languageOptions: {
         ecmaVersion: 2024,
