@@ -1,5 +1,5 @@
 ======================
-PoS MultiSafepay Cloud
+POS MultiSafepay Cloud
 ======================
 
 .. 
