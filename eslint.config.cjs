@@ -195,9 +195,8 @@ const config = [{
 
 }, {
     files: [
-        "**/*.esm.js",
-        "**/*test.js",
-        "pos_multisafepay_cloud/static/src/**/*.js",
+        "**/static/src/**/*.js",
+        "**/static/tests/**/*.js",
     ],
 
     languageOptions: {
