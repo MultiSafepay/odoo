@@ -3,10 +3,9 @@
 # See the LICENSE.md file for more information.
 # See the DISCLAIMER.md file for disclaimer details
 
-from error_payload import (
+from .error_payload import (
     _ErrorPayload,
 )
-
 from .status import _Status
 
 
