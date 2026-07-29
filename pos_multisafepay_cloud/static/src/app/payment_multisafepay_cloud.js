@@ -60,7 +60,7 @@ export function buildCustomer(order) {
         city: partner.city || "",
         state: partner.state_id?.name || "",
         country: partner.country_id?.code || "",
-        phone: partner.phone || partner.mobile || "",
+        phone: partner.phone || "",
         email: partner.email || "",
     };
 
