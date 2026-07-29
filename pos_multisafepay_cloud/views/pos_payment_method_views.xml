@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    Copyright (c) MultiSafepay, Inc. All rights reserved.
+    This file is licensed under the GNU Affero General Public License (AGPL) version 3.0.
+    See the LICENSE.md file for more information.
+    See the DISCLAIMER.md file for disclaimer details
+-->
+<odoo>
+    <record id="view_pos_payment_method_form_multisafepay_cloud" model="ir.ui.view">
+        <field name="name">pos.payment.method.form.multisafepay.cloud</field>
+        <field name="model">pos.payment.method</field>
+        <field name="inherit_id" ref="point_of_sale.pos_payment_method_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='use_payment_terminal']" position="after">
+                <group
+                    invisible="use_payment_terminal != 'multisafepay_cloud'"
+                    colspan="2"
+                    col="2"
+                    class="mt-3"
+                >
+                    <field
+                        name="msp_cloud_terminal_id"
+                        required="use_payment_terminal == 'multisafepay_cloud'"
+                    />
+                    <field
+                        name="msp_cloud_terminal_group_id"
+                        required="use_payment_terminal == 'multisafepay_cloud'"
+                    />
+                    <field
+                        name="msp_cloud_terminal_group_api_key"
+                        password="True"
+                        required="use_payment_terminal == 'multisafepay_cloud'"
+                    />
+                    <field name="msp_cloud_validate_cart" invisible="1" />
+                </group>
+                <group
+                    invisible="use_payment_terminal != 'multisafepay_cloud'"
+                    colspan="2"
+                >
+                    <div class="alert alert-warning mt-2 mb-2 w-100">
+                        <i class="fa fa-exclamation-triangle me-2" />
+                        <strong>Cloud POS reference strategy.</strong>
+                        Cloud POS uses the POS receipt reference as the remote order ID and suffixes retries as reference-1, reference-2, etc.
+                    </div>
+                </group>
+                <field name="msp_cloud_dev_settings_enabled" invisible="1" />
+                <group string="Developer Settings" invisible="1" colspan="2" col="2">
+                    <field name="msp_cloud_custom_api_url" />
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

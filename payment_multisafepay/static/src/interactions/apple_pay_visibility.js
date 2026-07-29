@@ -2,8 +2,6 @@
 /** @odoo-module **/
 
 (function () {
-    "use strict";
-
     function isApplePaySupported() {
         if (typeof window.ApplePaySession === "undefined") {
             return false;
