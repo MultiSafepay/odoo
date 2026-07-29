@@ -14,10 +14,10 @@
  * Overview of Key Modules and Workflow:
  * 1. Helper Utilities: Build customer profile, shopping cart items, tip amounts, and identify refundable lines.
  * 2. Payment Interface (`PaymentMultiSafepayCloud`):
- *    - Checkout Entry Point (`send_payment_request`): Prepares order payload and invokes backend RPC `multisafepay_cloud_rpc_payment_request`.
+ *    - Checkout Entry Point (`sendPaymentRequest`): Prepares order payload and invokes backend RPC `multisafepay_cloud_rpc_payment_request`.
  *    - Status Polling (`_schedule_status_poll` & `handle_multisafepay_cloud_status_response`): Polls Odoo backend via `multisafepay_cloud_rpc_poll_payment_status` every 2s until terminal transaction reaches a final state.
- *    - Terminal Cancellation (`send_payment_cancel`): Asks cashier confirmation and invokes `multisafepay_cloud_rpc_cancel_payment_request`.
- *    - Payment Reversals (`send_payment_reversal`): Voids uncompleted transactions via `multisafepay_cloud_rpc_reverse_payment_request`.
+ *    - Terminal Cancellation (`sendPaymentCancel`): Asks cashier confirmation and invokes `multisafepay_cloud_rpc_cancel_payment_request`.
+ *    - Payment Reversals (`sendPaymentReversal`): Voids uncompleted transactions via `multisafepay_cloud_rpc_reverse_payment_request`.
  *    - Refund Requests (`_send_refund_request`): Issues full/partial refunds via `multisafepay_cloud_rpc_refund_payment_request`.
  */
 
