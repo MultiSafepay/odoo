@@ -30,20 +30,20 @@ from odoo.exceptions import ValidationError
 #   (the 19.0 convention) rather than relative `..helpers` imports.
 from odoo.tools import file_path
 
-from odoo.addons.pos_multisafepay_cloud.helpers.error_payload import (
+from ..helpers.error_payload import (
     _ErrorPayload,
 )
-from odoo.addons.pos_multisafepay_cloud.helpers.order_payload_builder import (
+from ..helpers.order_payload_builder import (
     _OrderPayloadBuilder,
 )
-from odoo.addons.pos_multisafepay_cloud.helpers.sdk_factory import (
+from ..helpers.sdk_factory import (
     _SDKFactory,
 )
-from odoo.addons.pos_multisafepay_cloud.helpers.serializer import (
+from ..helpers.serializer import (
     _Serializer,
 )
-from odoo.addons.pos_multisafepay_cloud.helpers.status import _Status
-from odoo.addons.pos_multisafepay_cloud.helpers.utils import (
+from ..helpers.status import _Status
+from ..helpers.utils import (
     _Utils,
 )
 

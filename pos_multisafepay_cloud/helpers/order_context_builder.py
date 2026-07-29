@@ -3,7 +3,7 @@
 # See the LICENSE.md file for more information.
 # See the DISCLAIMER.md file for disclaimer details
 
-from odoo.addons.pos_multisafepay_cloud.helpers.utils import (
+from .utils import (
     _Utils,
 )
 

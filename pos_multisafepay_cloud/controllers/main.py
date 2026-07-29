@@ -9,13 +9,13 @@ import logging
 from odoo import _, http
 from odoo.http import request
 
-from odoo.addons.pos_multisafepay_cloud.helpers.frontend_response_builder import (
+from ..helpers.frontend_response_builder import (
     _FrontendResponseBuilder,
 )
-from odoo.addons.pos_multisafepay_cloud.helpers.notification_payload import (
+from ..helpers.notification_payload import (
     _NotificationPayload,
 )
-from odoo.addons.pos_multisafepay_cloud.helpers.notification_validator import (
+from ..helpers.notification_validator import (
     _NotificationValidator,
 )
 

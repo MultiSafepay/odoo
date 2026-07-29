@@ -12,16 +12,16 @@ from odoo import _, api, fields, models
 # Odoo 18 -> 19 model adaptation (matching branch ODOO-236): in-module helper
 # imports use the absolute `odoo.addons.<module>` form (the 19.0 convention)
 # rather than relative `..helpers` imports.
-from odoo.addons.pos_multisafepay_cloud.helpers.frontend_response_builder import (
+from ..helpers.frontend_response_builder import (
     _FrontendResponseBuilder,
 )
-from odoo.addons.pos_multisafepay_cloud.helpers.notification_payload import (
+from ..helpers.notification_payload import (
     _NotificationPayload,
 )
-from odoo.addons.pos_multisafepay_cloud.helpers.odoo_payload_builder import (
+from ..helpers.odoo_payload_builder import (
     _OdooPayloadBuilder,
 )
-from odoo.addons.pos_multisafepay_cloud.helpers.status import _Status
+from ..helpers.status import _Status
 
 _logger = logging.getLogger(__name__)
 

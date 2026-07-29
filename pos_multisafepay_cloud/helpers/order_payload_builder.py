@@ -21,7 +21,7 @@ from multisafepay.api.shared.customer import Customer
 
 from odoo import _
 
-from odoo.addons.pos_multisafepay_cloud.helpers.utils import (
+from .utils import (
     _Utils,
 )
 
