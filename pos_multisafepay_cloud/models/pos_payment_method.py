@@ -23,11 +23,9 @@ from multisafepay.util.json_encoder import DecimalEncoder
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
-# Odoo 18 -> 19 model adaptation (matching branch ODOO-236):
+# Odoo 18 -> 19:
 # - `odoo.modules.module.get_module_resource` was removed in 19.0; resolve
 #   in-module resource paths with `odoo.tools.file_path` instead.
-# - In-module helper imports use the absolute `odoo.addons.<module>` form
-#   (the 19.0 convention) rather than relative `..helpers` imports.
 from odoo.tools import file_path
 
 from ..helpers.error_payload import (

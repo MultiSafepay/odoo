@@ -9,9 +9,6 @@ import logging
 
 from odoo import _, api, fields, models
 
-# Odoo 18 -> 19 model adaptation (matching branch ODOO-236): in-module helper
-# imports use the absolute `odoo.addons.<module>` form (the 19.0 convention)
-# rather than relative `..helpers` imports.
 from ..helpers.frontend_response_builder import (
     _FrontendResponseBuilder,
 )
