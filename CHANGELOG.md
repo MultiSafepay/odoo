@@ -9,6 +9,9 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+- ODOO-281: Document Cloud POS transaction tracking and review details
+
 ## [18.0.2.4.0] - 2026-07-24
 
 ### Added

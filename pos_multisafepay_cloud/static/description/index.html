@@ -375,6 +375,11 @@ Point of Sale.</p>
 <p>It lets Odoo create Cloud POS orders, track terminal status, process
 webhook or event-stream confirmations, and handle POS-side reversals and
 refunds through the backend MultiSafepay API.</p>
+<p>Each Cloud POS request creates a local tracking record with the remote
+transaction identifier, the latest MultiSafepay status, and the related
+refund or reversal details. This makes terminal activity auditable from
+the POS order and lets later status checks reconcile Odoo with the
+MultiSafepay order state.</p>
 <p>The addon is intentionally independent from <tt class="docutils literal">pos_multisafepay</tt> and
 keeps that addon as a reference only.</p>
 <p><strong>Table of contents</strong></p>
@@ -427,6 +432,11 @@ payment method.</li>
 POS.</li>
 <li>Complete, cancel, reverse, or refund the payment from the POS flow.</li>
 </ol>
+<p>Transaction status is synchronized from MultiSafepay through polling and
+notifications. The local Cloud POS tracker stores the remote transaction
+ID and the latest response payload, so operators can review completed,
+cancelled, refunded, and partially refunded terminal payments from the
+related POS order.</p>
 <p>Real status polling and completed payment refunds require the Site API
 Key. Without that key, the module can still create terminal orders with
 the terminal group credentials, but account-level status and refund
