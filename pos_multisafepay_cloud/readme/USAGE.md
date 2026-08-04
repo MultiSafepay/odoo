@@ -10,8 +10,3 @@ notifications. The local Cloud POS tracker stores the remote transaction
 ID and the latest response payload, so operators can review completed,
 cancelled, refunded, and partially refunded terminal payments from the
 related POS order.
-
-Real status polling and completed payment refunds require the Site API
-Key. Without that key, the module can still create terminal
-orders with the terminal group credentials, but account-level status and
-refund calls are not available.

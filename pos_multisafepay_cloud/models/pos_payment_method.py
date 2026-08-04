@@ -67,7 +67,7 @@ class PosPaymentMethod(models.Model):
        - `_validate_cloud_pos_configuration`: Ensures required terminal parameters are present before API execution.
 
     2. SDK & API Client Factory:
-       - `_get_multisafepay_cloud_sdk`: Constructs a configured MultiSafepay SDK instance using scoped API keys.
+       - `_get_multisafepay_cloud_sdk`: Constructs a configured MultiSafepay SDK instance using terminal-group credentials.
 
     3. Transaction Lifecycle & API Methods:
        - `multisafepay_cloud_rpc_payment_request`: Primary entry point for POS frontend payment requests.
@@ -269,8 +269,8 @@ class PosPaymentMethod(models.Model):
     def _get_multisafepay_cloud_sdk(self):
         """Build an SDK client scoped to this method's terminal group.
 
-        The scoped credential resolver lets the same client use terminal-group
-        credentials for Cloud POS calls and the Site API Key for account-level calls.
+        The scoped credential resolver applies the configured terminal-group
+        credentials to Cloud POS calls.
 
         :return: Configured MultiSafepay SDK instance.
         :rtype: multisafepay.Sdk
