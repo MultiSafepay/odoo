@@ -9,6 +9,12 @@ on:
     branches:
       - "18.0"
       - "19.0"
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+      - unlabeled
 
 jobs:
   pre-commit:
@@ -20,4 +26,106 @@ jobs:
         with:
           python-version: '3.11'
       - uses: pre-commit/action@v3.0.1
+
+      - name: Resolve Odoo version and target branch
+        env:
+          GH_TOKEN: ${{ secrets.GLOBAL_GITHUB_TOKEN }}
+        run: |
+          VERSION="18.0"
+          DOCKER_ODOO_REF="main"
+          VERSION_REF="${{ github.base_ref || github.ref_name }}"
+          ROUTING_REF="${{ github.head_ref || github.ref_name }}"
+          if [[ "$VERSION_REF" == *"19.0"* ]]; then
+            VERSION="19.0"
+          fi
+          if [[ "$ROUTING_REF" == *"test-pos-assets-setup"* ]]; then
+            DOCKER_ODOO_REF="scaffold-pos-tests"
+          fi
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            mapfile -t DOCKER_ODOO_REFS < <(
+              jq -r '
+                [.pull_request.labels[].name
+                 | select(startswith("docker-odoo-ref:"))
+                 | sub("^docker-odoo-ref:"; "")]
+                | unique[]
+              ' "$GITHUB_EVENT_PATH"
+            )
+
+            if (( ${#DOCKER_ODOO_REFS[@]} > 1 )); then
+              echo "Only one docker-odoo-ref:<branch> label is allowed per PR."
+              exit 1
+            fi
+
+            if (( ${#DOCKER_ODOO_REFS[@]} == 1 )); then
+              REQUESTED_REF="${DOCKER_ODOO_REFS[0]}"
+              if [[ ! "$REQUESTED_REF" =~ ^[A-Za-z0-9][A-Za-z0-9._/-]*$ ]] || [[ "$REQUESTED_REF" == *..* ]]; then
+                echo "Invalid docker-odoo branch in label: $REQUESTED_REF"
+                exit 1
+              fi
+              if ! git ls-remote --exit-code --heads \
+                "https://x-access-token:${GH_TOKEN}@github.com/MultiSafepay/docker-odoo.git" \
+                "refs/heads/$REQUESTED_REF" >/dev/null; then
+                echo "docker-odoo branch does not exist: $REQUESTED_REF"
+                exit 1
+              fi
+              DOCKER_ODOO_REF="$REQUESTED_REF"
+            fi
+          fi
+
+          echo "ODOO_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "DOCKER_ODOO_REF=$DOCKER_ODOO_REF" >> $GITHUB_ENV
+
+      - name: Trigger docker-odoo integration tests and wait
+        env:
+          GH_TOKEN: ${{ secrets.GLOBAL_GITHUB_TOKEN }}
+        run: |
+          # Trigger workflow_dispatch
+          gh workflow run multisafepay-ci.yml \
+            --repo MultiSafepay/docker-odoo \
+            --ref "${{ env.DOCKER_ODOO_REF }}" \
+            -f commit_sha="${{ github.sha }}" \
+            -f odoo_version="${{ env.ODOO_VERSION }}"
+
+          # Wait 10 seconds for GitHub API to register the new run
+          echo "Giving GitHub API 10 seconds to spin up the run..."
+          sleep 10
+
+          # Get the database ID of the run we just started
+          RUN_ID=$(gh run list \
+            --repo MultiSafepay/docker-odoo \
+            --workflow multisafepay-ci.yml \
+            --branch "${{ env.DOCKER_ODOO_REF }}" \
+            --limit 1 \
+            --json databaseId \
+            --jq '.[0].databaseId')
+
+          if [ -z "$RUN_ID" ]; then
+            echo "Error: Could not find triggered workflow run in docker-odoo"
+            exit 1
+          fi
+
+          echo "Triggered workflow run database ID: $RUN_ID"
+          echo "Waiting for run to finish..."
+
+          # Poll status of the run every 15 seconds
+          while true; do
+            STATUS_JSON=$(gh run view "$RUN_ID" --repo MultiSafepay/docker-odoo --json status,conclusion)
+            STATUS=$(echo "$STATUS_JSON" | jq -r '.status')
+            CONCLUSION=$(echo "$STATUS_JSON" | jq -r '.conclusion')
+
+            echo "Current status: $STATUS, conclusion: $CONCLUSION"
+
+            if [ "$STATUS" = "completed" ]; then
+              if [ "$CONCLUSION" = "success" ]; then
+                echo "Integration tests passed successfully!"
+                exit 0
+              else
+                echo "Integration tests failed with conclusion: $CONCLUSION"
+                exit 1
+              fi
+            fi
+
+            sleep 15
+          done
 
