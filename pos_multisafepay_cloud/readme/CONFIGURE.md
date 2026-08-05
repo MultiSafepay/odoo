@@ -5,6 +5,5 @@
     - **MSP Cloud Terminal ID**
     - **MSP Cloud Terminal Group ID**
     - **MSP Cloud Terminal Group API Key**
-    - **MSP Cloud Site API Key**
     - **MSP Cloud Environment**
 
