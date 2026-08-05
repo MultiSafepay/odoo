@@ -274,8 +274,8 @@ class PosPaymentMethod(models.Model):
     def _get_multisafepay_cloud_sdk(self):
         """Build an SDK client scoped to this method's terminal group.
 
-        The scoped credential resolver lets the same client use terminal-group
-        credentials for Cloud POS calls and the Site API Key for account-level calls.
+        The scoped credential resolver applies the configured terminal-group
+        credentials to Cloud POS calls.
 
         :return: Configured MultiSafepay SDK instance.
         :rtype: multisafepay.Sdk
