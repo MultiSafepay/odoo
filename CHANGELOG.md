@@ -9,7 +9,13 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [18.0.2.5.0] - 2026-08-05
+
+### Added
+- ODOO-177: Add MultiSafepay Cloud POS module
+
 ### Changed
+- ODOO-279: Remove obsolete Cloud POS payment view cleanup
 - ODOO-281: Document Cloud POS transaction tracking and review details
 - ODOO-288: Integrate the blocking docker-odoo CI dispatcher
 - ODOO-297: Run integration tests only on odoo-internal repository
