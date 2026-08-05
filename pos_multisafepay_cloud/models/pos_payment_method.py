@@ -410,9 +410,9 @@ class PosPaymentMethod(models.Model):
             )
             plugin = (
                 Plugin()
-                .add_plugin_version("2.3.0")
+                .add_plugin_version("2.5.0")
                 .add_shop("Odoo")
-                .add_shop_version("18.0")
+                .add_shop_version("19.0")
                 .add_shop_root_url(self.get_base_url())
             )
             order_request = (

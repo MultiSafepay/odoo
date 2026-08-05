@@ -5,7 +5,7 @@
     "website": "https://www.multisafepay.com/",
     "license": "AGPL-3",
     "category": "Point of Sale",
-    "version": "19.0.2.4.0",
+    "version": "19.0.2.5.0",
     "application": True,
     "depends": [
         "point_of_sale",

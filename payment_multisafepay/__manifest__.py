@@ -10,7 +10,7 @@
     "website": "https://www.multisafepay.com/",
     "license": "AGPL-3",
     "category": "Accounting/Payment Providers",
-    "version": "19.0.2.4.0",
+    "version": "19.0.2.5.0",
     "application": True,
     "post_init_hook": "post_init_hook",
     "uninstall_hook": "uninstall_hook",

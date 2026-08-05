@@ -9,6 +9,18 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [19.0.2.5.0] - 2026-08-05
+
+### Added
+- ODOO-236: Add MultiSafepay Cloud POS module
+
+### Changed
+- ODOO-293: Remove obsolete Cloud POS payment view code
+
+### Fixed
+- ODOO-292: Remove obsolete Site API Key references from Cloud POS documentation and code comments
+- ODOO-236: Align Cloud POS plugin metadata with Odoo 19.0
+
 ## [19.0.2.4.0] - 2026-07-24
 ### Added
 - ODOO-261: Add optional shopping cart and restrict BNPL payment methods to this new setting field
