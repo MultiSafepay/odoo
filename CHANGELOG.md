@@ -11,6 +11,11 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 - ODOO-281: Document Cloud POS transaction tracking and review details
+- ODOO-288: Integrate the blocking docker-odoo CI dispatcher
+- ODOO-297: Run integration tests only on odoo-internal repository
+
+### Fixed
+- ODOO-275: Remove obsolete Site API Key references from Cloud POS documentation and code comments
 
 ## [18.0.2.4.0] - 2026-07-24
 
