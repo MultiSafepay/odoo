@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-inherit="point_of_sale.PosPaymentProviderCards" t-inherit-mode="extension">
+        <xpath expr="//img" position="attributes">
+            <attribute
+                name="t-att-src"
+            >provider.selection === 'multisafepay_cloud' ? '/pos_multisafepay_cloud/static/description/pos_payment_icon.png' : `/point_of_sale/static/img/providers/${provider.selection}.png`</attribute>
+        </xpath>
+    </t>
+</templates>

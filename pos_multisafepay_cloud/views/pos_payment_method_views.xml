@@ -20,15 +20,18 @@
                 >
                     <field
                         name="msp_cloud_terminal_id"
+                        placeholder="e.g. 1083921"
                         required="use_payment_terminal == 'multisafepay_cloud'"
                     />
                     <field
                         name="msp_cloud_terminal_group_id"
+                        placeholder="e.g. group_main"
                         required="use_payment_terminal == 'multisafepay_cloud'"
                     />
                     <field
                         name="msp_cloud_terminal_group_api_key"
                         password="True"
+                        placeholder="e.g. api_key_XXXXXXXX"
                         required="use_payment_terminal == 'multisafepay_cloud'"
                     />
                     <field name="msp_cloud_validate_cart" invisible="1" />

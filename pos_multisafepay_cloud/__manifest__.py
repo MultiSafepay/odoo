@@ -20,6 +20,9 @@
         "point_of_sale._assets_pos": [
             "pos_multisafepay_cloud/static/src/app/**/*",
         ],
+        "web.assets_backend": [
+            "pos_multisafepay_cloud/static/src/backend/**/*",
+        ],
     },
     "installable": True,
 }
