@@ -9,7 +9,7 @@
     "application": True,
     "depends": [
         "point_of_sale",
-        "payment_multisafepay",
+        "payment_multisafepay_official",
     ],
     "external_dependencies": {"python": ["multisafepay==3.1.0", "requests"]},
     "data": [

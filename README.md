@@ -27,10 +27,9 @@ Before installing the MultiSafepay module suite, ensure you have:
 
 ## Modules
 
-This repository no longer ships a single `payment_multisafepay_official` module.
-The previous functionality has been split into two Odoo addons:
+This repository ships the following Odoo addons:
 
-- `payment_multisafepay`: core MultiSafepay payment provider integration.
+- `payment_multisafepay_official`: core MultiSafepay payment provider integration.
 - `payment_multisafepay_enhanced`: optional enhanced business logic on top of the core addon.
 
 ## Installation
@@ -49,7 +48,7 @@ This method applies to administrators with direct access to the Odoo server. In 
 2. Copy the module into the `custom_addons` directory:
    ```
    cd /path/to/custom_addons
-   cp -r /path/to/payment_multisafepay .
+   cp -r /path/to/payment_multisafepay_official .
    # Optional (adds extra business logic/features)
    cp -r /path/to/payment_multisafepay_enhanced .
    ```
@@ -121,7 +120,7 @@ The MultiSafepay integration supports all major payment methods available throug
     ```
 5.  Restart Odoo and Upgrade Modules: Navigate to Apps and upgrade the installed addons, or via command line:
     ```
-    odoo-bin -u payment_multisafepay -d your_database_name
+    odoo-bin -u payment_multisafepay_official -d your_database_name
     # Optional (only if installed)
     odoo-bin -u payment_multisafepay_enhanced -d your_database_name
     ```

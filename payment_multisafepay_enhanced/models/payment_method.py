@@ -5,7 +5,7 @@
 
 """
 ENHANCED MODULE: Adds pricelist filtering functionality to MultiSafepay payment methods.
-This module EXTENDS payment_multisafepay (CORE) by adding custom pricelist restrictions.
+This module EXTENDS payment_multisafepay_official (CORE) by adding custom pricelist restrictions.
 """
 
 import logging
@@ -23,7 +23,7 @@ _logger = logging.getLogger(__name__)
 class PaymentMethod(models.Model):
     """Extend payment.method to add pricelist filtering (ENHANCED feature).
 
-    This enhanced model extends the CORE payment_multisafepay functionality by adding
+    This enhanced model extends the CORE payment_multisafepay_official functionality by adding
     pricelist-based filtering for payment methods, allowing merchants to restrict
     payment methods to specific pricelists.
     """
