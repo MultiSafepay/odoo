@@ -1,5 +1,5 @@
 {
-    "name": "MultiSafepay",
+    "name": "MultiSafepay Official",
     "summary": """E-commerce is part of our DNA""",
     "author": "MultiSafepay",
     "website": "https://www.multisafepay.com/",
@@ -7,6 +7,7 @@
     "category": "Accounting/Payment Providers",
     "version": "18.0.2.5.0",
     "application": True,
+    "pre_init_hook": "pre_init_hook",
     "post_init_hook": "post_init_hook",
     "uninstall_hook": "uninstall_hook",
     "depends": [
@@ -21,7 +22,7 @@
     ],
     "assets": {
         "web.assets_frontend": [
-            "payment_multisafepay/static/src/interactions/apple_pay_visibility.js",
+            "payment_multisafepay_official/static/src/interactions/apple_pay_visibility.js",
         ],
     },
 }

@@ -1,6 +1,6 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* payment_multisafepay
+# 	* payment_multisafepay_official
 #
 msgid ""
 msgstr ""
@@ -15,30 +15,30 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
 
-#. module: payment_multisafepay
-#: model_terms:ir.ui.view,arch_db:payment_multisafepay.payment_provider_form_multisafepay
+#. module: payment_multisafepay_official
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_official.payment_provider_form_multisafepay
 msgid "<i class=\"fa fa-refresh\"/> Sync Payment Methods"
 msgstr "<i class=\"fa fa-refresh\"/> Synchroniser les méthodes de paiement"
 
-#. module: payment_multisafepay
-#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_provider__multisafepay_api_key
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,field_description:payment_multisafepay_official.field_payment_provider__multisafepay_api_key
 msgid "API Key"
 msgstr "Clé API"
 
-#. module: payment_multisafepay
+#. module: payment_multisafepay_official
 #. odoo-python
-#: code:addons/payment_multisafepay/controllers/main.py:0
+#: code:addons/payment_multisafepay_official/controllers/main.py:0
 msgid "An unexpected error occurred. Please try again."
 msgstr "Une erreur inattendue s'est produite. Veuillez réessayer."
 
-#. module: payment_multisafepay
-#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_provider__code
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,field_description:payment_multisafepay_official.field_payment_provider__code
 msgid "Code"
 msgstr "Code"
 
-#. module: payment_multisafepay
+#. module: payment_multisafepay_official
 #. odoo-python
-#: code:addons/payment_multisafepay/models/payment_transaction.py:0
+#: code:addons/payment_multisafepay_official/models/payment_transaction.py:0
 msgid ""
 "Could not connect to MultiSafepay API for transaction %s.\n"
 "\n"
@@ -48,9 +48,9 @@ msgstr ""
 "\n"
 "Erreur : %s"
 
-#. module: payment_multisafepay
+#. module: payment_multisafepay_official
 #. odoo-python
-#: code:addons/payment_multisafepay/models/payment_transaction.py:0
+#: code:addons/payment_multisafepay_official/models/payment_transaction.py:0
 msgid ""
 "Could not retrieve order information from MultiSafepay for transaction %s.\n"
 "\n"
@@ -66,73 +66,73 @@ msgstr ""
 "\n"
 "Veuillez vérifier votre connexion Internet et réessayer ultérieurement."
 
-#. module: payment_multisafepay
-#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_method__display_name
-#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_provider__display_name
-#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_transaction__display_name
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,field_description:payment_multisafepay_official.field_payment_method__display_name
+#: model:ir.model.fields,field_description:payment_multisafepay_official.field_payment_provider__display_name
+#: model:ir.model.fields,field_description:payment_multisafepay_official.field_payment_transaction__display_name
 msgid "Display Name"
 msgstr "Nom d'affichage"
 
-#. module: payment_multisafepay
-#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_method__id
-#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_provider__id
-#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_transaction__id
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,field_description:payment_multisafepay_official.field_payment_method__id
+#: model:ir.model.fields,field_description:payment_multisafepay_official.field_payment_provider__id
+#: model:ir.model.fields,field_description:payment_multisafepay_official.field_payment_transaction__id
 msgid "ID"
 msgstr "ID"
 
-#. module: payment_multisafepay
-#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_method__main_currency_id
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,field_description:payment_multisafepay_official.field_payment_method__main_currency_id
 msgid "Main Currency"
 msgstr "Devise principale"
 
-#. module: payment_multisafepay
-#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_method__maximum_amount
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,field_description:payment_multisafepay_official.field_payment_method__maximum_amount
 msgid "Maximum Amount (EUR)"
 msgstr "Montant maximum (EUR)"
 
-#. module: payment_multisafepay
-#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_method__minimum_amount
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,field_description:payment_multisafepay_official.field_payment_method__minimum_amount
 msgid "Minimum Amount (EUR)"
 msgstr "Montant minimum (EUR)"
 
-#. module: payment_multisafepay
-#: model:payment.provider,name:payment_multisafepay.payment_provider_multisafepay
+#. module: payment_multisafepay_official
+#: model:payment.provider,name:payment_multisafepay_official.payment_provider_multisafepay
 msgid "MultiSafepay"
 msgstr "MultiSafepay"
 
-#. module: payment_multisafepay
+#. module: payment_multisafepay_official
 #. odoo-python
-#: code:addons/payment_multisafepay/controllers/main.py:0
+#: code:addons/payment_multisafepay_official/controllers/main.py:0
 msgid ""
 "MultiSafepay API error: Transaction not found. Please refresh and try again."
 msgstr ""
 "Erreur de l'API MultiSafepay : Transaction introuvable. Veuillez actualiser et réessayer."
 
-#. module: payment_multisafepay
-#: model_terms:ir.ui.view,arch_db:payment_multisafepay.payment_provider_form_multisafepay
+#. module: payment_multisafepay_official
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_official.payment_provider_form_multisafepay
 msgid "MultiSafepay Credentials"
 msgstr "Identifiants MultiSafepay"
 
-#. module: payment_multisafepay
+#. module: payment_multisafepay_official
 #. odoo-python
-#: code:addons/payment_multisafepay/controllers/main.py:0
+#: code:addons/payment_multisafepay_official/controllers/main.py:0
 msgid "MultiSafepay SDK is not initialized."
 msgstr "Le SDK MultiSafepay n'est pas initialisé."
 
-#. module: payment_multisafepay
-#: model:ir.model.fields.selection,name:payment_multisafepay.selection__payment_provider__code__multisafepay
+#. module: payment_multisafepay_official
+#: model:ir.model.fields.selection,name:payment_multisafepay_official.selection__payment_provider__code__multisafepay
 msgid "Multisafepay"
 msgstr "Multisafepay"
 
-#. module: payment_multisafepay
+#. module: payment_multisafepay_official
 #. odoo-python
-#: code:addons/payment_multisafepay/controllers/main.py:0
+#: code:addons/payment_multisafepay_official/controllers/main.py:0
 msgid "No customer info partner associated."
 msgstr "Aucun partenaire d'informations client associé."
 
-#. module: payment_multisafepay
+#. module: payment_multisafepay_official
 #. odoo-python
-#: code:addons/payment_multisafepay/models/payment_transaction.py:0
+#: code:addons/payment_multisafepay_official/models/payment_transaction.py:0
 msgid ""
 "No response received from MultiSafepay when attempting to refund transaction %s.\n"
 "\n"
@@ -142,41 +142,41 @@ msgstr ""
 "\n"
 "Veuillez vérifier votre connexion Internet et réessayer ultérieurement."
 
-#. module: payment_multisafepay
-#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_method__only_multisafepay
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,field_description:payment_multisafepay_official.field_payment_method__only_multisafepay
 msgid "Only Multisafepay"
 msgstr "Uniquement Multisafepay"
 
-#. module: payment_multisafepay
-#: model:ir.model,name:payment_multisafepay.model_payment_method
+#. module: payment_multisafepay_official
+#: model:ir.model,name:payment_multisafepay_official.model_payment_method
 msgid "Payment Method"
 msgstr "Mode de paiement"
 
-#. module: payment_multisafepay
-#: model:ir.model,name:payment_multisafepay.model_payment_provider
+#. module: payment_multisafepay_official
+#: model:ir.model,name:payment_multisafepay_official.model_payment_provider
 msgid "Payment Provider"
 msgstr "Fournisseur de paiement"
 
-#. module: payment_multisafepay
-#: model:ir.model,name:payment_multisafepay.model_payment_transaction
+#. module: payment_multisafepay_official
+#: model:ir.model,name:payment_multisafepay_official.model_payment_transaction
 msgid "Payment Transaction"
 msgstr "Transaction de paiement"
 
-#. module: payment_multisafepay
+#. module: payment_multisafepay_official
 #. odoo-python
-#: code:addons/payment_multisafepay/controllers/main.py:0
+#: code:addons/payment_multisafepay_official/controllers/main.py:0
 msgid "Payment provider not found."
 msgstr "Fournisseur de paiement introuvable."
 
-#. module: payment_multisafepay
+#. module: payment_multisafepay_official
 #. odoo-python
-#: code:addons/payment_multisafepay/controllers/main.py:0
+#: code:addons/payment_multisafepay_official/controllers/main.py:0
 msgid "Payment reference is missing. Please try again."
 msgstr "La référence de paiement est manquante. Veuillez réessayer."
 
-#. module: payment_multisafepay
+#. module: payment_multisafepay_official
 #. odoo-python
-#: code:addons/payment_multisafepay/models/payment_transaction.py:0
+#: code:addons/payment_multisafepay_official/models/payment_transaction.py:0
 msgid ""
 "Refund amount exceeds available amount.\n"
 "\n"
@@ -196,15 +196,15 @@ msgstr ""
 "\n"
 "Veuillez ajuster le montant du remboursement."
 
-#. module: payment_multisafepay
+#. module: payment_multisafepay_official
 #. odoo-python
-#: code:addons/payment_multisafepay/models/payment_transaction.py:0
+#: code:addons/payment_multisafepay_official/models/payment_transaction.py:0
 msgid "Refund failed at MultiSafepay: %s\n"
 msgstr "Le remboursement a échoué chez MultiSafepay : %s\n"
 
-#. module: payment_multisafepay
+#. module: payment_multisafepay_official
 #. odoo-python
-#: code:addons/payment_multisafepay/models/payment_transaction.py:0
+#: code:addons/payment_multisafepay_official/models/payment_transaction.py:0
 msgid ""
 "Refunds can only be processed from a refund transaction linked to an "
 "original payment transaction."
@@ -212,8 +212,8 @@ msgstr ""
 "Les remboursements ne peuvent être traités qu'à partir d'une transaction de remboursement liée à une "
 "transaction de paiement d'origine."
 
-#. module: payment_multisafepay
-#: model:ir.model.fields,help:payment_multisafepay.field_payment_method__only_multisafepay
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,help:payment_multisafepay_official.field_payment_method__only_multisafepay
 msgid ""
 "Technical field to identify if this payment method has MultiSafepay as one "
 "of its providers."
@@ -221,8 +221,8 @@ msgstr ""
 "Champ technique pour identifier si ce mode de paiement a MultiSafepay comme l'un "
 "de ses fournisseurs."
 
-#. module: payment_multisafepay
-#: model:ir.model.fields,help:payment_multisafepay.field_payment_provider__multisafepay_api_key
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,help:payment_multisafepay_official.field_payment_provider__multisafepay_api_key
 msgid ""
 "The API key for the Multisafepay account. This is used to authenticate "
 "requests to the Multisafepay API."
@@ -230,13 +230,13 @@ msgstr ""
 "La clé API pour le compte Multisafepay. Elle est utilisée pour authentifier "
 "les requêtes vers l'API Multisafepay."
 
-#. module: payment_multisafepay
-#: model:ir.model.fields,help:payment_multisafepay.field_payment_method__main_currency_id
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,help:payment_multisafepay_official.field_payment_method__main_currency_id
 msgid "The main currency of the first provider linked to this payment method."
 msgstr "La devise principale du premier fournisseur lié à ce mode de paiement."
 
-#. module: payment_multisafepay
-#: model:ir.model.fields,help:payment_multisafepay.field_payment_method__maximum_amount
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,help:payment_multisafepay_official.field_payment_method__maximum_amount
 msgid ""
 "The maximum payment amount in EUR that this payment provider is available "
 "for. Leave 0 to make it available for any payment amount."
@@ -244,8 +244,8 @@ msgstr ""
 "Le montant de paiement maximum en EUR pour lequel ce fournisseur de paiement est disponible. "
 "Laisser 0 pour le rendre disponible pour tout montant de paiement."
 
-#. module: payment_multisafepay
-#: model:ir.model.fields,help:payment_multisafepay.field_payment_method__minimum_amount
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,help:payment_multisafepay_official.field_payment_method__minimum_amount
 msgid ""
 "The minimum payment amount in EUR that this payment provider is available "
 "for. Leave 0 to make it available for any payment amount."
@@ -253,14 +253,14 @@ msgstr ""
 "Le montant de paiement minimum en EUR pour lequel ce fournisseur de paiement est disponible. "
 "Laisser 0 pour le rendre disponible pour tout montant de paiement."
 
-#. module: payment_multisafepay
-#: model:ir.model.fields,help:payment_multisafepay.field_payment_provider__code
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,help:payment_multisafepay_official.field_payment_provider__code
 msgid "The technical code of this payment provider."
 msgstr "Le code technique de ce fournisseur de paiement."
 
-#. module: payment_multisafepay
+#. module: payment_multisafepay_official
 #. odoo-python
-#: code:addons/payment_multisafepay/controllers/main.py:0
+#: code:addons/payment_multisafepay_official/controllers/main.py:0
 msgid ""
 "There was a problem processing your payment. Possible reasons could be: "
 "\"insufficient funds\", or \"verification failed\"."
@@ -268,9 +268,9 @@ msgstr ""
 "Un problème est survenu lors du traitement de votre paiement. Les raisons possibles pourraient être : "
 "\"fonds insuffisants\", ou \"échec de la vérification\"."
 
-#. module: payment_multisafepay
+#. module: payment_multisafepay_official
 #. odoo-python
-#: code:addons/payment_multisafepay/models/payment_transaction.py:0
+#: code:addons/payment_multisafepay_official/models/payment_transaction.py:0
 msgid ""
 "This order has already been fully refunded.\n"
 "\n"
@@ -288,89 +288,89 @@ msgstr ""
 "\n"
 "Aucun remboursement supplémentaire ne peut être traité."
 
-#. module: payment_multisafepay
+#. module: payment_multisafepay_official
 #. odoo-python
-#: code:addons/payment_multisafepay/controllers/main.py:0
+#: code:addons/payment_multisafepay_official/controllers/main.py:0
 msgid "Transaction amount is missing or invalid."
 msgstr "Le montant de la transaction est manquant ou invalide."
 
-#. module: payment_multisafepay
+#. module: payment_multisafepay_official
 #. odoo-python
-#: code:addons/payment_multisafepay/controllers/main.py:0
+#: code:addons/payment_multisafepay_official/controllers/main.py:0
 msgid "Transaction currency is missing or invalid."
 msgstr "La devise de la transaction est manquante ou invalide."
 
-#. module: payment_multisafepay
+#. module: payment_multisafepay_official
 #. odoo-python
-#: code:addons/payment_multisafepay/controllers/main.py:0
+#: code:addons/payment_multisafepay_official/controllers/main.py:0
 msgid "Transaction not found. Please refresh and try again."
 msgstr "Transaction introuvable. Veuillez actualiser et réessayer."
 
-#. module: payment_multisafepay
+#. module: payment_multisafepay_official
 #. odoo-python
-#: code:addons/payment_multisafepay/controllers/main.py:0
+#: code:addons/payment_multisafepay_official/controllers/main.py:0
 msgid "Transaction reference is missing."
 msgstr "La référence de la transaction est manquante."
 
-#. module: payment_multisafepay
-#: model_terms:payment.provider,auth_msg:payment_multisafepay.payment_provider_multisafepay
+#. module: payment_multisafepay_official
+#: model_terms:payment.provider,auth_msg:payment_multisafepay_official.payment_provider_multisafepay
 msgid "Your payment has been authorized."
 msgstr "Votre paiement a été autorisé."
 
-#. module: payment_multisafepay
-#: model_terms:payment.provider,cancel_msg:payment_multisafepay.payment_provider_multisafepay
+#. module: payment_multisafepay_official
+#: model_terms:payment.provider,cancel_msg:payment_multisafepay_official.payment_provider_multisafepay
 msgid "Your payment has been cancelled."
 msgstr "Votre paiement a été annulé."
 
-#. module: payment_multisafepay
-#: model_terms:payment.provider,pending_msg:payment_multisafepay.payment_provider_multisafepay
+#. module: payment_multisafepay_official
+#: model_terms:payment.provider,pending_msg:payment_multisafepay_official.payment_provider_multisafepay
 msgid "Your payment has been processed but is waiting for approval."
 msgstr "Votre paiement a été traité mais est en attente d'approbation."
 
-#. module: payment_multisafepay
-#: model_terms:payment.provider,done_msg:payment_multisafepay.payment_provider_multisafepay
+#. module: payment_multisafepay_official
+#: model_terms:payment.provider,done_msg:payment_multisafepay_official.payment_provider_multisafepay
 msgid "Your payment has been processed."
 msgstr "Votre paiement a été traité."
 
-#. module: payment_multisafepay
-#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_provider__multisafepay_validate_shopping_cart
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,field_description:payment_multisafepay_official.field_payment_provider__multisafepay_validate_shopping_cart
 msgid "Validate Shopping Cart"
 msgstr "Valider le panier"
 
-#. module: payment_multisafepay
-#: model:ir.model.fields,help:payment_multisafepay.field_payment_provider__multisafepay_validate_shopping_cart
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,help:payment_multisafepay_official.field_payment_provider__multisafepay_validate_shopping_cart
 msgid ""
 "Ensures the shopping cart items and taxes match the total order amount according to MultiSafepay's rounding rules."
 msgstr "Assure que les articles du panier et les taxes correspondent au montant total de la commande selon les règles d'arrondi de MultiSafepay."
 
-#. module: payment_multisafepay
-#: model_terms:ir.ui.view,arch_db:payment_multisafepay.payment_provider_form_multisafepay
+#. module: payment_multisafepay_official
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_official.payment_provider_form_multisafepay
 msgid "Advanced"
 msgstr "Avancé"
 
-#. module: payment_multisafepay
-#: model:ir.model.fields,field_description:payment_multisafepay.field_payment_provider__multisafepay_active_shopping_cart
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,field_description:payment_multisafepay_official.field_payment_provider__multisafepay_active_shopping_cart
 msgid "BNPL Support"
 msgstr "Support BNPL"
 
-#. module: payment_multisafepay
-#: model:ir.model.fields,help:payment_multisafepay.field_payment_provider__multisafepay_active_shopping_cart
+#. module: payment_multisafepay_official
+#: model:ir.model.fields,help:payment_multisafepay_official.field_payment_provider__multisafepay_active_shopping_cart
 msgid ""
 "Activate this option to show the cart items on the MultiSafepay payment page, which is required to support BNPL. Note: If disabled, the payment methods that require a shopping cart and are commonly known as BNPL won't work: Riverty - Afterpay, in3, Klarna and Billink."
 msgstr "Activez cette option pour afficher les articles du panier sur la page de paiement MultiSafepay, ce qui est nécessaire pour le support BNPL. Remarque : Si désactivé, les méthodes de paiement qui nécessitent un panier et généralement appelées BNPL ne fonctionneront pas : Riverty - Afterpay, in3, Klarna et Billink."
 
-#. module: payment_multisafepay
+#. module: payment_multisafepay_official
 #. odoo-python
-#: code:addons/payment_multisafepay/controllers/main.py:0
+#: code:addons/payment_multisafepay_official/controllers/main.py:0
 msgid "There was a problem processing your payment."
 msgstr "Un problème est survenu lors du traitement de votre paiement."
 
-#. module: payment_multisafepay
-#: model_terms:ir.ui.view,arch_db:payment_multisafepay.payment_provider_form_multisafepay
+#. module: payment_multisafepay_official
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_official.payment_provider_form_multisafepay
 msgid "Warning:"
 msgstr "Attention :"
 
-#. module: payment_multisafepay
-#: model_terms:ir.ui.view,arch_db:payment_multisafepay.payment_provider_form_multisafepay
+#. module: payment_multisafepay_official
+#: model_terms:ir.ui.view,arch_db:payment_multisafepay_official.payment_provider_form_multisafepay
 msgid "If disabled, the payment methods that require a shopping cart and are known as BNPL won't work: Riverty - Afterpay, in3, Klarna and Billink."
 msgstr "Si désactivé, les méthodes de paiement qui nécessitent un panier et appelées BNPL ne fonctionneront pas : Riverty - Afterpay, in3, Klarna et Billink."

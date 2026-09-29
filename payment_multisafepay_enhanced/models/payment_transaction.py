@@ -5,7 +5,7 @@
 
 """
 ENHANCED MODULE: Adds refund reason functionality to MultiSafepay payment transactions.
-This module EXTENDS payment_multisafepay (CORE) by adding custom refund reason tracking.
+This module EXTENDS payment_multisafepay_official (CORE) by adding custom refund reason tracking.
 """
 
 import logging
@@ -18,7 +18,7 @@ _logger = logging.getLogger(__name__)
 class PaymentTransaction(models.Model):
     """Extend payment.transaction to add refund reason tracking (ENHANCED feature).
 
-    This enhanced model extends the CORE payment_multisafepay functionality by adding
+    This enhanced model extends the CORE payment_multisafepay_official functionality by adding
     refund reason tracking for MultiSafepay transactions, allowing better audit trails
     and customer communication during refund operations.
     """
