@@ -49,39 +49,18 @@ class PaymentMethod(models.Model):
     # ENHANCED: OVERRIDE CORE METHOD
     # ===================================
 
-    def _get_compatible_payment_methods(
-        self,
-        provider_ids,
-        partner_id,
-        currency_id=None,
-        force_tokenization=False,
-        is_express_checkout=False,
-        report=None,
-        **kwargs,
-    ):
+    # migracion_19_20: extends _apply_multisafepay_filters, which replaces _get_compatible_payment_methods (removed in Odoo 20).
+    def _apply_multisafepay_filters(self, report=None, **kwargs):
         """Extend CORE method to add pricelist filtering for MultiSafepay methods.
 
-        :param provider_ids: List of provider IDs to filter payment methods
-        :param partner_id: ID of the partner for whom payment methods are fetched
-        :param currency_id: ID of the currency for filtering
-        :param force_tokenization: Whether tokenization is forced
-        :param is_express_checkout: Whether this is for express checkout
         :param report: Dictionary to store availability report information
-        :param kwargs: Additional keyword arguments
+        :param kwargs: Payment context forwarded by Odoo (sale_order_id, pricelist_id, etc.)
         :return: Filtered payment methods based on criteria
         :rtype: recordset
         """
 
-        # Call CORE method first (handles amount filtering)
-        payment_methods = super()._get_compatible_payment_methods(
-            provider_ids,
-            partner_id,
-            currency_id,
-            force_tokenization,
-            is_express_checkout,
-            report=report,
-            **kwargs,
-        )
+        # Call CORE method first (handles amount and BNPL filtering)
+        payment_methods = super()._apply_multisafepay_filters(report=report, **kwargs)
 
         # ENHANCED: Apply pricelist filtering - try to get pricelist from multiple sources
         pricelist = self._get_pricelist_from_context(kwargs)
@@ -268,12 +247,13 @@ class PaymentMethod(models.Model):
         :rtype: recordset
         """
         # Get standard compatible methods
-        methods = self._get_compatible_payment_methods(
-            provider_ids,
+        # migracion_19_20: _get_compatible_payment_methods was removed from payment.method; the providers find their methods now.
+        providers = self.env["payment.provider"].browse(provider_ids)
+        methods = providers._find_available_payment_methods(
             partner_id,
-            currency_id,
-            force_tokenization,
-            is_express_checkout,
+            currency_id=currency_id,
+            force_tokenization=force_tokenization,
+            is_express_checkout=is_express_checkout,
             **kwargs,
         )
 
