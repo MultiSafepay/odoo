@@ -23,7 +23,9 @@
 
 import {_t} from "@web/core/l10n/translation";
 import {PaymentInterface} from "@point_of_sale/app/utils/payment/payment_interface";
-import {register_payment_method} from "@point_of_sale/app/services/pos_store";
+// #migracion_19_20: register_payment_method() was removed from pos_store in Odoo 20; the
+// interface is now registered in the "pos_payment_providers" registry (end of this file).
+import {registry} from "@web/core/registry";
 import {
     AlertDialog,
     ConfirmationDialog,
@@ -217,8 +219,8 @@ export function isRefundableMspCloudPaymentLine(paymentLine) {
         paymentLine &&
             paymentLine.amount > 0 &&
             !paymentLine.is_change &&
-            paymentLine.payment_method_id?.use_payment_terminal ===
-                "multisafepay_cloud" &&
+            // #migracion_19_20: use_payment_terminal was replaced by payment_provider in Odoo 20.
+            paymentLine.payment_method_id?.payment_provider === "multisafepay_cloud" &&
             (paymentLine.transaction_id || paymentLine.id)
     );
 }
@@ -277,6 +279,8 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
      */
     setup() {
         super.setup(...arguments);
+        // #migracion_19_20: Odoo 20 core no longer reads supports_reversals nor calls
+        // sendPaymentReversal(); both are kept only for API parity with Odoo 19.
         this.supports_reversals = true;
         this.dialog = this.env.services.dialog;
         this.orm = this.env.services.orm;
@@ -320,12 +324,15 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
      * - Assembles customer, cart, and tip payloads.
      * - Invokes backend RPC `multisafepay_cloud_rpc_payment_request`.
      *
-     * @param {String} uuid - Unique payment line identifier.
+     * @param {Object} paymentLine - The payment line record to process.
      * @returns {Promise<boolean>} Resolves to true if payment succeeded.
      */
-    async sendPaymentRequest(uuid) {
+    async sendPaymentRequest(paymentLine) {
         await super.sendPaymentRequest(...arguments);
 
+        // #migracion_19_20: Odoo 20 passes the payment line record to sendPaymentRequest();
+        // Odoo 19 passed its UUID. The UUID keeps keying the internal resolvers below.
+        const uuid = paymentLine?.uuid;
         const order = this.pos.getOrder();
         const line = order?.getPaymentlineByUuid(uuid);
         if (!line) {
@@ -405,11 +412,14 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
      * - Invokes backend RPC `multisafepay_cloud_rpc_cancel_payment_request`.
      * - Resolves checkout promise to false and resets line status to 'retry'.
      *
-     * @param {Object} order - The active POS order.
-     * @param {String} uuid - Unique payment line identifier.
+     * @param {Object} paymentLine - The payment line record to cancel.
      * @returns {Promise<boolean>} Resolves to true if cancel request succeeded.
      */
-    async sendPaymentCancel(order, uuid) {
+    async sendPaymentCancel(paymentLine) {
+        // #migracion_19_20: Odoo 20 calls sendPaymentCancel(line); Odoo 19 called
+        // sendPaymentCancel(order, uuid). The order is resolved from the POS store.
+        const order = this.pos.getOrder();
+        const uuid = paymentLine?.uuid;
         return new Promise((resolve) => {
             // Ask cashier confirmation before canceling terminal prompt
             this.dialog.add(ConfirmationDialog, {
@@ -485,6 +495,9 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
      * Trigger a transaction reversal (void/cancellation) on the terminal for an incomplete payment.
      *
      * Invokes backend RPC `multisafepay_cloud_rpc_reverse_payment_request`.
+     *
+     * #migracion_19_20: Odoo 20 core no longer calls sendPaymentReversal(); the method is
+     * kept for API parity with Odoo 19 and for custom callers.
      *
      * @param {String} uuid - Unique payment line identifier.
      * @returns {Promise<boolean>} Resolves to true if reversal succeeded.
@@ -972,4 +985,8 @@ export class PaymentMultiSafepayCloud extends PaymentInterface {
     }
 }
 
-register_payment_method("multisafepay_cloud", PaymentMultiSafepayCloud);
+// #migracion_19_20: register_payment_method("multisafepay_cloud", ...) was replaced by the
+// "pos_payment_providers" registry; the key is the pos.payment.method payment_provider value.
+registry
+    .category("pos_payment_providers")
+    .add("multisafepay_cloud", PaymentMultiSafepayCloud);

@@ -11,9 +11,13 @@
         <field name="model">pos.payment.method</field>
         <field name="inherit_id" ref="point_of_sale.pos_payment_method_view_form" />
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='use_payment_terminal']" position="after">
+            <!--
+                migracion_19_20: use_payment_terminal was replaced by payment_provider in Odoo 20,
+                so the xpath anchor and every invisible/required condition use payment_provider.
+            -->
+            <xpath expr="//field[@name='payment_provider']" position="after">
                 <group
-                    invisible="use_payment_terminal != 'multisafepay_cloud'"
+                    invisible="payment_provider != 'multisafepay_cloud'"
                     colspan="2"
                     col="2"
                     class="mt-3"
@@ -21,26 +25,24 @@
                     <field
                         name="msp_cloud_terminal_id"
                         placeholder="e.g. 1083921"
-                        required="use_payment_terminal == 'multisafepay_cloud'"
+                        required="payment_provider == 'multisafepay_cloud'"
                     />
                     <field
                         name="msp_cloud_terminal_group_id"
                         placeholder="e.g. group_main"
-                        required="use_payment_terminal == 'multisafepay_cloud'"
+                        required="payment_provider == 'multisafepay_cloud'"
                     />
                     <field
                         name="msp_cloud_terminal_group_api_key"
                         password="True"
                         placeholder="e.g. api_key_XXXXXXXX"
-                        required="use_payment_terminal == 'multisafepay_cloud'"
+                        required="payment_provider == 'multisafepay_cloud'"
                     />
                     <field name="msp_cloud_validate_cart" invisible="1" />
                 </group>
-                <group
-                    invisible="use_payment_terminal != 'multisafepay_cloud'"
-                    colspan="2"
-                >
-                    <div class="alert alert-warning mt-2 mb-2 w-100">
+                <group invisible="payment_provider != 'multisafepay_cloud'" colspan="2">
+                    <!-- migracion_19_20: Odoo 20 view validation warns when an alert has no role; status keeps it informational. -->
+                    <div class="alert alert-warning mt-2 mb-2 w-100" role="status">
                         <i class="fa fa-exclamation-triangle me-2" />
                         <strong>Cloud POS reference strategy.</strong>
                         Cloud POS uses the POS receipt reference as the remote order ID and suffixes retries as reference-1, reference-2, etc.

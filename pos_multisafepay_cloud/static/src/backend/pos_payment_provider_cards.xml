@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
+    <!--
+        migracion_19_20: the Odoo 20 widget lists providers from the Python
+        get_payment_providers() (overridden in pos.payment.method) and exposes them as
+        `provider.provider` instead of `provider.selection`. Only the card icon is
+        overridden here, because the Cloud POS icon lives in this module.
+    -->
     <t t-inherit="point_of_sale.PosPaymentProviderCards" t-inherit-mode="extension">
         <xpath expr="//img" position="attributes">
             <attribute
                 name="t-att-src"
-            >provider.selection === 'multisafepay_cloud' ? '/pos_multisafepay_cloud/static/description/pos_payment_icon.png' : `/point_of_sale/static/img/providers/${provider.selection}.png`</attribute>
+            >provider.provider === 'multisafepay_cloud' ? '/pos_multisafepay_cloud/static/description/pos_payment_icon.png' : `/point_of_sale/static/img/providers/${provider.provider}.png`</attribute>
         </xpath>
     </t>
 </templates>

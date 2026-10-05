@@ -5,7 +5,6 @@
 
 """Cloud POS payment method configuration and SDK helpers."""
 
-import base64
 import json
 import logging
 import os
@@ -26,7 +25,8 @@ from odoo.exceptions import ValidationError
 # Odoo 18 -> 19:
 # - `odoo.modules.module.get_module_resource` was removed in 19.0; resolve
 #   in-module resource paths with `odoo.tools.file_path` instead.
-from odoo.tools import file_path
+# migracion_19_20: BinaryBytes is required to assign image data to Binary/Image fields.
+from odoo.tools import BinaryBytes, file_path
 
 from ..helpers.error_payload import (
     _ErrorPayload,
@@ -147,8 +147,9 @@ class PosPaymentMethod(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
+            # migracion_19_20: use_payment_terminal was removed in Odoo 20; the terminal is picked with payment_provider.
             if vals.get(
-                "use_payment_terminal"
+                "payment_provider"
             ) == MSP_CLOUD_PAYMENT_TERMINAL_CODE and not vals.get("image"):
                 try:
                     icon_path = file_path(
@@ -158,11 +159,13 @@ class PosPaymentMethod(models.Model):
                     icon_path = None
                 if icon_path:
                     with open(icon_path, "rb") as icon_file:
-                        vals["image"] = base64.b64encode(icon_file.read())
+                        # migracion_19_20: Image fields reject base64 bytes in Odoo 20; assign a BinaryBytes value.
+                        vals["image"] = BinaryBytes(icon_file.read())
         return super().create(vals_list)
 
+    # migracion_19_20: use_payment_terminal was replaced by payment_provider in Odoo 20.
     @api.constrains(
-        "use_payment_terminal",
+        "payment_provider",
         "active",
         "msp_cloud_terminal_id",
         "msp_cloud_terminal_group_id",
@@ -207,7 +210,7 @@ class PosPaymentMethod(models.Model):
                 [
                     ("id", "!=", payment_method.id),
                     ("active", "=", True),
-                    ("use_payment_terminal", "=", MSP_CLOUD_PAYMENT_TERMINAL_CODE),
+                    ("payment_provider", "=", MSP_CLOUD_PAYMENT_TERMINAL_CODE),
                     ("msp_cloud_terminal_id", "=", terminal_id),
                     ("msp_cloud_terminal_group_id", "=", terminal_group_id),
                 ],
@@ -228,20 +231,39 @@ class PosPaymentMethod(models.Model):
                 )
 
         for payment_method in self:
-            if payment_method.use_payment_terminal != MSP_CLOUD_PAYMENT_TERMINAL_CODE:
+            if payment_method.payment_provider != MSP_CLOUD_PAYMENT_TERMINAL_CODE:
                 continue
 
             check_group_key_configured(payment_method)
             check_terminal_configuration_unique(payment_method)
 
-    def _get_payment_terminal_selection(self):
-        """Add MultiSafepay Cloud POS to Odoo's payment terminal selection.
+    # migracion_19_20: _get_payment_terminal_selection was replaced by _get_terminal_provider_selection in Odoo 20.
+    def _get_terminal_provider_selection(self):
+        """Add MultiSafepay Cloud POS to Odoo's terminal provider selection.
 
         :return: Terminal options list.
         :rtype: list[tuple[str, str]]
         """
-        return super()._get_payment_terminal_selection() + [
+        return super()._get_terminal_provider_selection() + [
             MSP_CLOUD_PAYMENT_TERMINAL_SELECTION
+        ]
+
+    # migracion_19_20: Odoo 20 builds the provider cards of the payment method form
+    # from get_payment_providers(); it replaces the 19 JS patch of the cards widget.
+    @api.model
+    def get_payment_providers(self):
+        """Add MultiSafepay Cloud POS to the provider cards of the payment method form.
+
+        :return: Provider descriptors used by the provider cards widget.
+        :rtype: list[dict]
+        """
+        return super().get_payment_providers() + [
+            {
+                "type": "terminal",
+                "provider": MSP_CLOUD_PAYMENT_TERMINAL_CODE,
+                "module": "pos_multisafepay_cloud",
+                "name": MSP_CLOUD_PAYMENT_TERMINAL_SELECTION[1],
+            }
         ]
 
     def multisafepay_cloud_rpc_payment_request(self, data):
@@ -410,9 +432,9 @@ class PosPaymentMethod(models.Model):
             )
             plugin = (
                 Plugin()
-                .add_plugin_version("2.5.0")
+                .add_plugin_version("1.0.0")
                 .add_shop("Odoo")
-                .add_shop_version("19.0")
+                .add_shop_version("20.0")
                 .add_shop_root_url(self.get_base_url())
             )
             order_request = (

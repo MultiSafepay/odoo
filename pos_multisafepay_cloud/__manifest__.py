@@ -5,7 +5,7 @@
     "website": "https://www.multisafepay.com/",
     "license": "AGPL-3",
     "category": "Point of Sale",
-    "version": "19.0.2.5.0",
+    "version": "20.0.1.0.0",
     "application": True,
     "depends": [
         "point_of_sale",
@@ -13,7 +13,9 @@
     ],
     "external_dependencies": {"python": ["multisafepay==3.1.0", "requests"]},
     "data": [
-        "security/ir.model.access.csv",
+        # migracion_19_20: ir.model.access was replaced by ir.access in Odoo 20; the CSV
+        # is named ir.access.csv and uses the operation/domain columns.
+        "security/ir.access.csv",
         "views/pos_payment_method_views.xml",
     ],
     "assets": {

@@ -29,18 +29,22 @@ class PosPayment(models.Model):
     )
 
     @api.model
-    def _load_pos_data_fields(self, config_id):
+    def _load_pos_data_fields(self, config):
         """Load POS payment fields needed to select refundable terminal payments.
 
         These fields feed the POS refund UI and let the cashier pick the original
         MultiSafepay Cloud payment line. Refund execution is still revalidated by
         the backend tracking model before calling MultiSafepay.
 
-        :param int config_id: POS configuration id being loaded.
+        :param pos.config config: POS configuration being loaded.
         :return: Field names loaded for ``pos.payment`` records in the POS cache.
         :rtype: list[str]
         """
-        base_fields = super()._load_pos_data_fields(config_id)
+        base_fields = super()._load_pos_data_fields(config)
+        # migracion_19_20: in Odoo 20 an empty list means "load every field", so the
+        # required fields are already included; extending it would restrict the load.
+        if not base_fields:
+            return base_fields
         required_fields = [
             "amount",
             "is_change",
