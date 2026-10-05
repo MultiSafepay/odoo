@@ -9,6 +9,20 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [20.0.1.0.0] - 2026-10-02
+### Added
+- Initial baseline support for Odoo 20.0
+- Rename core payment module references to payment_multisafepay_official
+- Tests for the provider sync, queued payment processing, the redirect, webhook and status routes, pricelist filters and the Cloud POS provider mechanism
+- Refund synchronization from the webhook (POST and GET): the order's `related_transactions` are reconciled with the Odoo refund transactions, so refunds made in the MultiSafepay panel are created in Odoo, refunds requested from Odoo are completed and repeated notifications do nothing. The source transaction is locked while a refund is requested so that a webhook arriving first does not duplicate it
+
+### Changed
+- Adapt the payment modules to the Odoo 20 payment refactor: `provider_id` on payment methods, provider mode from `is_live`, `_find_available_payment_methods`, queued payment processing (`_record`/`_apply_updates`) and `BinaryBytes` images
+- Replace APIs removed in Odoo 20 in the redirect flow: `ir.config_parameter.get_param` is now `get_str` and the `t-esc` QWeb directive is now `t-out`
+- The refund transaction stores the MultiSafepay `refund_id` as `provider_reference` (it used the paid order's `transaction_id`), set when the refund is requested and not only when Odoo 20 processes the queued data
+- Adapt the Cloud POS module to the Odoo 20 POS: `payment_provider` replaces `use_payment_terminal`, payment interface registered in the `pos_payment_providers` registry, line-based `sendPaymentRequest`/`sendPaymentCancel`, provider cards from `get_payment_providers` and `ir.access.csv` replaces `ir.model.access.csv`
+- Every Odoo 19 to 20 adaptation is marked in the code with a `migracion_19_20` comment
+
 ## [19.0.2.5.0] - 2026-08-05
 
 ### Added
