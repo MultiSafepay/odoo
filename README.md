@@ -4,7 +4,7 @@
 
 # MultiSafepay Official Modules for Odoo
 
-[![Odoo Version](https://img.shields.io/badge/Odoo-19.0-purple?style=for-the-badge)](https://www.odoo.com/)
+[![Odoo Version](https://img.shields.io/badge/Odoo-20.0-purple?style=for-the-badge)](https://www.odoo.com/)
 
 ## About MultiSafepay
 
@@ -15,7 +15,7 @@ MultiSafepay is a Dutch payment services provider, which takes care of contracts
 
 Before installing the MultiSafepay module suite, ensure you have:
 
-- Odoo 19.0 or compatible version
+- Odoo 20.0 or compatible version
 - Active MultiSafepay account. Consider a test account first. [Sign up here](https://testmerchant.multisafepay.com/signup) if you don't have one.
 - API Credentials from your MultiSafepay Control Panel
 - Python 3.9+
@@ -142,4 +142,4 @@ Are you a developer interested in working at MultiSafepay? Check out our [job op
 
 ## License
 
-This project is licensed under the terms specified in the [LICENSE](https://github.com/MultiSafepay/odoo/blob/19.0/LICENSE.md) file in the root directory of this repository.
+This project is licensed under the terms specified in the [LICENSE](https://github.com/MultiSafepay/odoo/blob/20.0/LICENSE.md) file in the root directory of this repository.

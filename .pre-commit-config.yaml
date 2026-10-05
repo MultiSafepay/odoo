@@ -52,7 +52,8 @@ repos:
       - id: oca-gen-addon-readme
         args:
           - --addons-dir=.
-          - --branch=19.0
+          # migracion_19_20: README links and issue templates point to the 20.0 branch.
+          - --branch=20.0
           - --org-name=
           - --repo-name=multisafepay
           - --if-source-changed
