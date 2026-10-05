@@ -34,6 +34,7 @@
     </template>
 
     <!-- Extend payment status template to show errors (uses payment module, not website_sale) -->
+    <!-- migracion_19_20: Odoo 20 QWeb no longer supports t-esc, so every t-esc below is t-out. -->
     <template
         id="payment_status_error_message"
         inherit_id="payment.payment_status"
@@ -61,7 +62,7 @@
                 <strong><i class="fa fa-exclamation-triangle" /> Payment Error</strong>
                 <br />
                 <t
-                    t-esc="request.params.get('message', 'An error occurred. Please try again.')"
+                    t-out="request.params.get('message', 'An error occurred. Please try again.')"
                 />
             </div>
             <!-- Only show for MultiSafepay payment methods -->
@@ -82,7 +83,7 @@
                                 <div>
                                     <small class="fw-bold">Payment Method</small>
                                     <div
-                                        t-esc="request.params.get('payment_method', '').upper()"
+                                        t-out="request.params.get('payment_method', '').upper()"
                                     />
                                 </div>
                             </div>
@@ -93,7 +94,7 @@
                                     <small class="fw-bold">Status</small>
                                     <div>
                                         <span
-                                            t-esc="request.params.get('payment_status', '')"
+                                            t-out="request.params.get('payment_status', '')"
                                         />
                                     </div>
                                 </div>
@@ -105,10 +106,10 @@
                                     <small class="fw-bold">Amount</small>
                                     <div>
                                         <span
-                                            t-esc="request.params.get('amount', '')"
+                                            t-out="request.params.get('amount', '')"
                                         />
                                         <span
-                                            t-esc="request.params.get('currency', '')"
+                                            t-out="request.params.get('currency', '')"
                                         />
                                     </div>
                                 </div>
@@ -123,7 +124,7 @@
                             <small class="text-muted">Transaction ID</small>
                             <div
                                 class="font-monospace small"
-                                t-esc="request.params.get('transaction_id', '')"
+                                t-out="request.params.get('transaction_id', '')"
                             />
                         </div>
                         <div
@@ -133,7 +134,7 @@
                             <small class="text-muted">MultiSafepay ID</small>
                             <div
                                 class="font-monospace small"
-                                t-esc="request.params.get('multisafepay_order_id', '')"
+                                t-out="request.params.get('multisafepay_order_id', '')"
                             />
                         </div>
                     </div>
@@ -152,7 +153,7 @@
                                 <small class="text-muted">Account Holder</small>
                                 <div
                                     class="fw-bold"
-                                    t-esc="request.params.get('account_holder_name', '')"
+                                    t-out="request.params.get('account_holder_name', '')"
                                 />
                             </div>
                             <div
@@ -164,7 +165,7 @@
                                 >External Transaction ID</small>
                                 <div
                                     class="font-monospace small"
-                                    t-esc="request.params.get('external_transaction_id', '')"
+                                    t-out="request.params.get('external_transaction_id', '')"
                                 />
                             </div>
                         </div>
@@ -178,7 +179,7 @@
                             >
                                 <small class="text-muted">Payment Description</small>
                                 <div
-                                    t-esc="request.params.get('payment_description', '')"
+                                    t-out="request.params.get('payment_description', '')"
                                 />
                             </div>
                             <div
@@ -188,7 +189,7 @@
                                 <small class="text-muted">Account ID</small>
                                 <div
                                     class="font-monospace small"
-                                    t-esc="request.params.get('account_id', '')"
+                                    t-out="request.params.get('account_id', '')"
                                 />
                             </div>
                         </div>

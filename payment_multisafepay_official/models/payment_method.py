@@ -36,7 +36,7 @@ class PaymentMethod(models.Model):
         string="Main Currency",
         compute="_compute_main_currency_id",
         store=False,
-        help="The main currency of the first provider linked to this payment method.",
+        help="The main currency of the provider of this payment method.",
     )
 
     minimum_amount = fields.Float(
@@ -58,53 +58,43 @@ class PaymentMethod(models.Model):
     only_multisafepay = fields.Boolean(
         compute="_compute_is_multisafepay",
         store=False,
-        help="Technical field to identify if this payment method has MultiSafepay as one of its providers.",
+        help="Technical field to identify if this payment method belongs to the MultiSafepay provider.",
     )
 
     # ===================================
     # COMPUTE METHODS (ODOO)
     # ===================================
 
-    @api.depends("provider_ids.code")
+    @api.depends("provider_id.code")
     def _compute_is_multisafepay(self):
-        """Compute if this payment method has MultiSafepay as one of its providers.
+        """Compute if this payment method belongs to the MultiSafepay provider.
 
         :return: None
         """
+        # migracion_19_20: payment.method.provider_ids (m2m) became provider_id (m2o) in Odoo 20.
         for method in self:
-            providers = method.provider_ids
-            # Check if ANY provider is MultiSafepay (not just if it's the only one)
-            method.only_multisafepay = any(
-                provider.code == "multisafepay" for provider in providers
-            )
+            method.only_multisafepay = method.provider_id.code == "multisafepay"
 
-    @api.depends("provider_ids.main_currency_id")
+    @api.depends("provider_id.main_currency_id")
     def _compute_main_currency_id(self):
-        """Compute the main currency from the first provider.
+        """Compute the main currency from the provider.
 
         :return: None
         """
+        # migracion_19_20: payment.method.provider_ids (m2m) became provider_id (m2o) in Odoo 20.
         for method in self:
-            provider = method.provider_ids[:1]
-            method.main_currency_id = provider.main_currency_id if provider else False
+            method.main_currency_id = method.provider_id.main_currency_id
 
     # ===================================
     # BUSINESS METHODS (ODOO)
     # ===================================
 
-    def _get_compatible_payment_methods(
-        self,
-        provider_ids,
-        partner_id,
-        currency_id=None,
-        force_tokenization=False,
-        is_express_checkout=False,
-        report=None,
-        **kwargs,
-    ):
-        """Override core method to add amount filtering for MultiSafepay payment methods.
+    # migracion_19_20: replaces payment.method._get_compatible_payment_methods, removed in Odoo 20.
+    def _apply_multisafepay_filters(self, report=None, **kwargs):
+        """Filter payment methods by MultiSafepay amount limits and BNPL support.
 
-        This method extends Odoo's standard payment method filtering to support:
+        Called by `payment.provider._find_available_payment_methods` with the methods
+        found for the available providers. It supports:
 
         - Amount-based filtering (minimum/maximum amount from MultiSafepay API)
         - Availability reporting for debugging
@@ -112,26 +102,13 @@ class PaymentMethod(models.Model):
         .. note::
             Pricelist filtering moved to payment_multisafepay_enhanced module (custom feature)
 
-        :param provider_ids: List of provider IDs to filter payment methods
-        :param partner_id: ID of the partner for whom the payment methods are being fetched
-        :param currency_id: ID of the currency for which the payment methods are being fetched
-        :param force_tokenization: Boolean indicating if tokenization is forced
-        :param is_express_checkout: Boolean indicating if the request is for express checkout
         :param report: Dictionary to store availability report information
-        :param kwargs: Additional keyword arguments (amount, sale_order_id, etc.)
+        :param kwargs: Payment context forwarded by Odoo (amount, sale_order_id, etc.)
         :return: Filtered payment methods based on the provided criteria
         :rtype: recordset of `payment.method`
         """
 
-        payment_methods = super()._get_compatible_payment_methods(
-            provider_ids,
-            partner_id,
-            currency_id,
-            force_tokenization,
-            is_express_checkout,
-            report=report,
-            **kwargs,
-        )
+        payment_methods = self
 
         amount = kwargs.get("amount")
 
@@ -187,35 +164,29 @@ class PaymentMethod(models.Model):
             )
 
         # Apply BNPL filtering if shopping cart is disabled
-        providers = (
-            self.env["payment.provider"].browse(provider_ids)
-            if isinstance(provider_ids, list)
-            else provider_ids
+        # migracion_19_20: a payment method has a single provider now, so the cart setting is read from provider_id.
+        def is_not_bnpl(method):
+            provider = method.provider_id
+            if (
+                provider.code != "multisafepay"
+                or provider.multisafepay_active_shopping_cart
+            ):
+                return True
+            if not method.code.startswith(const.PAYMENT_METHOD_PREFIX):
+                return True
+            clean_code = method.code[len(const.PAYMENT_METHOD_PREFIX) :]
+            return clean_code not in const.BNPL_METHODS
+
+        methods_before_bnpl = payment_methods
+        payment_methods = payment_methods.filtered(is_not_bnpl)
+
+        filtered_out_bnpl = methods_before_bnpl - payment_methods
+        self._report_filtered_methods(
+            report,
+            filtered_out_bnpl,
+            "bnpl",
+            "Shopping cart is disabled, 'Pay After Delivery' (BNPL) methods are unavailable",
         )
-
-        multisafepay_providers = providers.filtered(lambda p: p.code == "multisafepay")
-
-        if any(
-            not getattr(p, "multisafepay_active_shopping_cart", False)
-            for p in multisafepay_providers
-        ):
-            methods_before_bnpl = payment_methods
-
-            def is_not_bnpl(method):
-                if not method.code.startswith(const.PAYMENT_METHOD_PREFIX):
-                    return True
-                clean_code = method.code[len(const.PAYMENT_METHOD_PREFIX) :]
-                return clean_code not in const.BNPL_METHODS
-
-            payment_methods = payment_methods.filtered(is_not_bnpl)
-
-            filtered_out_bnpl = methods_before_bnpl - payment_methods
-            self._report_filtered_methods(
-                report,
-                filtered_out_bnpl,
-                "bnpl",
-                "Shopping cart is disabled, 'Pay After Delivery' (BNPL) methods are unavailable",
-            )
 
         return payment_methods
 
@@ -244,9 +215,9 @@ class PaymentMethod(models.Model):
         # Apply amount filtering only to MultiSafepay methods
         allowed_multisafepay_methods = multisafepay_methods.filtered(
             lambda method: (
-                not method.minimum_amount or amount >= method.minimum_amount
+                (not method.minimum_amount or amount >= method.minimum_amount)
+                and (not method.maximum_amount or amount <= method.maximum_amount)
             )
-            and (not method.maximum_amount or amount <= method.maximum_amount)
         )
 
         # Log filtering information
@@ -300,12 +271,10 @@ class PaymentMethod(models.Model):
             report["payment_methods"][method]["available"] = available
         else:
             # Create new entry
+            # migracion_19_20: Odoo 20 report entries only hold available and reason (supported_providers is gone).
             report["payment_methods"][method] = {
                 "available": available,
                 "reason": reason,
-                "supported_providers": [
-                    (provider, True) for provider in method.provider_ids
-                ],
             }
 
     def _report_filtered_methods(self, report, filtered_methods, filter_type, context):

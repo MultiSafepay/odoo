@@ -15,16 +15,15 @@
                 </group>
             </xpath>
 
-            <xpath expr="//a[@name='action_view_payment_methods']" position="after">
-                <a
-                    invisible="code != 'multisafepay' or code == 'multisafepay' and state == 'disabled'"
+            <!-- migracion_19_20: the action_view_payment_methods link was removed in Odoo 20; the sync button moves to the form header, and state is now active. -->
+            <xpath expr="//header" position="inside">
+                <button
+                    string="Sync Payment Methods"
+                    invisible="code != 'multisafepay' or not active"
                     type="object"
                     name="pull_merchant_payment_methods"
-                    class="btn btn-link pl-2"
-                    role="button"
-                >
-                    <i class="fa fa-refresh" /> Sync Payment Methods
-                </a>
+                    class="btn-secondary"
+                />
             </xpath>
             <xpath expr="//field[@name='allow_tokenization']" position="attributes">
                 <attribute name="readonly">code == 'multisafepay'</attribute>

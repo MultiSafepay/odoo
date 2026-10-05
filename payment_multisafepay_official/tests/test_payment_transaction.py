@@ -14,7 +14,8 @@ class TestPaymentTransaction(TransactionCase):
             {
                 "name": "MultiSafepay Test",
                 "code": "multisafepay",
-                "state": "test",
+                # migracion_19_20: payment.provider.state was removed in Odoo 20, test mode is is_live=False.
+                "is_live": False,
             }
         )
 

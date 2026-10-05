@@ -12,7 +12,11 @@ from multisafepay.transport import RequestsTransport
 from odoo import fields, models
 
 from .. import const
-from ..utils import _get_image_base64, _get_requests_session
+from ..utils import (
+    _get_default_payment_method_image,
+    _get_image_binary,
+    _get_requests_session,
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -67,7 +71,8 @@ class PaymentProvider(models.Model):
         :rtype: bool
         """
 
-        old_states = {record.id: record.state for record in self}
+        # migracion_19_20: payment.provider.state was removed in Odoo 20; the mode is derived from active + is_live.
+        old_states = {record.id: record._get_multisafepay_state() for record in self}
         old_api_keys = {record.id: record.multisafepay_api_key for record in self}
 
         result = super().write(vals)
@@ -77,10 +82,10 @@ class PaymentProvider(models.Model):
         for record in multisafepay_records:
             old_state = old_states.get(record.id)
             old_api_key = old_api_keys.get(record.id)
-            new_state = record.state
+            new_state = record._get_multisafepay_state()
             new_api_key = record.multisafepay_api_key
 
-            state_changed = "state" in vals and old_state != new_state
+            state_changed = old_state != new_state
             api_key_changed = (
                 "multisafepay_api_key" in vals and old_api_key != new_api_key
             )
@@ -149,6 +154,39 @@ class PaymentProvider(models.Model):
             )
         return supported_currencies
 
+    # migracion_19_20: payment.method._get_compatible_payment_methods was removed in Odoo 20; this hook replaces it.
+    def _find_available_payment_methods(
+        self,
+        partner_id,
+        *,
+        currency_id=None,
+        force_tokenization=False,
+        is_express_checkout=False,
+        report=None,
+        **kwargs,
+    ):
+        """Override of `payment` to apply the MultiSafepay amount and BNPL filters.
+
+        :param int partner_id: The partner making the payment, as a `res.partner` id
+        :param int currency_id: The payment currency, as a `res.currency` id
+        :param bool force_tokenization: Whether payment methods must support tokenization
+        :param bool is_express_checkout: Whether payment methods must support express checkout
+        :param dict report: The report into which availability statuses are to be logged
+        :param dict kwargs: The payment context (sale_order_id, etc.)
+        :return: The available payment methods
+        :rtype: recordset of `payment.method`
+        """
+
+        payment_methods = super()._find_available_payment_methods(
+            partner_id,
+            currency_id=currency_id,
+            force_tokenization=force_tokenization,
+            is_express_checkout=is_express_checkout,
+            report=report,
+            **kwargs,
+        )
+        return payment_methods._apply_multisafepay_filters(report=report, **kwargs)
+
     # ===================================
     # ACTION METHODS (ODOO)
     # ===================================
@@ -168,6 +206,18 @@ class PaymentProvider(models.Model):
     # ===================================
     # MULTISAFEPAY - Configuration
     # ===================================
+
+    def _get_multisafepay_state(self):
+        """Return the provider mode: 'disabled', 'test' or 'enabled' (live).
+
+        :return: The mode of the provider
+        :rtype: str
+        """
+        # migracion_19_20: payment.provider.state was removed in Odoo 20; the mode is derived from active + is_live.
+        self.ensure_one()
+        if not self.active:
+            return "disabled"
+        return "enabled" if self.is_live else "test"
 
     def _on_multisafepay_config_changed(
         self, old_state, new_state, state_changed, new_api_key, api_key_changed
@@ -223,7 +273,7 @@ class PaymentProvider(models.Model):
         """Get MultiSafepay SDK instance for API operations.
 
         Creates an SDK client configured with the provider's API key and environment
-        (production or test mode based on provider state).
+        (production or test mode based on provider mode).
 
         :return: Configured MultiSafepay SDK instance for making API requests
         :rtype: Sdk
@@ -232,9 +282,10 @@ class PaymentProvider(models.Model):
         custom_session = _get_requests_session()
         transport = RequestsTransport(session=custom_session)
 
+        # migracion_19_20: state == "enabled" is now active and is_live (see _get_multisafepay_state).
         return Sdk(
             api_key=self.multisafepay_api_key,
-            is_production=(self.state == "enabled"),
+            is_production=(self._get_multisafepay_state() == "enabled"),
             transport=transport,
         )
 
@@ -262,7 +313,8 @@ class PaymentProvider(models.Model):
             .with_context(active_test=False)
             .search(
                 [
-                    ("provider_ids", "in", [self.id]),
+                    # migracion_19_20: payment.method.provider_ids (m2m) became provider_id (m2o).
+                    ("provider_id", "=", self.id),
                     ("code", "=like", f"{const.PAYMENT_METHOD_PREFIX}%"),
                 ]
             )
@@ -298,10 +350,11 @@ class PaymentProvider(models.Model):
             "MultiSafepay provider disabled - deactivating all associated payment methods"
         )
 
+        # migracion_19_20: payment.method.provider_ids (m2m) became provider_id (m2o).
         multisafepay_methods = (
             self.env["payment.method"]
             .with_context(active_test=False)
-            .search([("provider_ids", "in", [self.id])])
+            .search([("provider_id", "=", self.id)])
         )
 
         if not multisafepay_methods:
@@ -375,8 +428,10 @@ class PaymentProvider(models.Model):
                 country_ids = self._get_country_ids(gateway.allowed_countries)
                 currency_ids = self._get_currency_ids(gateway.allowed_currencies)
 
+                # migracion_19_20: methods belong to one provider in Odoo 20, so only this provider's methods are matched.
                 existing = payment_method.with_context(active_test=False).search(
-                    [("code", "=", unique_code)], limit=1
+                    [("provider_id", "=", self.id), ("code", "=", unique_code)],
+                    limit=1,
                 )
 
                 # Values that are ALWAYS updated from API
@@ -389,6 +444,7 @@ class PaymentProvider(models.Model):
                 # New methods are disabled by default
                 creation_only_vals = {
                     "active": False,
+                    "provider_id": self.id,
                 }
 
                 # Optional values from API (update if present)
@@ -407,19 +463,21 @@ class PaymentProvider(models.Model):
                     api_vals["supported_currency_ids"] = [(6, 0, currency_ids)]
 
                 if gateway.icon_urls and gateway.icon_urls.large:
-                    api_vals["image"] = _get_image_base64(url=gateway.icon_urls.large)
+                    gateway_image = _get_image_binary(url=gateway.icon_urls.large)
+                    if gateway_image:
+                        api_vals["image"] = gateway_image
 
                 if not existing:
+                    # migracion_19_20: payment.method.image is required in Odoo 20, so fall back to the module icon.
+                    if "image" not in api_vals:
+                        api_vals["image"] = _get_default_payment_method_image()
                     # Use all values: api_vals and creation_only_vals
                     main_method = payment_method.create(
                         {**api_vals, **creation_only_vals}
                     )
-                    main_method.write({"provider_ids": [(4, self.id, 0)]})
                     count_new += 1
                 else:
                     existing.write(api_vals)
-                    if self.id not in existing.provider_ids.ids:
-                        existing.write({"provider_ids": [(4, self.id, 0)]})
                     main_method = existing
                     count_updated += 1
 
@@ -433,9 +491,13 @@ class PaymentProvider(models.Model):
                     )
                     synced_payment_method_codes.add(brand_code)
 
+                    # migracion_19_20: same provider-scoped lookup as for the gateway above.
                     existing_brand = payment_method.with_context(
                         active_test=False
-                    ).search([("code", "=", brand_code)], limit=1)
+                    ).search(
+                        [("provider_id", "=", self.id), ("code", "=", brand_code)],
+                        limit=1,
+                    )
 
                     # Values that are ALWAYS updated from API
                     brand_api_vals = {
@@ -448,12 +510,13 @@ class PaymentProvider(models.Model):
                     # Brands are inactive by default when created
                     brand_creation_vals = {
                         "active": False,
+                        "provider_id": self.id,
                     }
 
                     if brand.icon_urls and brand.icon_urls.large:
-                        brand_api_vals["image"] = _get_image_base64(
-                            brand.icon_urls.large
-                        )
+                        brand_image = _get_image_binary(brand.icon_urls.large)
+                        if brand_image:
+                            brand_api_vals["image"] = brand_image
 
                     brand_currency_ids = self._get_currency_ids(
                         gateway.allowed_currencies
@@ -470,10 +533,14 @@ class PaymentProvider(models.Model):
                         ]
 
                     if not existing_brand:
+                        # migracion_19_20: payment.method.image is required in Odoo 20, so fall back to the module icon.
+                        if "image" not in brand_api_vals:
+                            brand_api_vals["image"] = (
+                                _get_default_payment_method_image()
+                            )
                         brand_method = payment_method.create(
                             {**brand_api_vals, **brand_creation_vals}
                         )
-                        brand_method.write({"provider_ids": [(4, self.id, 0)]})
                         count_new += 1
                         _logger.debug(
                             f"Created new brand: {brand_method.name} (code: {brand_method.code})"
@@ -481,16 +548,7 @@ class PaymentProvider(models.Model):
 
                     else:
                         existing_brand.write(brand_api_vals)
-
-                        if self.id not in existing_brand.provider_ids.ids:
-                            existing_brand.write({"provider_ids": [(4, self.id, 0)]})
-                            _logger.info(
-                                f"Associated brand with provider: {existing_brand.name}"
-                            )
-                        else:
-                            _logger.debug(
-                                f"Updated brand (already associated): {existing_brand.name}"
-                            )
+                        _logger.debug(f"Updated brand: {existing_brand.name}")
 
                         count_updated += 1
 

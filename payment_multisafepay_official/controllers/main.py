@@ -205,8 +205,9 @@ class MultiSafepayController(http.Controller):
                 "reference": transactionid,
             }
 
-            # Process notification to update transaction state
-            payment_transaction._process_notification_data(notification_data)
+            # Queue the payment data to update the transaction state
+            # migracion_19_20: _process_notification_data is gone; Odoo 20 queues payment data with _record().
+            payment_transaction._record(notification_data)
 
             # Redirect for pending payment - can be overridden by e-commerce module
             return self._redirect_pending_payment(
@@ -246,7 +247,8 @@ class MultiSafepayController(http.Controller):
             "reference": transactionid,
         }
 
-        payment_transaction._process_notification_data(notification_data)
+        # migracion_19_20: _process_notification_data is gone; Odoo 20 queues payment data with _record().
+        payment_transaction._record(notification_data)
 
         _logger.info("MultiSafepay payment cancelled: %s", transactionid)
 
@@ -299,6 +301,10 @@ class MultiSafepayController(http.Controller):
             )
             return request.make_response("No status found", status=400)
 
+        # Refunds are reported in the order's related transactions, whoever requested them (Odoo or
+        # the MultiSafepay panel); the order status alone would be dropped as a duplicate below.
+        payment_transaction._multisafepay_sync_refunds(order)
+
         # Prevent duplicate processing of same status
         duplicated = self._duplicated_status(payment_transaction, order.status)
         if duplicated:
@@ -318,7 +324,8 @@ class MultiSafepayController(http.Controller):
         }
 
         # Update transaction state based on webhook notification
-        payment_transaction._process_notification_data(notification_data)
+        # migracion_19_20: _process_notification_data is gone; Odoo 20 queues payment data with _record().
+        payment_transaction._record(notification_data)
 
         _logger.info(
             "Webhook processing completed for transaction %s with status %s",
@@ -396,9 +403,10 @@ class MultiSafepayController(http.Controller):
                         "Webhook validation failed for transaction %s: Invalid signature",
                         transactionid,
                     )
-                    payment_transaction._set_error(
-                        "Webhook validation failed: Invalid signature"
-                    )
+                    # migracion_19_20: Odoo 20 blocks direct writes on transactions without payment_safe_write.
+                    payment_transaction.with_context(
+                        payment_safe_write=True
+                    )._set_error("Webhook validation failed: Invalid signature")
                     return request.make_response(
                         "Webhook validation failed", status=403
                     )
@@ -413,6 +421,11 @@ class MultiSafepayController(http.Controller):
                         transactionid,
                     )
                     return request.make_response("No status found", status=400)
+
+                # Refunds are reported in the order's related transactions, whoever requested them
+                # (Odoo or the MultiSafepay panel); the order status alone would be dropped as a
+                # duplicate below.
+                payment_transaction._multisafepay_sync_refunds(order)
 
                 # Check if we already processed this status to avoid duplicate processing
                 duplicated = self._duplicated_status(payment_transaction, order.status)
@@ -431,7 +444,8 @@ class MultiSafepayController(http.Controller):
                     else None,
                 }
 
-                payment_transaction._process_notification_data(notification_data)
+                # migracion_19_20: _process_notification_data is gone; Odoo 20 queues payment data with _record().
+                payment_transaction._record(notification_data)
 
                 _logger.info(
                     "Webhook processing completed for transaction %s with status %s",
@@ -927,9 +941,9 @@ class MultiSafepayController(http.Controller):
         # Create a Plugin object with the necessary details
         plugin = (
             Plugin(**{})
-            .add_plugin_version("2.5.0")
+            .add_plugin_version("1.0.0")
             .add_shop("Odoo")
-            .add_shop_version("19.0")
+            .add_shop_version("20.0")
             .add_shop_root_url(url)
         )
 
@@ -1270,9 +1284,8 @@ class MultiSafepayController(http.Controller):
         """Get the correct base URL, prioritizing configured domain over localhost"""
 
         # Priority 1: System parameter (configured domain)
-        base_url = (
-            request.env["ir.config_parameter"].sudo().get_param("web.base.url", "")
-        )
+        # migracion_19_20: ir.config_parameter.get_param was replaced by typed getters.
+        base_url = request.env["ir.config_parameter"].sudo().get_str("web.base.url")
         if base_url and not ("localhost" in base_url or "127.0.0.1" in base_url):
             _logger.debug("Using configured base URL: %s", base_url)
             return base_url

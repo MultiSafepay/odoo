@@ -19,7 +19,8 @@ class TestMultiSafepayProvider(TransactionCase):
             provider, "MultiSafepay provider should exist after module installation."
         )
         self.assertEqual(provider.name, "MultiSafepay")
-        self.assertIn(provider.state, ("disabled", "test"))
+        # migracion_19_20: payment.provider.state was removed in Odoo 20; the mode derives from active + is_live.
+        self.assertIn(provider._get_multisafepay_state(), ("disabled", "test"))
 
 
 class TestMultiSafepaySdkWiring(TransactionCase):
@@ -30,7 +31,8 @@ class TestMultiSafepaySdkWiring(TransactionCase):
             {
                 "name": "MultiSafepay SDK Test",
                 "code": "multisafepay",
-                "state": "test",
+                # migracion_19_20: payment.provider.state was removed in Odoo 20, test mode is is_live=False.
+                "is_live": False,
                 "multisafepay_api_key": "test-api-key-12345",
             }
         )
@@ -52,3 +54,22 @@ class TestMultiSafepaySdkWiring(TransactionCase):
             first_sdk.client.transport.session,
             second_sdk.client.transport.session,
         )
+
+
+class TestMultiSafepayMoneyConversion(TransactionCase):
+    def test_minor_units_are_converted_to_the_currency_precision(self):
+        eur = self.env.ref("base.EUR")
+        jpy = self.env.ref("base.JPY")
+
+        self.assertEqual(utils.minor_units_to_money(3998, eur), 39.98)
+        self.assertEqual(utils.minor_units_to_money("250", eur), 2.5)
+        self.assertEqual(utils.minor_units_to_money(500, jpy), 500.0)
+        self.assertEqual(utils.minor_units_to_money(None, eur), 0.0)
+
+    def test_money_survives_a_round_trip_through_minor_units(self):
+        eur = self.env.ref("base.EUR")
+
+        for amount in (0.01, 0.1, 4.0, 39.98, 1234.56):
+            with self.subTest(amount=amount):
+                minor_units = utils.money_to_minor_units(amount, eur)
+                self.assertEqual(utils.minor_units_to_money(minor_units, eur), amount)
