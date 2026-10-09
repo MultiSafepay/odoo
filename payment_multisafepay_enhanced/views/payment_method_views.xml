@@ -5,7 +5,10 @@
     <record id="payment_method_form_enhanced" model="ir.ui.view">
         <field name="name">payment.method.form.inherit.multisafepay.enhanced</field>
         <field name="model">payment.method</field>
-        <field name="inherit_id" ref="payment_multisafepay.payment_method_form" />
+        <field
+            name="inherit_id"
+            ref="payment_multisafepay_official.payment_method_form"
+        />
         <field name="arch" type="xml">
             <!-- Add pricelist field after maximum_amount in main group -->
             <xpath expr="//field[@name='maximum_amount']" position="after">

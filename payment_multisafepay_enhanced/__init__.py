@@ -3,6 +3,6 @@
 # See the LICENSE.md file for more information.
 # See the DISCLAIMER.md file for disclaimer details
 
-# ENHANCED MODULE: Extends payment_multisafepay (CORE) with custom business logic
+# ENHANCED MODULE: Extends payment_multisafepay_official (CORE) with custom business logic
 from . import models
 from . import wizard
