@@ -6,16 +6,13 @@
         <field name="inherit_id" ref="payment.payment_provider_form" />
         <field name="arch" type="xml">
             <xpath expr="//group[@name='provider_credentials']" position="inside">
-                <group
-                    name="multisafepay_credentials"
-                    string="MultiSafepay Credentials"
+                <field
+                    name="multisafepay_api_key"
+                    password="True"
                     invisible="code != 'multisafepay'"
-                >
-                    <field name="multisafepay_api_key" password="True" />
-                </group>
+                    widget="password"
+                />
             </xpath>
-
-            <!-- migracion_19_20: the action_view_payment_methods link was removed in Odoo 20; the sync button moves to the form header, and state is now active. -->
             <xpath expr="//header" position="inside">
                 <button
                     string="Sync Payment Methods"
