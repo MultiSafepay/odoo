@@ -1095,7 +1095,7 @@ class MultiSafepayController(http.Controller):
                     merchant_item_id += f"-{variant.name}"
 
             # Get line fields - compatible with both sale and invoice lines
-            line_name = getattr(line, "name", "") or ""
+            line_name = getattr(line, "label", "") or ""
             line_description = ""
             if product:
                 line_description = getattr(product, "description_sale", "") or ""
