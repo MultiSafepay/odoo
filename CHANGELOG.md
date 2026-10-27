@@ -9,6 +9,13 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [18.0.3.0.0] - 2026-10-21
+
+### Changed
+- ODOO-303: Rename core payment module to payment_multisafepay_official
+- ODOO-308: Add payment_multisafepay dependency to pos_multisafepay_cloud
+- ODOO-327: Update pos_multisafepay_cloud dependency to payment_multisafepay_official
+
 ## [18.0.2.5.0] - 2026-08-05
 
 ### Added
