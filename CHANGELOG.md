@@ -9,6 +9,15 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [19.0.3.0.0] - 2026-10-21
+
+### Added
+- ODOO-306: Add MultiSafepay Cloud POS to terminal provider grid
+
+### Changed
+- ODOO-309: Add payment_multisafepay dependency to pos_multisafepay_cloud
+- ODOO-315: Rename core payment module to payment_multisafepay_official
+
 ## [19.0.2.5.0] - 2026-08-05
 
 ### Added
