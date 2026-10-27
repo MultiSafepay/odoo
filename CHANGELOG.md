@@ -9,19 +9,22 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-## [20.0.1.0.0] - 2026-10-02
+## [20.0.3.0.0] - 2026-10-21
+
 ### Added
-- Initial baseline support for Odoo 20.0
-- Rename core payment module references to payment_multisafepay_official
-- Tests for the provider sync, queued payment processing, the redirect, webhook and status routes, pricelist filters and the Cloud POS provider mechanism
-- Refund synchronization from the webhook (POST and GET): the order's `related_transactions` are reconciled with the Odoo refund transactions, so refunds made in the MultiSafepay panel are created in Odoo, refunds requested from Odoo are completed and repeated notifications do nothing. The source transaction is locked while a refund is requested so that a webhook arriving first does not duplicate it
+- ODOO-306: Add MultiSafepay Cloud POS to terminal provider grid
+- ODOO-330: Point the repository tooling and README at the Odoo 20.0 line
+- ODOO-330: Port payment_multisafepay_official to Odoo 20 and sync webhook refunds
+- ODOO-330: Adapt payment_multisafepay_enhanced to Odoo 20 payment method hooks
+- ODOO-330: Port pos_multisafepay_cloud to the Odoo 20 point of sale
 
 ### Changed
-- Adapt the payment modules to the Odoo 20 payment refactor: `provider_id` on payment methods, provider mode from `is_live`, `_find_available_payment_methods`, queued payment processing (`_record`/`_apply_updates`) and `BinaryBytes` images
-- Replace APIs removed in Odoo 20 in the redirect flow: `ir.config_parameter.get_param` is now `get_str` and the `t-esc` QWeb directive is now `t-out`
-- The refund transaction stores the MultiSafepay `refund_id` as `provider_reference` (it used the paid order's `transaction_id`), set when the refund is requested and not only when Odoo 20 processes the queued data
-- Adapt the Cloud POS module to the Odoo 20 POS: `payment_provider` replaces `use_payment_terminal`, payment interface registered in the `pos_payment_providers` registry, line-based `sendPaymentRequest`/`sendPaymentCancel`, provider cards from `get_payment_providers` and `ir.access.csv` replaces `ir.model.access.csv`
-- Every Odoo 19 to 20 adaptation is marked in the code with a `migracion_19_20` comment
+- ODOO-309: Add payment_multisafepay dependency to pos_multisafepay_cloud
+- ODOO-315: Rename core payment module to payment_multisafepay_official
+
+### Fixed
+- ODOO-320: Remove duplicated input group label in configuration page
+- ODOO-321: Fix empty shopping cart item name
 
 ## [19.0.2.5.0] - 2026-08-05
 
